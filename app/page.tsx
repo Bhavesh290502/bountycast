@@ -239,8 +239,15 @@ export default function HomePage() {
                                     />
                                     <div className="flex flex-col items-start">
                                         <div className="flex items-center gap-1">
-                                            <span className="text-white font-bold">@{userProfile.username || 'user'}</span>
-                                            {userProfile.isPro && <span title="Pro User">⚡</span>}
+                                            <a
+                                                href={`https://warpcast.com/${userProfile.username}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-white font-bold hover:underline hover:text-brand-purple transition-colors"
+                                            >
+                                                @{userProfile.username || 'user'}
+                                            </a>
+                                            {userProfile.isPro && <span title="Pro User" className="text-yellow-400 ml-1">⚡</span>}
                                         </div>
                                         <div className="text-[10px] text-gray-400 flex gap-2">
                                             <span>Score: {typeof userProfile.score === 'number' ? userProfile.score.toFixed(2) : '0.00'}</span>
@@ -386,24 +393,6 @@ export default function HomePage() {
 
                                     <div>
                                         <div className="flex items-center gap-1">
-                                            <a
-                                                href={`https://warpcast.com/${q.authorProfile ? q.authorProfile.username : (q.username || 'anon')}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="font-semibold text-white text-sm hover:underline hover:text-brand-purple transition-colors"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                {q.authorProfile ? `@${q.authorProfile.username}` : (q.username || 'Anon')}
-                                            </a>
-                                            {q.authorProfile?.isPro && (
-                                                <span title="Pro User" className="text-yellow-400 text-sm ml-1">⚡</span>
-                                            )}
-                                        </div>
-                                        <div className="text-[10px] text-gray-500 flex gap-2">
-                                            <span>{q.created ? new Date(q.created).toLocaleDateString() : ''}</span>
-                                            {q.authorProfile && q.authorProfile.score > 0 && (
-                                                <span>Score: {q.authorProfile.score.toFixed(2)}</span>
-                                            )}
                                         </div>
                                     </div>
                                 </div>
