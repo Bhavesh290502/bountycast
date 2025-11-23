@@ -14,16 +14,40 @@ export async function GET() {
 
             const enrichedRows = rows.map(row => ({
                 ...row,
+                id: row.id,
+                question: row.question,
+                bounty: row.bounty,
+                token: row.token,
+                created: row.created,
+                deadline: row.deadline,
+                onchainId: row.onchainid ?? row.onchainId, // Handle Postgres lowercase
+                status: row.status,
+                address: row.address,
                 authorProfile: profiles[row.fid] || null
             }));
             return NextResponse.json(enrichedRows);
         }
 
-        return NextResponse.json(rows);
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: 'DB error' }, { status: 500 });
     }
+
+        const formattedRows = rows.map(row => ({
+        ...row,
+        id: row.id,
+        question: row.question,
+        bounty: row.bounty,
+        token: row.token,
+        created: row.created,
+        deadline: row.deadline,
+        onchainId: row.onchainid ?? row.onchainId,
+        status: row.status,
+        address: row.address,
+    }));
+
+    return NextResponse.json(formattedRows);
+} catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: 'DB error' }, { status: 500 });
+}
 }
 
 export async function POST(req: NextRequest) {
