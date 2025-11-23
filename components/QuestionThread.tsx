@@ -8,6 +8,12 @@ interface Answer {
     username: string;
     answer: string;
     upvotes: number;
+    authorProfile?: {
+        username: string;
+        pfpUrl: string;
+        isPro: boolean;
+        score: number;
+    };
 }
 
 export default function QuestionThread({
@@ -133,8 +139,29 @@ export default function QuestionThread({
                         className="bg-white/5 p-3 rounded-lg flex justify-between items-center group hover:bg-white/10 transition-colors"
                     >
                         <div className="flex-1 mr-2">
-                            <span className="font-bold text-brand-purple text-xs mr-2">{a.username}</span>
-                            <span className="text-gray-300 text-xs">{a.answer}</span>
+                            <div className="flex items-center gap-2 mb-1">
+                                {a.authorProfile ? (
+                                    <img
+                                        src={a.authorProfile.pfpUrl}
+                                        alt={a.authorProfile.username}
+                                        className="w-5 h-5 rounded-full border border-white/10"
+                                    />
+                                ) : (
+                                    <div className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center text-[8px] text-gray-400">
+                                        {(a.username || 'AN').slice(0, 2).toUpperCase()}
+                                    </div>
+                                )}
+                                <a
+                                    href={`https://warpcast.com/${a.authorProfile?.username || a.username}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-bold text-brand-purple text-xs hover:underline"
+                                >
+                                    {a.authorProfile ? `@${a.authorProfile.username}` : a.username}
+                                </a>
+                                {a.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
+                            </div>
+                            <span className="text-gray-300 text-xs block pl-7">{a.answer}</span>
                         </div>
 
                         <div className="flex items-center gap-2">

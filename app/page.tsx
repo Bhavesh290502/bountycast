@@ -386,9 +386,15 @@ export default function HomePage() {
 
                                     <div>
                                         <div className="flex items-center gap-1">
-                                            <span className="font-semibold text-white text-sm">
+                                            <a
+                                                href={`https://warpcast.com/${q.authorProfile ? q.authorProfile.username : (q.username || 'anon')}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="font-semibold text-white text-sm hover:underline hover:text-brand-purple transition-colors"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
                                                 {q.authorProfile ? `@${q.authorProfile.username}` : (q.username || 'Anon')}
-                                            </span>
+                                            </a>
                                             {q.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
                                         </div>
                                         <div className="text-[10px] text-gray-500 flex gap-2">

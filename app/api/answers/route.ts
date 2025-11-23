@@ -17,6 +17,20 @@ export async function GET(req: NextRequest) {
       WHERE questionId = ${questionId}
       ORDER BY upvotes DESC, id ASC
     `;
+
+        // Enrich with Neynar data
+        const fids = rows.map(r => r.fid).filter(f => f > 0);
+        if (fids.length > 0) {
+            const { getBulkUserProfiles } = await import('../../../lib/neynar');
+            const profiles = await getBulkUserProfiles(fids);
+
+            const enrichedRows = rows.map(row => ({
+                ...row,
+                authorProfile: profiles[row.fid] || null
+            }));
+            return NextResponse.json(enrichedRows);
+        }
+
         return NextResponse.json(rows);
     } catch (error) {
         console.error(error);
