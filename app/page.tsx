@@ -58,9 +58,18 @@ export default function HomePage() {
             try {
                 await sdk.actions.ready();
                 const ctx = await sdk.context as any;
-                if (ctx?.viewer) {
+                console.log("Farcaster Context:", ctx); // DEBUG LOG
+
+                if (ctx?.user) { // Try ctx.user first (v2 spec)
+                    console.log("Found ctx.user:", ctx.user);
+                    setViewerFid(ctx.user.fid);
+                    setViewerUsername(ctx.user.username || undefined);
+                } else if (ctx?.viewer) { // Fallback to ctx.viewer (older spec)
+                    console.log("Found ctx.viewer:", ctx.viewer);
                     setViewerFid(ctx.viewer.fid);
                     setViewerUsername(ctx.viewer.username || undefined);
+                } else {
+                    console.warn("No viewer found in context");
                 }
             } catch (e) {
                 console.error("mini app init error (likely outside Farcaster)", e);
