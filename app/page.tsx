@@ -85,7 +85,12 @@ export default function HomePage() {
         try {
             const res = await fetch("/api/questions");
             const data = await res.json();
-            setQuestions(data || []);
+            if (Array.isArray(data)) {
+                setQuestions(data);
+            } else {
+                console.error("Failed to load questions:", data);
+                setQuestions([]);
+            }
         } catch (e) {
             console.error(e);
         }

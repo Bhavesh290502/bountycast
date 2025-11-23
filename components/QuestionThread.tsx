@@ -30,7 +30,12 @@ export default function QuestionThread({
         try {
             const res = await fetch(`/api/answers?questionId=${questionId}`);
             const data = await res.json();
-            setAnswers(data || []);
+            if (Array.isArray(data)) {
+                setAnswers(data);
+            } else {
+                console.error("Failed to load answers:", data);
+                setAnswers([]);
+            }
         } catch (e) {
             console.error(e);
         }
