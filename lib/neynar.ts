@@ -94,3 +94,44 @@ export async function checkEligibility(fid: number): Promise<{ allowed: boolean;
         reason: `Eligibility failed. Requirements: Pro User or Neynar Score > 0.6. (Your Score: ${score})`
     };
 }
+
+export async function getBulkUserProfiles(fids: number[]): Promise<Record<number, UserProfile>> {
+    if (fids.length === 0) return {};
+
+    const apiKey = process.env.NEYNAR_API_KEY;
+    if (!apiKey) return {};
+
+    try {
+        const uniqueFids = Array.from(new Set(fids)).join(',');
+        const url = `https://api.neynar.com/v2/farcaster/user/bulk?fids=${uniqueFids}`;
+        const options = {
+            method: 'GET',
+            headers: { accept: 'application/json', api_key: apiKey }
+        };
+
+        const res = await fetch(url, options);
+        if (!res.ok) return {};
+
+        const data = await res.json();
+        const users = data.users || [];
+
+        const profileMap: Record<number, UserProfile> = {};
+        users.forEach((user: NeynarUser) => {
+            const score = user.score || user.experimental?.score || 0;
+            profileMap[user.fid] = {
+                fid: user.fid,
+                username: user.username,
+                displayName: user.display_name,
+                pfpUrl: user.pfp_url,
+                bio: user.profile?.bio?.text || "",
+                isPro: user.power_badge || false,
+                score,
+            };
+        });
+
+        return profileMap;
+    } catch (error) {
+        console.error("getBulkUserProfiles exception:", error);
+        return {};
+    }
+}
