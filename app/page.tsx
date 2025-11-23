@@ -386,15 +386,16 @@ export default function HomePage() {
 
                                     <div>
                                         <div className="flex items-center gap-1">
-                                            <a
-                                                href={`https://warpcast.com/${q.authorProfile ? q.authorProfile.username : (q.username || 'anon')}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="font-semibold text-white text-sm hover:underline hover:text-brand-purple transition-colors"
-                                                onClick={(e) => e.stopPropagation()}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const username = q.authorProfile ? q.authorProfile.username : (q.username || 'anon');
+                                                    sdk.actions.openUrl(`https://warpcast.com/${username}`);
+                                                }}
+                                                className="font-semibold text-white text-sm hover:underline hover:text-brand-purple transition-colors text-left"
                                             >
                                                 {q.authorProfile ? `@${q.authorProfile.username}` : (q.username || 'Anon')}
-                                            </a>
+                                            </button>
                                             {q.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
                                         </div>
                                         <div className="text-[10px] text-gray-500 flex gap-2">

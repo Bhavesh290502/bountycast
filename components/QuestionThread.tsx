@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
+import { sdk } from "@farcaster/miniapp-sdk";
 
 interface Answer {
     id: number;
@@ -151,14 +152,15 @@ export default function QuestionThread({
                                         {(a.username || 'AN').slice(0, 2).toUpperCase()}
                                     </div>
                                 )}
-                                <a
-                                    href={`https://warpcast.com/${a.authorProfile?.username || a.username}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="font-bold text-brand-purple text-xs hover:underline"
+                                <button
+                                    onClick={() => {
+                                        const username = a.authorProfile?.username || a.username;
+                                        sdk.actions.openUrl(`https://warpcast.com/${username}`);
+                                    }}
+                                    className="font-bold text-brand-purple text-xs hover:underline text-left"
                                 >
                                     {a.authorProfile ? `@${a.authorProfile.username}` : a.username}
-                                </a>
+                                </button>
                                 {a.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
                             </div>
                             <span className="text-gray-300 text-xs block pl-7">{a.answer}</span>
