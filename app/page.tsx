@@ -227,11 +227,11 @@ export default function HomePage() {
                                     />
                                     <div className="flex flex-col items-start">
                                         <div className="flex items-center gap-1">
-                                            <span className="text-white font-bold">@{userProfile.username}</span>
+                                            <span className="text-white font-bold">@{userProfile.username || 'user'}</span>
                                             {userProfile.isPro && <span title="Pro User">⚡</span>}
                                         </div>
                                         <div className="text-[10px] text-gray-400 flex gap-2">
-                                            <span>Score: {userProfile.score.toFixed(2)}</span>
+                                            <span>Score: {typeof userProfile.score === 'number' ? userProfile.score.toFixed(2) : '0.00'}</span>
                                             <span>|</span>
                                             <span>{address.slice(0, 6)}...{address.slice(-4)}</span>
                                         </div>
