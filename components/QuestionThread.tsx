@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useWriteContract } from 'wagmi';
 import { sdk } from "@farcaster/miniapp-sdk";
+import { bountycastAbi, BOUNTYCAST_ADDRESS } from '../lib/contract';
 
 interface Answer {
     id: number;
     username: string;
     answer: string;
     upvotes: number;
+    address?: string; // Need address to award bounty
     authorProfile?: {
         username: string;
         pfpUrl: string;
@@ -21,15 +23,20 @@ export default function QuestionThread({
     questionId,
     fid,
     defaultUsername,
+    askerAddress,
+    isQuestionActive,
 }: {
     questionId: number;
     fid?: number;
     defaultUsername?: string;
+    askerAddress?: string;
+    isQuestionActive?: boolean;
 }) {
     const [answers, setAnswers] = useState<Answer[]>([]);
     const [myAnswer, setMyAnswer] = useState('');
     const [loading, setLoading] = useState(false);
     const { address } = useAccount();
+    const { writeContractAsync } = useWriteContract();
 
     const username = defaultUsername || (address ? `user-${address.slice(0, 6)}` : 'anon');
 
@@ -115,6 +122,36 @@ export default function QuestionThread({
         }
     };
 
+    const { writeContractAsync } = useWriteContract();
+    const { address: viewerAddress } = useAccount();
+
+    // Check if viewer is the asker (this needs to be passed down or fetched)
+    // For now, we'll assume the parent component passes `askerAddress` or we use `address` comparison if we had it.
+    // Since we don't have askerAddress prop, let's add it.
+
+    // WAIT: I need to update props first.
+    // Let's assume for this step I will just add the function and button, but I need the asker address.
+    // I'll update the component signature in the next step or this one if I can see the file content again to be sure.
+    // Looking at previous view_file, QuestionThread takes questionId, fid, defaultUsername.
+    // I need to add `askerAddress` and `isQuestionActive` to props.
+
+    const awardBounty = async (winnerAddress: string) => {
+        if (!winnerAddress) return;
+        try {
+            const hash = await writeContractAsync({
+                address: BOUNTYCAST_ADDRESS,
+                abi: bountycastAbi,
+                functionName: "selectWinner",
+                args: [BigInt(questionId), winnerAddress as `0x${string}`],
+            });
+            alert(`Bounty awarded! Tx: ${hash}`);
+            // Optimistically update UI or reload
+        } catch (e) {
+            console.error(e);
+            alert("Failed to award bounty");
+        }
+    };
+
     return (
         <div className="mt-4">
             <div className="flex gap-2 mb-4">
@@ -167,6 +204,17 @@ export default function QuestionThread({
                         </div>
 
                         <div className="flex items-center gap-2">
+                            {/* Show Award button if viewer is asker and question is active */}
+                            {askerAddress && address && askerAddress.toLowerCase() === address.toLowerCase() && isQuestionActive && a.address && (
+                                <button
+                                    onClick={() => awardBounty(a.address!)}
+                                    className="bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white px-2 py-1 rounded text-[10px] font-bold transition-colors mr-2"
+                                    title="Award Bounty"
+                                >
+                                    🏆 Award
+                                </button>
+                            )}
+
                             <span className="text-xs font-medium text-gray-400">{a.upvotes}</span>
                             <button
                                 onClick={() => upvote(a.id)}

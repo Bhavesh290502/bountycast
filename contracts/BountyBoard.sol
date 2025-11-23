@@ -107,7 +107,26 @@ contract BountyBoard {
         emit Upvoted(questionId, answerer, upvotes[questionId][answerer]);
     }
 
-    // --- CLAIM BOUNTY ---
+    // --- SELECT WINNER (MANUAL) ---
+    function selectWinner(uint256 questionId, address winner) external {
+        Question storage q = questions[questionId];
+        require(q.asker == msg.sender, "only asker can select winner");
+        require(q.active, "already claimed/awarded");
+        require(winner != address(0), "invalid winner");
+
+        q.active = false;
+        q.winner = winner;
+
+        // payout ETH
+        if (q.token == address(0)) {
+            (bool ok, ) = winner.call{value: q.bounty}("");
+            require(ok, "ETH transfer failed");
+        }
+
+        emit BountyClaimed(questionId, winner, q.bounty);
+    }
+
+    // --- CLAIM BOUNTY (FALLBACK) ---
     function claimBounty(uint256 questionId) external {
         Question storage q = questions[questionId];
         require(q.asker != address(0), "question not found");

@@ -456,26 +456,6 @@ export default function HomePage() {
                                     </button>
                                     <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                                         <span>🏆</span>
-                                        <span>{q.bounty || 0} ETH</span>
                                     </div>
-                                </div>
-                            </div>
-
-                            <p className="text-gray-200 mb-4 text-sm leading-relaxed">
-                                {q.question}
-                            </p>
-
-                            <div className="border-t border-white/5 pt-3 mt-3">
-                                <QuestionThread
-                                    questionId={q.id}
-                                    fid={viewerFid}
-                                    defaultUsername={viewerUsername || username}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-        </div>
-    );
+                                    );
 }
