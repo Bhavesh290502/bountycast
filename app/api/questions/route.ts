@@ -28,26 +28,26 @@ export async function GET() {
             return NextResponse.json(enrichedRows);
         }
 
-    }
+
 
         const formattedRows = rows.map(row => ({
-        ...row,
-        id: row.id,
-        question: row.question,
-        bounty: row.bounty,
-        token: row.token,
-        created: row.created,
-        deadline: row.deadline,
-        onchainId: row.onchainid ?? row.onchainId,
-        status: row.status,
-        address: row.address,
-    }));
+            ...row,
+            id: row.id,
+            question: row.question,
+            bounty: row.bounty,
+            token: row.token,
+            created: row.created,
+            deadline: row.deadline,
+            onchainId: row.onchainid ?? row.onchainId,
+            status: row.status,
+            address: row.address,
+        }));
 
-    return NextResponse.json(formattedRows);
-} catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'DB error' }, { status: 500 });
-}
+        return NextResponse.json(formattedRows);
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ error: 'DB error' }, { status: 500 });
+    }
 }
 
 export async function POST(req: NextRequest) {
