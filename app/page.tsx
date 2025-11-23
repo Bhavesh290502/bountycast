@@ -179,45 +179,6 @@ export default function HomePage() {
                 address: BOUNTYCAST_ADDRESS,
                 abi: bountycastAbi,
                 functionName: "createQuestion",
-                args: [metadataUri, BigInt(deadlineSec)],
-                value: BigInt(Math.floor(bounty * 1e18)),
-            });
-            setPendingHash(hash);
-
-            let onchainId = -1;
-            if (publicClient) {
-                try {
-                    const receipt = await publicClient.waitForTransactionReceipt({ hash });
-                    console.log("Tx Receipt Logs:", receipt.logs);
-                    // Find the QuestionPosted event
-                    for (const log of receipt.logs) {
-                        try {
-                            const event = decodeEventLog({
-                                abi: bountycastAbi,
-                                data: log.data,
-                                topics: log.topics,
-                            });
-                            console.log("Decoded Event:", event);
-                            if (event.eventName === 'QuestionCreated' && event.args) {
-                                // @ts-ignore
-                                onchainId = Number(event.args.id);
-                                console.log("Captured OnChain ID:", onchainId);
-                                break;
-                            }
-                        } catch (e) {
-                            console.log("Failed to decode log:", e);
-                            // Ignore logs that don't match our ABI
-                        }
-                    }
-                } catch (e) {
-                    console.error("Failed to parse logs:", e);
-                }
-            }
-
-            // 2) Store question in DB for UI
-            await fetch("/api/questions", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     fid: viewerFid,
                     username,
