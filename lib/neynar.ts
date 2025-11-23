@@ -1,8 +1,35 @@
-export async function checkEligibility(fid: number): Promise<{ allowed: boolean; reason?: string }> {
+interface NeynarUser {
+    fid: number;
+    username: string;
+    display_name: string;
+    pfp_url: string;
+    profile: {
+        bio: {
+            text: string;
+        };
+    };
+    power_badge: boolean;
+    score?: number;
+    experimental?: {
+        score?: number;
+    };
+}
+
+export interface UserProfile {
+    fid: number;
+    username: string;
+    displayName: string;
+    pfpUrl: string;
+    bio: string;
+    isPro: boolean;
+    score: number;
+}
+
+async function fetchNeynarUser(fid: number): Promise<NeynarUser | null> {
     const apiKey = process.env.NEYNAR_API_KEY;
     if (!apiKey) {
-        console.warn("NEYNAR_API_KEY missing in env, skipping eligibility check.");
-        return { allowed: true };
+        console.warn("NEYNAR_API_KEY missing");
+        return null;
     }
 
     try {
@@ -13,40 +40,57 @@ export async function checkEligibility(fid: number): Promise<{ allowed: boolean;
         };
 
         const res = await fetch(url, options);
-
         if (!res.ok) {
-            console.error(`Neynar API error: ${res.status} ${res.statusText}`);
-            // Fail closed if API errors? Or open? 
-            // Let's fail closed for security/exclusivity, but log it.
-            return { allowed: false, reason: "Unable to verify eligibility (API error)" };
+            console.error(`Neynar API error: ${res.status}`);
+            return null;
         }
 
         const data = await res.json();
-        const user = data.users?.[0];
-
-        if (!user) {
-            return { allowed: false, reason: "User not found on Farcaster" };
-        }
-
-        // Logic: Pro User (Power Badge) OR Neynar Score > 0.6
-        // Note: 'score' is sometimes at the top level of user, or experimental.
-        // We'll check common locations.
-        const score = user.score || user.experimental?.score || 0;
-        const isPro = user.power_badge || false;
-
-        console.log(`Eligibility Check [FID:${fid}]: Pro=${isPro}, Score=${score}`);
-
-        if (isPro || score > 0.6) {
-            return { allowed: true };
-        }
-
-        return {
-            allowed: false,
-            reason: `Eligibility failed. Requirements: Pro User or Neynar Score > 0.6. (Your Score: ${score})`
-        };
-
+        return data.users?.[0] || null;
     } catch (error) {
-        console.error("Neynar check exception:", error);
-        return { allowed: false, reason: "Eligibility check failed (Internal Error)" };
+        console.error("fetchNeynarUser exception:", error);
+        return null;
     }
+}
+
+export async function getUserProfile(fid: number): Promise<UserProfile | null> {
+    const user = await fetchNeynarUser(fid);
+    if (!user) return null;
+
+    const score = user.score || user.experimental?.score || 0;
+
+    return {
+        fid: user.fid,
+        username: user.username,
+        displayName: user.display_name,
+        pfpUrl: user.pfp_url,
+        bio: user.profile?.bio?.text || "",
+        isPro: user.power_badge || false,
+        score,
+    };
+}
+
+export async function checkEligibility(fid: number): Promise<{ allowed: boolean; reason?: string }> {
+    const user = await fetchNeynarUser(fid);
+
+    // If API fails or key missing, we default to allowed (fail open) or blocked (fail closed).
+    // Previously we failed closed for API errors but open for missing key.
+    // Let's keep it simple: if we can't fetch, we can't verify, so we might block or allow.
+    // For now, if user is null (API error), we'll block to be safe, unless key is missing.
+    if (!process.env.NEYNAR_API_KEY) return { allowed: true };
+    if (!user) return { allowed: false, reason: "Unable to verify identity (Neynar API error)" };
+
+    const score = user.score || user.experimental?.score || 0;
+    const isPro = user.power_badge || false;
+
+    console.log(`Eligibility Check [FID:${fid}]: Pro=${isPro}, Score=${score}`);
+
+    if (isPro || score > 0.6) {
+        return { allowed: true };
+    }
+
+    return {
+        allowed: false,
+        reason: `Eligibility failed. Requirements: Pro User or Neynar Score > 0.6. (Your Score: ${score})`
+    };
 }

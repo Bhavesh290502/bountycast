@@ -191,6 +191,20 @@ export default function HomePage() {
         );
     }
 
+    const [userProfile, setUserProfile] = useState<any>(null);
+
+    // Load User Profile
+    useEffect(() => {
+        if (viewerFid) {
+            fetch(`/api/user?fid=${viewerFid}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.error) setUserProfile(data);
+                })
+                .catch(console.error);
+        }
+    }, [viewerFid]);
+
     return (
         <div className="max-w-xl mx-auto p-4 font-sans text-sm pb-20">
             <header className="mb-8 text-center">
@@ -203,14 +217,37 @@ export default function HomePage() {
 
                 <div className="flex justify-center">
                     {isConnected && address ? (
-                        <div className="glass-card px-4 py-2 rounded-full text-xs flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-gray-300">
-                                {viewerUsername ? `@${viewerUsername}` : "Connected"}
-                            </span>
-                            <span className="text-gray-500">
-                                ({address.slice(0, 6)}…{address.slice(-4)})
-                            </span>
+                        <div className="glass-card px-4 py-2 rounded-full text-xs flex items-center gap-3">
+                            {userProfile ? (
+                                <>
+                                    <img
+                                        src={userProfile.pfpUrl}
+                                        alt={userProfile.username}
+                                        className="w-6 h-6 rounded-full border border-white/10"
+                                    />
+                                    <div className="flex flex-col items-start">
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-white font-bold">@{userProfile.username}</span>
+                                            {userProfile.isPro && <span title="Pro User">⚡</span>}
+                                        </div>
+                                        <div className="text-[10px] text-gray-400 flex gap-2">
+                                            <span>Score: {userProfile.score.toFixed(2)}</span>
+                                            <span>|</span>
+                                            <span>{address.slice(0, 6)}...{address.slice(-4)}</span>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                    <span className="text-gray-300">
+                                        {viewerUsername ? `@${viewerUsername}` : "Connected"}
+                                    </span>
+                                    <span className="text-gray-500">
+                                        ({address.slice(0, 6)}…{address.slice(-4)})
+                                    </span>
+                                </>
+                            )}
                         </div>
                     ) : (
                         <button
