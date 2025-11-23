@@ -179,6 +179,41 @@ export default function HomePage() {
                 address: BOUNTYCAST_ADDRESS,
                 abi: bountycastAbi,
                 functionName: "createQuestion",
+                args: [metadataUri, BigInt(deadlineSec)],
+                value: BigInt(Math.floor(bounty * 1e18)),
+            });
+            setPendingHash(hash);
+
+            let onchainId = -1;
+            if (publicClient) {
+                try {
+                    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+                    // Find the QuestionCreated event
+                    for (const log of receipt.logs) {
+                        try {
+                            const event = decodeEventLog({
+                                abi: bountycastAbi,
+                                data: log.data,
+                                topics: log.topics,
+                            });
+                            if (event.eventName === 'QuestionCreated' && event.args) {
+                                // @ts-ignore
+                                onchainId = Number(event.args.id);
+                                break;
+                            }
+                        } catch (e) {
+                            // Ignore logs that don't match our ABI
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to parse logs:", e);
+                }
+            }
+
+            // 2) Store question in DB for UI
+            await fetch("/api/questions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     fid: viewerFid,
                     username,
