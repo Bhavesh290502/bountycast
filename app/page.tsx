@@ -21,6 +21,8 @@ interface Question {
     deadline: number;
     onchainId: number;
     status: string;
+    address?: string; // Asker address
+    active?: boolean;
     authorProfile?: {
         username: string;
         pfpUrl: string;
