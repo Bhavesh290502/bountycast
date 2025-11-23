@@ -21,6 +21,12 @@ interface Question {
     deadline: number;
     onchainId: number;
     status: string;
+    authorProfile?: {
+        username: string;
+        pfpUrl: string;
+        isPro: boolean;
+        score: number;
+    };
 }
 
 export default function HomePage() {
@@ -366,13 +372,30 @@ export default function HomePage() {
                         >
                             <div className="flex justify-between items-start mb-3">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400">
-                                        {(q.username || 'AN').slice(0, 2).toUpperCase()}
-                                    </div>
+                                    {q.authorProfile ? (
+                                        <img
+                                            src={q.authorProfile.pfpUrl}
+                                            alt={q.authorProfile.username}
+                                            className="w-8 h-8 rounded-full border border-white/10"
+                                        />
+                                    ) : (
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400">
+                                            {(q.username || 'AN').slice(0, 2).toUpperCase()}
+                                        </div>
+                                    )}
+
                                     <div>
-                                        <div className="font-semibold text-white text-sm">{q.username || 'Anon'}</div>
-                                        <div className="text-[10px] text-gray-500">
-                                            {q.created ? new Date(q.created).toLocaleDateString() : ''}
+                                        <div className="flex items-center gap-1">
+                                            <span className="font-semibold text-white text-sm">
+                                                {q.authorProfile ? `@${q.authorProfile.username}` : (q.username || 'Anon')}
+                                            </span>
+                                            {q.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
+                                        </div>
+                                        <div className="text-[10px] text-gray-500 flex gap-2">
+                                            <span>{q.created ? new Date(q.created).toLocaleDateString() : ''}</span>
+                                            {q.authorProfile?.score > 0 && (
+                                                <span>Score: {q.authorProfile.score.toFixed(2)}</span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
