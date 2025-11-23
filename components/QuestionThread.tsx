@@ -137,19 +137,35 @@ export default function QuestionThread({
     // I need to add `askerAddress` and `isQuestionActive` to props.
 
     const awardBounty = async (winnerAddress: string) => {
+        console.log("Awarding Bounty Debug:", {
+            onchainId,
+            questionId,
+            winnerAddress,
+            askerAddress,
+            viewerAddress: viewerAddress
+        });
+
         if (!winnerAddress) return;
+
+        const targetId = onchainId && onchainId > -1 ? onchainId : questionId;
+
+        if (targetId === -1 || targetId === undefined) {
+            alert("Error: Invalid On-Chain ID. Cannot award bounty.");
+            return;
+        }
+
         try {
             const hash = await writeContractAsync({
                 address: BOUNTYCAST_ADDRESS,
                 abi: bountycastAbi,
                 functionName: "selectWinner",
-                args: [BigInt(onchainId && onchainId > -1 ? onchainId : questionId), winnerAddress as `0x${string}`],
+                args: [BigInt(targetId), winnerAddress as `0x${string}`],
             });
             alert(`Bounty awarded! Tx: ${hash}`);
             // Optimistically update UI or reload
         } catch (e) {
-            console.error(e);
-            alert("Failed to award bounty");
+            console.error("Award Error:", e);
+            alert("Failed to award bounty. Check console for details.");
         }
     };
 
