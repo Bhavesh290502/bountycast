@@ -25,11 +25,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body style={{ margin: 0 }}>
         <Providers>{children}</Providers>
       </body>

@@ -1,26 +1,58 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #0f0e13;
+  --foreground: #ededed;
+  
+  /* Brand Colors */
+  --brand-purple: #8a63d2;
+  --brand-purple-dark: #6b4c9a;
+  --brand-gold: #ffd700;
+  --brand-gold-dim: #b39700;
+  
+  /* Surface Colors */
+  --surface-glass: rgba(255, 255, 255, 0.05);
+  --surface-glass-hover: rgba(255, 255, 255, 0.1);
+  --border-glass: rgba(255, 255, 255, 0.1);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(138, 99, 210, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 30%);
+}
+
+/* Custom Utilities */
+.glass-card {
+  background: var(--surface-glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-glass);
+}
+
+.glass-input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-glass);
+  color: white;
+}
+
+.glass-input:focus {
+  border-color: var(--brand-purple);
+  outline: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--brand-purple) 0%, var(--brand-purple-dark) 100%);
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(138, 99, 210, 0.3);
 }

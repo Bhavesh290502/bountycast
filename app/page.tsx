@@ -63,7 +63,6 @@ export default function HomePage() {
                     setViewerUsername(ctx.viewer.username || undefined);
                 }
             } catch (e) {
-                // This will usually fail if opened outside Farcaster – that's fine.
                 console.error("mini app init error (likely outside Farcaster)", e);
             } finally {
                 setIsReady(true);
@@ -97,13 +96,7 @@ export default function HomePage() {
             return;
         }
 
-        const connector = connectors[0]; // mini app usually exposes a single connector
-
-        console.log(
-            "Connecting with Farcaster mini app wallet:",
-            connector.id,
-            connector.name
-        );
+        const connector = connectors[0];
         connect({ connector });
     };
 
@@ -140,7 +133,6 @@ export default function HomePage() {
             });
             setPendingHash(hash);
 
-            // TODO: decode onchainId from QuestionCreated event
             const onchainId = -1;
 
             // 2) Store question in DB for UI
@@ -173,202 +165,174 @@ export default function HomePage() {
 
     if (!isReady) {
         return (
-            <div
-                style={{
-                    width: "100%",
-                    minHeight: "100vh",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontFamily: "sans-serif",
-                    fontSize: 12,
-                    color: "#777",
-                }}
-            >
+            <div className="flex items-center justify-center min-h-screen text-gray-400 text-sm">
                 Loading mini app…
             </div>
         );
     }
 
     return (
-        <div
-            style={{
-                maxWidth: 640,
-                margin: "0 auto",
-                padding: 12,
-                fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-                fontSize: 14,
-            }}
-        >
-            <header style={{ marginBottom: 12 }}>
-                <h2 style={{ margin: 0 }}>🔮 BountyCast</h2>
-                <p style={{ margin: 0, fontSize: 12, color: "#666" }}>
-                    Post questions with on-chain bounties. Let Farcaster answer.
+        <div className="max-w-xl mx-auto p-4 font-sans text-sm pb-20">
+            <header className="mb-8 text-center">
+                <h2 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-brand-purple to-brand-gold">
+                    BountyCast
+                </h2>
+                <p className="text-gray-400 text-xs mb-4">
+                    Ask questions. Get answers. Earn ETH.
                 </p>
-                <div style={{ marginTop: 6, fontSize: 12 }}>
+
+                <div className="flex justify-center">
                     {isConnected && address ? (
-                        <span>
-                            {viewerUsername ? `@${viewerUsername}` : "Connected"} ·{" "}
-                            {address.slice(0, 6)}…{address.slice(-4)}
-                        </span>
+                        <div className="glass-card px-4 py-2 rounded-full text-xs flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                            <span className="text-gray-300">
+                                {viewerUsername ? `@${viewerUsername}` : "Connected"}
+                            </span>
+                            <span className="text-gray-500">
+                                ({address.slice(0, 6)}…{address.slice(-4)})
+                            </span>
+                        </div>
                     ) : (
-                        <button onClick={handleConnectClick} style={{ fontSize: 12 }}>
-                            {isConnectPending ? "Connecting…" : "Connect wallet"}
+                        <button
+                            onClick={handleConnectClick}
+                            className="btn-primary px-6 py-2 rounded-full font-medium text-xs"
+                        >
+                            {isConnectPending ? "Connecting…" : "Connect Wallet"}
                         </button>
                     )}
                     {connectError && (
-                        <div style={{ fontSize: 10, color: "red" }}>
+                        <div className="text-red-500 text-xs mt-2">
                             {connectError.message}
                         </div>
                     )}
                 </div>
             </header>
 
-            <section style={{ marginBottom: 16 }}>
-                <button
-                    onClick={() => setShowAsk((s) => !s)}
-                    style={{
-                        fontSize: 13,
-                        padding: "6px 10px",
-                        borderRadius: 8,
-                        border: "1px solid #ccc",
-                        background: "#fff",
-                    }}
-                >
-                    {showAsk ? "Cancel" : "Ask a question"}
-                </button>
-
-                {showAsk && (
-                    <div
-                        style={{
-                            marginTop: 8,
-                            border: "1px solid #eee",
-                            borderRadius: 8,
-                            padding: 8,
-                            background: "#fafafa",
-                        }}
+            <section className="mb-8">
+                {!showAsk ? (
+                    <button
+                        onClick={() => setShowAsk(true)}
+                        className="w-full glass-card p-4 rounded-xl text-left text-gray-400 hover:bg-white/5 transition-colors flex items-center justify-between group"
                     >
+                        <span>Ask a question...</span>
+                        <span className="bg-brand-purple/20 text-brand-purple px-2 py-1 rounded text-xs group-hover:bg-brand-purple group-hover:text-white transition-colors">
+                            + New
+                        </span>
+                    </button>
+                ) : (
+                    <div className="glass-card p-5 rounded-xl animate-in fade-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-semibold text-white">New Bounty</h3>
+                            <button
+                                onClick={() => setShowAsk(false)}
+                                className="text-gray-500 hover:text-white transition-colors"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
                         <textarea
-                            style={{
-                                width: "100%",
-                                padding: 6,
-                                marginBottom: 6,
-                                fontSize: 13,
-                                minHeight: 60,
-                                resize: "vertical",
-                            }}
-                            placeholder="Your question…"
+                            className="glass-input w-full p-3 rounded-lg mb-3 min-h-[100px] resize-none text-sm placeholder-gray-500"
+                            placeholder="What do you want to know?"
                             value={questionText}
                             onChange={(e) => setQuestionText(e.target.value)}
                         />
-                        <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-                            <input
-                                type="number"
-                                min={0.001}
-                                step={0.001}
-                                style={{ flex: 1, padding: 6, fontSize: 13 }}
-                                placeholder="Bounty (ETH)"
-                                value={bounty}
-                                onChange={(e) =>
-                                    setBounty(Number(e.target.value || 0.001))
-                                }
-                            />
-                            <span
-                                style={{
-                                    fontSize: 12,
-                                    color: "#666",
-                                    alignSelf: "center",
-                                }}
-                            >
-                                Native (Base)
-                            </span>
+
+                        <div className="flex gap-3 mb-4">
+                            <div className="relative flex-1">
+                                <input
+                                    type="number"
+                                    min={0.001}
+                                    step={0.001}
+                                    className="glass-input w-full p-3 rounded-lg pl-8 text-sm"
+                                    placeholder="0.01"
+                                    value={bounty}
+                                    onChange={(e) => setBounty(Number(e.target.value || 0.001))}
+                                />
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-gold">
+                                    Ξ
+                                </span>
+                            </div>
+                            <div className="flex items-center text-xs text-gray-500">
+                                Native Base ETH
+                            </div>
                         </div>
+
                         <button
                             onClick={ask}
                             disabled={loading || txPending}
-                            style={{
-                                fontSize: 13,
-                                padding: "6px 10px",
-                                borderRadius: 8,
-                                border: "none",
-                                background: "#000",
-                                color: "#fff",
-                                width: "100%",
-                            }}
+                            className="btn-primary w-full py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading || txPending
-                                ? "Locking bounty…"
-                                : "Submit & lock bounty"}
+                            {loading || txPending ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Processing...
+                                </span>
+                            ) : (
+                                "Post Bounty"
+                            )}
                         </button>
                     </div>
                 )}
             </section>
 
             <section>
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginBottom: 4,
-                    }}
-                >
-                    <h3 style={{ margin: 0, fontSize: 14 }}>Open questions</h3>
+                <div className="flex justify-between items-end mb-4 px-1">
+                    <h3 className="text-lg font-bold text-white">Recent Questions</h3>
                     <button
                         onClick={loadQuestions}
-                        style={{ fontSize: 11, padding: "2px 6px" }}
+                        className="text-brand-purple text-xs hover:text-brand-purple-dark transition-colors"
                     >
                         Refresh
                     </button>
                 </div>
-                {questions.length === 0 && (
-                    <p style={{ fontSize: 12, color: "#777" }}>
-                        No questions yet. Be the first to ask.
-                    </p>
-                )}
-                {questions.map((q) => (
-                    <div
-                        key={q.id}
-                        style={{
-                            border: "1px solid #eee",
-                            borderRadius: 8,
-                            padding: 8,
-                            marginBottom: 8,
-                            opacity: q.status === "awarded" ? 0.6 : 1,
-                        }}
-                    >
-                        <div style={{ marginBottom: 4 }}>
-                            <b>{q.username}</b>: {q.question}
+
+                <div className="space-y-4">
+                    {questions.length === 0 && (
+                        <div className="text-center py-10 text-gray-600">
+                            <p>No questions yet.</p>
+                            <p className="text-xs mt-1">Be the first to ask!</p>
                         </div>
+                    )}
+
+                    {questions.map((q) => (
                         <div
-                            style={{
-                                fontSize: 12,
-                                color: "#666",
-                                display: "flex",
-                                justifyContent: "space-between",
-                            }}
+                            key={q.id}
+                            className={`glass-card p-5 rounded-xl transition-all duration-300 ${q.status === "awarded" ? "opacity-70 grayscale-[0.5]" : "hover:scale-[1.01] hover:shadow-lg hover:shadow-brand-purple/10"
+                                }`}
                         >
-                            <span>🏆 {q.bounty} ETH</span>
-                            <span>
-                                {new Date(q.created).toLocaleString(undefined, {
-                                    hour12: false,
-                                })}
-                            </span>
+                            <div className="flex justify-between items-start mb-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400">
+                                        {q.username.slice(0, 2).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-white text-sm">{q.username}</div>
+                                        <div className="text-[10px] text-gray-500">
+                                            {new Date(q.created).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                                    <span>🏆</span>
+                                    <span>{q.bounty} ETH</span>
+                                </div>
+                            </div>
+
+                            <p className="text-gray-200 mb-4 text-sm leading-relaxed">
+                                {q.question}
+                            </p>
+
+                            <div className="border-t border-white/5 pt-3 mt-3">
+                                <QuestionThread
+                                    questionId={q.id}
+                                    fid={viewerFid}
+                                    defaultUsername={username}
+                                />
+                            </div>
                         </div>
-                        <div style={{ fontSize: 11, color: "#999", marginTop: 2 }}>
-                            Closes{" "}
-                            {new Date(q.deadline).toLocaleDateString(undefined, {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                            })}
-                        </div>
-                        <QuestionThread
-                            questionId={q.id}
-                            fid={viewerFid}
-                            defaultUsername={username}
-                        />
-                    </div>
-                ))}
+                    ))}
+                </div>
             </section>
         </div>
     );
