@@ -393,7 +393,7 @@ export default function HomePage() {
                                         </div>
                                         <div className="text-[10px] text-gray-500 flex gap-2">
                                             <span>{q.created ? new Date(q.created).toLocaleDateString() : ''}</span>
-                                            {q.authorProfile?.score > 0 && (
+                                            {q.authorProfile && q.authorProfile.score > 0 && (
                                                 <span>Score: {q.authorProfile.score.toFixed(2)}</span>
                                             )}
                                         </div>
