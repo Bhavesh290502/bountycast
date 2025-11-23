@@ -473,7 +473,7 @@ export default function HomePage() {
                                     fid={viewerFid}
                                     defaultUsername={viewerUsername || username}
                                     askerAddress={q.address}
-                                    isQuestionActive={q.active}
+                                    isQuestionActive={q.status === 'active'}
                                 />
                             </div>
                         </div>

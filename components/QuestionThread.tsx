@@ -128,13 +128,6 @@ export default function QuestionThread({
     // For now, we'll assume the parent component passes `askerAddress` or we use `address` comparison if we had it.
     // Since we don't have askerAddress prop, let's add it.
 
-    console.log("Debug Award:", {
-        askerAddress,
-        viewerAddress,
-        isQuestionActive,
-        match: askerAddress && viewerAddress && askerAddress.toLowerCase() === viewerAddress.toLowerCase()
-    });
-
     // WAIT: I need to update props first.
     // Let's assume for this step I will just add the function and button, but I need the asker address.
     // I'll update the component signature in the next step or this one if I can see the file content again to be sure.
