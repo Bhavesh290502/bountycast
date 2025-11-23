@@ -53,13 +53,16 @@ Once your project is created on Vercel:
 1.  Go to your Project Dashboard on Vercel.
 2.  Click the **"Storage"** tab at the top.
 3.  Click **"Connect Store"** (or "Create").
-4.  Select **"Postgres"** -> **"Continue"**.
+4.  Select **"Neon"** (this is what powers Vercel Postgres).
+    *   *Note: If you see "Vercel Postgres" explicitly, choose that. Otherwise, Neon is the correct choice.*
+5.  Click **"Install"** or **"Add Integration"**.
 5.  Accept the terms and click **"Create"**.
 6.  **Important**: Select your project (`bountycast`) to connect it to, then click **"Connect"**.
     *   *This automatically adds the `POSTGRES_URL` environment variables to your project.*
 7.  **Initialize the Tables**:
-    *   In the Storage tab, click on your new database (e.g., `bountycast-postgres`).
-    *   Click **"Query"** on the left sidebar.
+    *   In the Vercel Storage tab, click on your Neon database.
+    *   Look for a button that says **"Open in Neon Console"** (or similar). Click it.
+    *   In the Neon Console, go to the **"SQL Editor"** (sidebar on the left).
     *   Paste and run this SQL command:
 
 ```sql
