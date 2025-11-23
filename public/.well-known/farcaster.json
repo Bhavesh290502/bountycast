@@ -1,9 +1,10 @@
 {
-    "accountAssociation": {
-        "header": "eyJmaWQiOjM2MjEsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgyYzlhYTI2Y2QyMmVkMzFhY2Q2NzY5ZThkNDRhZGYxYjM2NTc5YjY4In0",
-        "payload": "eyJkb21haW4iOiJib3VudHljYXN0LnZlcmNlbC5hcHAifQ",
-        "signature": "MHg5YjY4..."
-    },
+  "accountAssociation": {
+    "header": "eyJmaWQiOjE3OTkxLCJ0eXBlIjoiYXV0aCIsImtleSI6IjB4RDhjNEQ3OEExNUUwOTIxMTQwODk0MUQwZjNmZjk4MDgxZDNkQ2U4MCJ9",
+    "payload": "eyJkb21haW4iOiJib3VudHljYXN0LnZlcmNlbC5hcHAifQ",
+    "signature": "DD8nxfH47WCMKyjwrNeXLgPeMddES0KdzwawqmW+6hoMfgPE+H2mpPAwavJ9OD8Yk/bpLyqOoZN8fXsMrbuAYBw="
+  }
+,
     "frame": {
         "version": "1",
         "name": "BountyCast",
