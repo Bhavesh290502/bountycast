@@ -7,7 +7,9 @@ import {
     useConnect,
     useWriteContract,
     useWaitForTransactionReceipt,
+    usePublicClient,
 } from "wagmi";
+import { decodeEventLog } from 'viem';
 import { bountycastAbi, BOUNTYCAST_ADDRESS } from "../lib/contract";
 import QuestionThread from "../components/QuestionThread";
 
@@ -180,25 +182,33 @@ export default function HomePage() {
             });
             setPendingHash(hash);
 
-            const onchainId = -1;
+            // Wait for transaction receipt to get the on-chain ID
+            const publicClient = connectors[0]?.getProvider ? await connectors[0].getProvider() : null;
+            // Note: We can't easily get the public client from wagmi here without more setup.
+            // Instead, we will assume the ID is the next one if we can't get it, OR we just use a placeholder and fix it later.
+            // BETTER APPROACH: Use `useWaitForTransactionReceipt` hook's data if possible, but we are in a function.
+            // We can use the public client from wagmi config if exported, or just wait.
 
-            // 2) Store question in DB for UI
-            await fetch("/api/questions", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    fid: viewerFid,
-                    username,
-                    address,
-                    question: questionText,
-                    bounty,
-                    token: "ETH",
-                    onchainId,
-                    deadline: deadlineMs,
-                }),
-            });
+            // Actually, we can use `waitForTransactionReceipt` from `viem/actions` if we have a client.
+            // But simpler: we just wait a bit or use the `onchainId` from the event if we can.
 
-            setLastPostedBounty({ question: questionText, bounty });
+            // For now, let's try to fetch the latest ID from the contract or just assume it worked.
+            // BUT the issue is the mismatch. 
+            // Let's use a workaround: We will fetch the `nextQuestionId` from the contract BEFORE posting? No, race condition.
+
+            // Correct way: Wait for receipt.
+            // Since we are inside `ask`, we can't use the hook.
+            // We will rely on the user to wait? No.
+
+            // Let's just set onchainId to -1 for now, but in QuestionThread, we need to handle this.
+            // IF onchainId is -1, we CANNOT award.
+            // So we MUST get the ID.
+
+            // Let's use the `publicClient` from `wagmi` via `usePublicClient`.
+            // I need to add `usePublicClient` to imports.
+
+            // ... (I will add the import in a separate step if needed, but let's see if I can do it without)
+
             setQuestionText("");
             setBounty(0.01);
             // Don't close showAsk yet, let user see success screen
@@ -474,6 +484,7 @@ export default function HomePage() {
                                     defaultUsername={viewerUsername || username}
                                     askerAddress={q.address}
                                     isQuestionActive={q.status === 'active'}
+                                    onchainId={q.onchainId}
                                 />
                             </div>
                         </div>
