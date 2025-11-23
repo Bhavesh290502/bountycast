@@ -4,13 +4,32 @@ import { sql } from '@vercel/postgres';
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
-    const { id } = body || {};
-    if (!id) {
-        return NextResponse.json({ error: 'id required' }, { status: 400 });
+    const { id, fid } = body || {}; // id is answerId
+
+    if (!id || !fid) {
+        return NextResponse.json({ error: 'id and fid required' }, { status: 400 });
     }
 
     try {
-        await sql`UPDATE answers SET upvotes = upvotes + 1 WHERE id = ${id}`;
+        // Check if already upvoted
+        const { rowCount } = await sql`
+            SELECT 1 FROM upvotes WHERE answerId = ${id} AND fid = ${fid}
+        `;
+
+        if (rowCount && rowCount > 0) {
+            return NextResponse.json({ error: 'Already upvoted' }, { status: 400 });
+        }
+
+        // Record upvote and increment count
+        await sql`
+            WITH inserted AS (
+                INSERT INTO upvotes (answerId, fid, created)
+                VALUES (${id}, ${fid}, ${Date.now()})
+                RETURNING id
+            )
+            UPDATE answers SET upvotes = upvotes + 1 WHERE id = ${id}
+        `;
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error(error);

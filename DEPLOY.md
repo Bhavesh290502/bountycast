@@ -89,6 +89,15 @@ CREATE TABLE IF NOT EXISTS answers (
   answer TEXT,
   upvotes INTEGER DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS upvotes (
+  id SERIAL PRIMARY KEY,
+  answerId INTEGER,
+  fid INTEGER,
+  created BIGINT,
+  UNIQUE(answerId, fid)
+);
+
 ```
 
 ## 5. Final Redeploy

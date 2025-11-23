@@ -35,10 +35,30 @@ export async function POST(req: NextRequest) {
         );
     }
 
+    if (!fid) {
+        return NextResponse.json(
+            { error: 'fid required (please log in)' },
+            { status: 400 }
+        );
+    }
+
     try {
+        // Check if user already answered this question
+        const { rowCount } = await sql`
+            SELECT 1 FROM answers 
+            WHERE questionId = ${questionId} AND fid = ${fid}
+        `;
+
+        if (rowCount && rowCount > 0) {
+            return NextResponse.json(
+                { error: 'You have already answered this question' },
+                { status: 400 }
+            );
+        }
+
         const { rows } = await sql`
       INSERT INTO answers (questionId, fid, username, address, answer, upvotes)
-      VALUES (${questionId}, ${fid || 0}, ${username || 'anon'}, ${address || ''}, ${answer}, 0)
+      VALUES (${questionId}, ${fid}, ${username || 'anon'}, ${address || ''}, ${answer}, 0)
       RETURNING id;
     `;
         return NextResponse.json({ id: rows[0].id });

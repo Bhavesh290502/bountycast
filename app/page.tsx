@@ -327,7 +327,7 @@ export default function HomePage() {
                                 <QuestionThread
                                     questionId={q.id}
                                     fid={viewerFid}
-                                    defaultUsername={username}
+                                    defaultUsername={viewerUsername || username}
                                 />
                             </div>
                         </div>

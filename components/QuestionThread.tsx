@@ -42,9 +42,15 @@ export default function QuestionThread({
 
     const submitAnswer = async () => {
         if (!myAnswer.trim()) return;
+
+        if (!fid) {
+            alert("Please log in to answer.");
+            return;
+        }
+
         setLoading(true);
         try {
-            await fetch('/api/answers', {
+            const res = await fetch('/api/answers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -55,22 +61,42 @@ export default function QuestionThread({
                     address,
                 }),
             });
+
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || "Failed to post answer");
+                return;
+            }
+
             setMyAnswer('');
             await loadAnswers();
         } catch (e) {
             console.error(e);
+            alert("An error occurred while posting your answer.");
         } finally {
             setLoading(false);
         }
     };
 
     const upvote = async (id: number) => {
+        if (!fid) {
+            alert("Please log in to upvote.");
+            return;
+        }
+
         try {
-            await fetch('/api/answers/upvote', {
+            const res = await fetch('/api/answers/upvote', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id }),
+                body: JSON.stringify({ id, fid }),
             });
+
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || "Failed to upvote");
+                return;
+            }
+
             await loadAnswers();
         } catch (e) {
             console.error(e);
