@@ -32,4 +32,15 @@ export const bountycastAbi: Abi = [
         ],
         outputs: [],
     }
+    {
+        type: 'event',
+        name: 'QuestionPosted',
+        inputs: [
+            { indexed: true, name: 'id', type: 'uint256' },
+            { indexed: true, name: 'asker', type: 'address' },
+            { indexed: false, name: 'bounty', type: 'uint256' },
+            { indexed: false, name: 'token', type: 'address' },
+            { indexed: false, name: 'expires', type: 'uint256' },
+        ],
+    },
 ] as const;
