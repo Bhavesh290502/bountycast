@@ -142,13 +142,10 @@ export default function QuestionThread({
             const hash = await writeContractAsync({
                 address: BOUNTYCAST_ADDRESS,
                 abi: bountycastAbi,
-                const hash = await writeContractAsync({
-                    address: BOUNTYCAST_ADDRESS,
-                    abi: bountycastAbi,
-                    functionName: "selectWinner",
-                    args: [BigInt(onchainId && onchainId > -1 ? onchainId : questionId), winnerAddress as `0x${string}`],
-                });
-                alert(`Bounty awarded! Tx: ${hash}`);
+                functionName: "selectWinner",
+                args: [BigInt(onchainId && onchainId > -1 ? onchainId : questionId), winnerAddress as `0x${string}`],
+            });
+            alert(`Bounty awarded! Tx: ${hash}`);
             // Optimistically update UI or reload
         } catch (e) {
             console.error(e);
@@ -198,39 +195,39 @@ export default function QuestionThread({
                                         const username = a.authorProfile?.username || a.username;
                                         sdk.actions.openUrl(`https://warpcast.com/${username}`);
                                     }}
-    className = "font-bold text-brand-purple text-xs hover:underline text-left"
-        >
-        { a.authorProfile ? `@${a.authorProfile.username}` : a.username }
+                                    className="font-bold text-brand-purple text-xs hover:underline text-left"
+                                >
+                                    {a.authorProfile ? `@${a.authorProfile.username}` : a.username}
                                 </button >
-        { a.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span> }
+                                {a.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
                             </div >
-        <span className="text-gray-300 text-xs block pl-7">{a.answer}</span>
+                            <span className="text-gray-300 text-xs block pl-7">{a.answer}</span>
                         </div >
 
-        <div className="flex items-center gap-2">
-            {/* Show Award button if viewer is asker and question is active */}
-            {askerAddress && address && askerAddress.toLowerCase() === address.toLowerCase() && isQuestionActive && a.address && (
-                <button
-                    onClick={() => awardBounty(a.address!)}
-                    className="bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white px-2 py-1 rounded text-[10px] font-bold transition-colors mr-2"
-                    title="Award Bounty"
-                >
-                    🏆 Award
-                </button>
-            )}
+                        <div className="flex items-center gap-2">
+                            {/* Show Award button if viewer is asker and question is active */}
+                            {askerAddress && address && askerAddress.toLowerCase() === address.toLowerCase() && isQuestionActive && a.address && (
+                                <button
+                                    onClick={() => awardBounty(a.address!)}
+                                    className="bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white px-2 py-1 rounded text-[10px] font-bold transition-colors mr-2"
+                                    title="Award Bounty"
+                                >
+                                    🏆 Award
+                                </button>
+                            )}
 
-            <span className="text-xs font-medium text-gray-400">{a.upvotes}</span>
-            <button
-                onClick={() => upvote(a.id)}
-                className="text-gray-500 hover:text-brand-gold transition-colors p-1 rounded hover:bg-brand-gold/10"
-                title="Upvote"
-            >
-                ▲
-            </button>
-        </div>
+                            <span className="text-xs font-medium text-gray-400">{a.upvotes}</span>
+                            <button
+                                onClick={() => upvote(a.id)}
+                                className="text-gray-500 hover:text-brand-gold transition-colors p-1 rounded hover:bg-brand-gold/10"
+                                title="Upvote"
+                            >
+                                ▲
+                            </button>
+                        </div>
                     </div >
                 ))
-}
+                }
             </div >
         </div >
     );
