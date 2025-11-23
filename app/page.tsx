@@ -188,6 +188,7 @@ export default function HomePage() {
             if (publicClient) {
                 try {
                     const receipt = await publicClient.waitForTransactionReceipt({ hash });
+                    console.log("Tx Receipt Logs:", receipt.logs);
                     // Find the QuestionPosted event
                     for (const log of receipt.logs) {
                         try {
@@ -196,6 +197,7 @@ export default function HomePage() {
                                 data: log.data,
                                 topics: log.topics,
                             });
+                            console.log("Decoded Event:", event);
                             if (event.eventName === 'QuestionPosted' && event.args) {
                                 // @ts-ignore
                                 onchainId = Number(event.args.id);
@@ -203,6 +205,7 @@ export default function HomePage() {
                                 break;
                             }
                         } catch (e) {
+                            console.log("Failed to decode log:", e);
                             // Ignore logs that don't match our ABI
                         }
                     }
