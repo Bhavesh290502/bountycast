@@ -66,124 +66,129 @@ export default function HomePage() {
         error: connectError,
         isPending: isConnectPending,
     } = useConnect();
-    const { writeContractAsync } = useWriteContract();
+} = useConnect();
+const { writeContractAsync } = useWriteContract();
+const publicClient = usePublicClient();
 
-    const [pendingHash, setPendingHash] = useState<`0x${string}` | undefined>();
-    const { isLoading: txPending } = useWaitForTransactionReceipt({
-        hash: pendingHash,
-    });
+const [pendingHash, setPendingHash] = useState<`0x${string}` | undefined>();
+const { isLoading: txPending } = useWaitForTransactionReceipt({
+    hash: pendingHash,
+});
 
-    const username =
-        viewerUsername || (address ? `user-${address.slice(0, 6)}` : "anon");
+const username =
+    viewerUsername || (address ? `user-${address.slice(0, 6)}` : "anon");
 
-    // Initialize Farcaster mini app context
-    useEffect(() => {
-        const init = async () => {
-            try {
-                await sdk.actions.ready();
-                const ctx = await sdk.context as any;
-                console.log("Farcaster Context:", ctx); // DEBUG LOG
-
-                if (ctx?.user) { // Try ctx.user first (v2 spec)
-                    console.log("Found ctx.user:", ctx.user);
-                    setViewerFid(ctx.user.fid);
-                    setViewerUsername(ctx.user.username || undefined);
-                } else if (ctx?.viewer) { // Fallback to ctx.viewer (older spec)
-                    console.log("Found ctx.viewer:", ctx.viewer);
-                    setViewerFid(ctx.viewer.fid);
-                    setViewerUsername(ctx.viewer.username || undefined);
-                } else {
-                    console.warn("No viewer found in context");
-                }
-            } catch (e) {
-                console.error("mini app init error (likely outside Farcaster)", e);
-            } finally {
-                setIsReady(true);
-            }
-        };
-        init();
-    }, []);
-
-    // Load questions from API
-    const loadQuestions = async () => {
+// Initialize Farcaster mini app context
+useEffect(() => {
+    const init = async () => {
         try {
-            const res = await fetch("/api/questions");
-            const data = await res.json();
-            if (Array.isArray(data)) {
-                setQuestions(data);
+            await sdk.actions.ready();
+            const ctx = await sdk.context as any;
+            console.log("Farcaster Context:", ctx); // DEBUG LOG
+
+            if (ctx?.user) { // Try ctx.user first (v2 spec)
+                console.log("Found ctx.user:", ctx.user);
+                setViewerFid(ctx.user.fid);
+                setViewerUsername(ctx.user.username || undefined);
+            } else if (ctx?.viewer) { // Fallback to ctx.viewer (older spec)
+                console.log("Found ctx.viewer:", ctx.viewer);
+                setViewerFid(ctx.viewer.fid);
+                setViewerUsername(ctx.viewer.username || undefined);
             } else {
-                console.error("Failed to load questions:", data);
-                setQuestions([]);
+                console.warn("No viewer found in context");
             }
         } catch (e) {
-            console.error(e);
+            console.error("mini app init error (likely outside Farcaster)", e);
+        } finally {
+            setIsReady(true);
         }
     };
+    init();
+}, []);
 
-    useEffect(() => {
-        loadQuestions();
-    }, []);
-
-    // Connect to Farcaster mini app wallet
-    const handleConnectClick = () => {
-        if (!connectors || connectors.length === 0) {
-            console.error("No Farcaster mini app wallet connector available");
-            alert(
-                "This app is meant to run inside Farcaster as a mini app. Open it from Warpcast."
-            );
-            return;
+// Load questions from API
+const loadQuestions = async () => {
+    try {
+        const res = await fetch("/api/questions");
+        const data = await res.json();
+        if (Array.isArray(data)) {
+            setQuestions(data);
+        } else {
+            console.error("Failed to load questions:", data);
+            setQuestions([]);
         }
+    } catch (e) {
+        console.error(e);
+    }
+};
 
-        const connector = connectors[0];
-        connect({ connector });
-    };
+useEffect(() => {
+    loadQuestions();
+}, []);
 
-    // Ask a question + lock bounty on-chain
-    const ask = async () => {
-        if (!questionText.trim()) return;
-        if (!isConnected || !address) {
-            alert("Connect your Farcaster wallet to lock bounty on-chain.");
-            return;
-        }
+// Connect to Farcaster mini app wallet
+const handleConnectClick = () => {
+    if (!connectors || connectors.length === 0) {
+        console.error("No Farcaster mini app wallet connector available");
+        alert(
+            "This app is meant to run inside Farcaster as a mini app. Open it from Warpcast."
+        );
+        return;
+    }
 
-        setLoading(true);
-        try {
-            // 0) Check Eligibility
-            if (viewerFid) {
-                const checkRes = await fetch(`/api/check-eligibility?fid=${viewerFid}`);
-                if (!checkRes.ok) {
-                    const checkData = await checkRes.json();
-                    alert(checkData.reason || "You are not eligible to post (Pro or Score > 0.6 required).");
-                    setLoading(false);
-                    return;
-                }
+    const connector = connectors[0];
+    connect({ connector });
+};
+
+// Ask a question + lock bounty on-chain
+const ask = async () => {
+    if (!questionText.trim()) return;
+    if (!isConnected || !address) {
+        alert("Connect your Farcaster wallet to lock bounty on-chain.");
+        return;
+    }
+
+    setLoading(true);
+    try {
+        // 0) Check Eligibility
+        if (viewerFid) {
+            const checkRes = await fetch(`/api/check-eligibility?fid=${viewerFid}`);
+            if (!checkRes.ok) {
+                const checkData = await checkRes.json();
+                alert(checkData.reason || "You are not eligible to post (Pro or Score > 0.6 required).");
+                setLoading(false);
+                return;
             }
+        }
 
-            const now = Date.now();
-            const deadlineMs = now + 30 * 24 * 60 * 60 * 1000; // 30 days
-            const deadlineSec = Math.floor(deadlineMs / 1000);
+        const now = Date.now();
+        const deadlineMs = now + 30 * 24 * 60 * 60 * 1000; // 30 days
+        const deadlineSec = Math.floor(deadlineMs / 1000);
 
-            const metadata = {
-                question: questionText,
-                createdAt: now,
-                bounty,
-            };
-            const metadataUri = `data:application/json,${encodeURIComponent(
-                JSON.stringify(metadata)
-            )}`;
+        const metadata = {
+            question: questionText,
+            createdAt: now,
+            bounty,
+        };
+        const metadataUri = `data:application/json,${encodeURIComponent(
+            JSON.stringify(metadata)
+        )}`;
 
-            // 1) On-chain: createQuestion + lock bounty
-            const hash = await writeContractAsync({
-                address: BOUNTYCAST_ADDRESS,
-                abi: bountycastAbi,
-                functionName: "createQuestion",
-                args: [metadataUri, BigInt(deadlineSec)],
-                value: BigInt(Math.floor(bounty * 1e18)),
-            });
-            setPendingHash(hash);
+        // 1) On-chain: createQuestion + lock bounty
+        const hash = await writeContractAsync({
+            address: BOUNTYCAST_ADDRESS,
+            abi: bountycastAbi,
+            functionName: "createQuestion",
+            args: [metadataUri, BigInt(deadlineSec)],
+            value: BigInt(Math.floor(bounty * 1e18)),
+        });
+        setPendingHash(hash);
 
-            // Wait for transaction receipt to get the on-chain ID
-            const publicClient = connectors[0]?.getProvider ? await connectors[0].getProvider() : null;
+        // Wait for transaction receipt to get the on-chain ID
+        // Wait for transaction receipt to get the on-chain ID
+        // We use the publicClient from the hook defined at the top level
+        let onchainId = -1;
+        if (publicClient) {
             // Note: We can't easily get the public client from wagmi here without more setup.
             // Instead, we will assume the ID is the next one if we can't get it, OR we just use a placeholder and fix it later.
             // BETTER APPROACH: Use `useWaitForTransactionReceipt` hook's data if possible, but we are in a function.
