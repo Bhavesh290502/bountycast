@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserProfile } from '../../lib/neynar';
+import { getUserProfile } from '../../../lib/neynar';
 
 export async function GET(req: NextRequest) {
     const fid = Number(req.nextUrl.searchParams.get('fid'));
