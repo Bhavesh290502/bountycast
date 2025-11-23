@@ -122,7 +122,6 @@ export default function QuestionThread({
         }
     };
 
-    const { writeContractAsync } = useWriteContract();
     const { address: viewerAddress } = useAccount();
 
     // Check if viewer is the asker (this needs to be passed down or fetched)
