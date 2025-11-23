@@ -366,18 +366,18 @@ export default function HomePage() {
                             <div className="flex justify-between items-start mb-3">
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400">
-                                        {q.username.slice(0, 2).toUpperCase()}
+                                        {(q.username || 'AN').slice(0, 2).toUpperCase()}
                                     </div>
                                     <div>
-                                        <div className="font-semibold text-white text-sm">{q.username}</div>
+                                        <div className="font-semibold text-white text-sm">{q.username || 'Anon'}</div>
                                         <div className="text-[10px] text-gray-500">
-                                            {new Date(q.created).toLocaleDateString()}
+                                            {q.created ? new Date(q.created).toLocaleDateString() : ''}
                                         </div>
                                     </div>
                                 </div>
                                 <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                                     <span>🏆</span>
-                                    <span>{q.bounty} ETH</span>
+                                    <span>{q.bounty || 0} ETH</span>
                                 </div>
                             </div>
 
