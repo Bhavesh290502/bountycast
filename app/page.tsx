@@ -40,6 +40,7 @@ export default function HomePage() {
     const [bounty, setBounty] = useState(0.01);
     const [loading, setLoading] = useState(false);
     const [lastPostedBounty, setLastPostedBounty] = useState<{ question: string; bounty: number } | null>(null);
+    const [userProfile, setUserProfile] = useState<any>(null);
 
     // Load User Profile
     useEffect(() => {
