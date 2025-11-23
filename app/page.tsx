@@ -198,7 +198,7 @@ export default function HomePage() {
                                 topics: log.topics,
                             });
                             console.log("Decoded Event:", event);
-                            if (event.eventName === 'QuestionPosted' && event.args) {
+                            if (event.eventName === 'QuestionCreated' && event.args) {
                                 // @ts-ignore
                                 onchainId = Number(event.args.id);
                                 console.log("Captured OnChain ID:", onchainId);
