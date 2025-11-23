@@ -14,12 +14,10 @@ export default function QuestionThread({
     questionId,
     fid,
     defaultUsername,
-    viewerPfp,
 }: {
     questionId: number;
     fid?: number;
     defaultUsername?: string;
-    viewerPfp?: string;
 }) {
     const [answers, setAnswers] = useState<Answer[]>([]);
     const [myAnswer, setMyAnswer] = useState('');
@@ -60,7 +58,6 @@ export default function QuestionThread({
                     answer: myAnswer,
                     fid,
                     username,
-                    pfpUrl: viewerPfp,
                     address,
                 }),
             });
@@ -130,22 +127,9 @@ export default function QuestionThread({
                         key={a.id}
                         className="bg-white/5 p-3 rounded-lg flex justify-between items-center group hover:bg-white/10 transition-colors"
                     >
-                        <div className="flex-1 mr-2 flex items-center gap-2">
-                            {(a as any).pfpUrl ? (
-                                <img
-                                    src={(a as any).pfpUrl}
-                                    alt={a.username}
-                                    className="w-5 h-5 rounded-full border border-white/10 object-cover"
-                                />
-                            ) : (
-                                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-[8px] font-bold text-gray-400">
-                                    {a.username.slice(0, 2).toUpperCase()}
-                                </div>
-                            )}
-                            <div>
-                                <span className="font-bold text-brand-purple text-xs mr-2">{a.username}</span>
-                                <span className="text-gray-300 text-xs">{a.answer}</span>
-                            </div>
+                        <div className="flex-1 mr-2">
+                            <span className="font-bold text-brand-purple text-xs mr-2">{a.username}</span>
+                            <span className="text-gray-300 text-xs">{a.answer}</span>
                         </div>
 
                         <div className="flex items-center gap-2">

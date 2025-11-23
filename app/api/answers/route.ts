@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
-    const { questionId, fid, username, pfpUrl, address, answer } = body || {};
+    const { questionId, fid, username, address, answer } = body || {};
 
     if (!questionId || !answer) {
         return NextResponse.json(
@@ -57,8 +57,8 @@ export async function POST(req: NextRequest) {
         }
 
         const { rows } = await sql`
-      INSERT INTO answers (questionId, fid, username, pfpUrl, address, answer, upvotes)
-      VALUES (${questionId}, ${fid}, ${username || 'anon'}, ${pfpUrl || ''}, ${address || ''}, ${answer}, 0)
+      INSERT INTO answers (questionId, fid, username, address, answer, upvotes)
+      VALUES (${questionId}, ${fid}, ${username || 'anon'}, ${address || ''}, ${answer}, 0)
       RETURNING id;
     `;
         return NextResponse.json({ id: rows[0].id });
