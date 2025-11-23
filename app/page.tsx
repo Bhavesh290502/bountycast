@@ -39,7 +39,7 @@ export default function HomePage() {
     const [questionText, setQuestionText] = useState("");
     const [bounty, setBounty] = useState(0.01);
     const [loading, setLoading] = useState(false);
-    const [userProfile, setUserProfile] = useState<any>(null);
+    const [lastPostedBounty, setLastPostedBounty] = useState<{ question: string; bounty: number } | null>(null);
 
     // Load User Profile
     useEffect(() => {
@@ -195,9 +195,10 @@ export default function HomePage() {
                 }),
             });
 
+            setLastPostedBounty({ question: questionText, bounty });
             setQuestionText("");
             setBounty(0.01);
-            setShowAsk(false);
+            // Don't close showAsk yet, let user see success screen
             await loadQuestions();
         } catch (e) {
             console.error(e);
@@ -290,57 +291,90 @@ export default function HomePage() {
                     </button>
                 ) : (
                     <div className="glass-card p-5 rounded-xl animate-in fade-in slide-in-from-bottom-4 duration-300">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-semibold text-white">New Bounty</h3>
-                            <button
-                                onClick={() => setShowAsk(false)}
-                                className="text-gray-500 hover:text-white transition-colors"
-                            >
-                                ✕
-                            </button>
-                        </div>
+                        {lastPostedBounty ? (
+                            <div className="text-center py-4">
+                                <div className="text-4xl mb-3">🎉</div>
+                                <h3 className="font-bold text-white text-lg mb-2">Bounty Posted!</h3>
+                                <p className="text-gray-400 text-sm mb-6">
+                                    Share it to Farcaster to get answers faster.
+                                </p>
 
-                        <textarea
-                            className="glass-input w-full p-3 rounded-lg mb-3 min-h-[100px] resize-none text-sm placeholder-gray-500"
-                            placeholder="What do you want to know?"
-                            value={questionText}
-                            onChange={(e) => setQuestionText(e.target.value)}
-                        />
+                                <button
+                                    onClick={() => {
+                                        const text = `Help me solve this bounty! 💰 ${lastPostedBounty.bounty} ETH\n\n${lastPostedBounty.question}\n\nAnswer here:`;
+                                        const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent('https://bountycast.vercel.app')}`;
+                                        sdk.actions.openUrl(url);
+                                    }}
+                                    className="btn-primary w-full py-3 rounded-lg font-medium mb-3 flex items-center justify-center gap-2"
+                                >
+                                    <span>🔁</span> Share on Warpcast
+                                </button>
 
-                        <div className="flex gap-3 mb-4">
-                            <div className="relative flex-1">
-                                <input
-                                    type="number"
-                                    min={0.001}
-                                    step={0.001}
-                                    className="glass-input w-full p-3 rounded-lg pl-8 text-sm"
-                                    placeholder="0.01"
-                                    value={bounty}
-                                    onChange={(e) => setBounty(Number(e.target.value || 0.001))}
+                                <button
+                                    onClick={() => {
+                                        setLastPostedBounty(null);
+                                        setShowAsk(false);
+                                    }}
+                                    className="text-gray-500 hover:text-white text-sm transition-colors"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-semibold text-white">New Bounty</h3>
+                                    <button
+                                        onClick={() => setShowAsk(false)}
+                                        className="text-gray-500 hover:text-white transition-colors"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <textarea
+                                    className="glass-input w-full p-3 rounded-lg mb-3 min-h-[100px] resize-none text-sm placeholder-gray-500"
+                                    placeholder="What do you want to know?"
+                                    value={questionText}
+                                    onChange={(e) => setQuestionText(e.target.value)}
                                 />
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-gold">
-                                    Ξ
-                                </span>
-                            </div>
-                            <div className="flex items-center text-xs text-gray-500">
-                                Native Base ETH
-                            </div>
-                        </div>
 
-                        <button
-                            onClick={ask}
-                            disabled={loading || txPending}
-                            className="btn-primary w-full py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading || txPending ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Processing...
-                                </span>
-                            ) : (
-                                "Post Bounty"
-                            )}
-                        </button>
+                                <div className="flex gap-3 mb-4">
+                                    <div className="relative flex-1">
+                                        <input
+                                            type="number"
+                                            min={0.001}
+                                            step={0.001}
+                                            className="glass-input w-full p-3 rounded-lg pl-8 text-sm"
+                                            placeholder="0.01"
+                                            value={bounty}
+                                            onChange={(e) => setBounty(Number(e.target.value || 0.001))}
+                                        />
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-gold">
+                                            Ξ
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center text-xs text-gray-500">
+                                        Native Base ETH
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={ask}
+                                    disabled={loading || txPending}
+                                    className="btn-primary w-full py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {loading || txPending ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Processing...
+                                        </span>
+                                    ) : (
+                                        "Post Bounty"
+                                    )}
+                                </button>
+                            </>
+                        )}
                     </div>
                 )}
             </section>
