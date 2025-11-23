@@ -1,24 +1,18 @@
 {
-    "name": "BountyCast",
-    "description": "Ask questions with ETH bounties on Farcaster",
-    "icon": {
-        "url": "https://bountycast.vercel.app/icon.png",
-        "width": 512,
-        "height": 512
+    "accountAssociation": {
+        "header": "eyJmaWQiOjM2MjEsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgyYzlhYTI2Y2QyMmVkMzFhY2Q2NzY5ZThkNDRhZGYxYjM2NTc5YjY4In0",
+        "payload": "eyJkb21haW4iOiJib3VudHljYXN0LnZlcmNlbC5hcHAifQ",
+        "signature": "MHg5YjY4..."
     },
-    "homeUrl": "https://bountycast.vercel.app",
     "frame": {
         "version": "1",
+        "name": "BountyCast",
+        "iconUrl": "https://bountycast.vercel.app/icon.png",
+        "homeUrl": "https://bountycast.vercel.app",
         "imageUrl": "https://bountycast.vercel.app/opengraph-image.png",
-        "button": {
-            "title": "Launch BountyCast",
-            "action": {
-                "type": "launch_frame",
-                "name": "BountyCast",
-                "url": "https://bountycast.vercel.app",
-                "splashImageUrl": "https://bountycast.vercel.app/splash.png",
-                "splashBackgroundColor": "#000000"
-            }
-        }
+        "buttonTitle": "Launch BountyCast",
+        "splashImageUrl": "https://bountycast.vercel.app/splash.png",
+        "splashBackgroundColor": "#000000",
+        "webhookUrl": "https://bountycast.vercel.app/api/webhook"
     }
 }
