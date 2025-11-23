@@ -33,6 +33,19 @@ export default function HomePage() {
     const [questionText, setQuestionText] = useState("");
     const [bounty, setBounty] = useState(0.01);
     const [loading, setLoading] = useState(false);
+    const [userProfile, setUserProfile] = useState<any>(null);
+
+    // Load User Profile
+    useEffect(() => {
+        if (viewerFid) {
+            fetch(`/api/user?fid=${viewerFid}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.error) setUserProfile(data);
+                })
+                .catch(console.error);
+        }
+    }, [viewerFid]);
 
     // wagmi hooks (Farcaster mini app wallet)
     const { isConnected, address } = useAccount();
@@ -196,19 +209,7 @@ export default function HomePage() {
         );
     }
 
-    const [userProfile, setUserProfile] = useState<any>(null);
 
-    // Load User Profile
-    useEffect(() => {
-        if (viewerFid) {
-            fetch(`/api/user?fid=${viewerFid}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.error) setUserProfile(data);
-                })
-                .catch(console.error);
-        }
-    }, [viewerFid]);
 
     return (
         <div className="max-w-xl mx-auto p-4 font-sans text-sm pb-20">
