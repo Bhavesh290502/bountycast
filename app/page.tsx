@@ -405,9 +405,23 @@ export default function HomePage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
-                                    <span>🏆</span>
-                                    <span>{q.bounty || 0} ETH</span>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const text = `Help me solve this bounty! 💰 ${q.bounty} ETH\n\nAnswer here:`;
+                                            const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent('https://bountycast.vercel.app')}`; // TODO: Deep link if possible
+                                            sdk.actions.openUrl(url);
+                                        }}
+                                        className="bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white px-2 py-1 rounded text-xs transition-colors flex items-center gap-1"
+                                        title="Share on Warpcast"
+                                    >
+                                        <span>🔁</span>
+                                    </button>
+                                    <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                                        <span>🏆</span>
+                                        <span>{q.bounty || 0} ETH</span>
+                                    </div>
                                 </div>
                             </div>
 
