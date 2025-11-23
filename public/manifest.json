@@ -1,0 +1,24 @@
+{
+    "name": "BountyCast",
+    "description": "Ask questions with ETH bounties on Farcaster",
+    "icon": {
+        "url": "https://bountycast.vercel.app/icon.png",
+        "width": 512,
+        "height": 512
+    },
+    "homeUrl": "https://bountycast.vercel.app",
+    "frame": {
+        "version": "1",
+        "imageUrl": "https://bountycast.vercel.app/opengraph-image.png",
+        "button": {
+            "title": "Launch BountyCast",
+            "action": {
+                "type": "launch_frame",
+                "name": "BountyCast",
+                "url": "https://bountycast.vercel.app",
+                "splashImageUrl": "https://bountycast.vercel.app/splash.png",
+                "splashBackgroundColor": "#000000"
+            }
+        }
+    }
+}
