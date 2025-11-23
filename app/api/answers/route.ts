@@ -1,6 +1,6 @@
+// app/api/answers/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { checkEligibility, getBulkUserProfiles } from '../../../lib/neynar';
 
 export async function GET(req: NextRequest) {
     const questionId = Number(new URL(req.url).searchParams.get('questionId'));
@@ -13,29 +13,18 @@ export async function GET(req: NextRequest) {
 
     try {
         const { rows } = await sql`
-            SELECT * FROM answers 
-            WHERE questionId = ${questionId} 
-            ORDER BY created ASC
-        `;
-
-        // Enrich with Neynar data
-        const fids = rows.map(r => r.fid).filter(f => f > 0);
-        if (fids.length > 0) {
-            const profiles = await getBulkUserProfiles(fids);
-
-            const enrichedRows = rows.map(row => ({
-                ...row,
-                authorProfile: profiles[row.fid] || null
-            }));
-            return NextResponse.json(enrichedRows);
-        }
-
+      SELECT * FROM answers
+      WHERE questionId = ${questionId}
+      ORDER BY upvotes DESC, id ASC
+    `;
         return NextResponse.json(rows);
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: 'DB error' }, { status: 500 });
     }
 }
+
+import { checkEligibility } from '../../../lib/neynar';
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -89,3 +78,4 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Insert error' }, { status: 500 });
     }
 }
+
