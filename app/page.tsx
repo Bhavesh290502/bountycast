@@ -367,51 +367,14 @@ export default function HomePage() {
                     {questions.map((q) => (
                         <div
                             key={q.id}
-                            className={`glass-card p-5 rounded-xl transition-all duration-300 ${q.status === "awarded" ? "opacity-70 grayscale-[0.5]" : "hover:scale-[1.01] hover:shadow-lg hover:shadow-brand-purple/10"
-                                }`}
-                        >
-                            <div className="flex justify-between items-start mb-3">
-                                <div className="flex items-center gap-2">
-                                    {q.authorProfile ? (
-                                        <img
-                                            src={q.authorProfile.pfpUrl}
-                                            alt={q.authorProfile.username}
-                                            className="w-8 h-8 rounded-full border border-white/10"
-                                        />
-                                    ) : (
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400">
-                                            {(q.username || 'AN').slice(0, 2).toUpperCase()}
                                         </div>
-                                    )}
-
-                                    <div>
-                                        <div className="flex items-center gap-1">
-                                            <a
-                                                href={`https://warpcast.com/${q.authorProfile ? q.authorProfile.username : (q.username || 'anon')}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="font-semibold text-white text-sm hover:underline hover:text-brand-purple transition-colors"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                {q.authorProfile ? `@${q.authorProfile.username}` : (q.username || 'Anon')}
-                                            </a>
-                                            {q.authorProfile?.isPro && (
-                                                <span title="Pro User" className="text-yellow-400 text-sm ml-1">⚡</span>
-                                            )}
-                                        </div>
-                                        <div className="text-[10px] text-gray-500 flex gap-2">
-                                            <span>{q.created ? new Date(q.created).toLocaleDateString() : ''}</span>
-                                            {q.authorProfile && q.authorProfile.score > 0 && (
-                                                <span>Score: {q.authorProfile.score.toFixed(2)}</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
-                                    <span>🏆</span>
-                                    <span>{q.bounty || 0} ETH</span>
-                                </div>
-                            </div>
+        </div>
+                                </div >
+        <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+            <span>🏆</span>
+            <span>{q.bounty || 0} ETH</span>
+        </div>
+                            </div >
 
                             <p className="text-gray-200 mb-4 text-sm leading-relaxed">
                                 {q.question}
@@ -424,10 +387,11 @@ export default function HomePage() {
                                     defaultUsername={viewerUsername || username}
                                 />
                             </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-        </div>
+                        </div >
+                    ))
+}
+                </div >
+            </section >
+        </div >
     );
 }
