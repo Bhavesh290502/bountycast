@@ -31,7 +31,7 @@ export const bountycastAbi: Abi = [
             { name: 'questionId', type: 'uint256' }
         ],
         outputs: [],
-    }
+    },
     {
         type: 'event',
         name: 'QuestionPosted',
