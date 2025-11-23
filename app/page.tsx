@@ -57,7 +57,7 @@ export default function HomePage() {
         const init = async () => {
             try {
                 await sdk.actions.ready();
-                const ctx = await sdk.context;
+                const ctx = await sdk.context as any;
                 if (ctx?.viewer) {
                     setViewerFid(ctx.viewer.fid);
                     setViewerUsername(ctx.viewer.username || undefined);
