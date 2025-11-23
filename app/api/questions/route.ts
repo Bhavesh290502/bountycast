@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     const {
         fid,
         username,
+        pfpUrl,
         address,
         question,
         bounty,
@@ -37,10 +38,11 @@ export async function POST(req: NextRequest) {
     try {
         const { rows } = await sql`
       INSERT INTO questions
-      (fid, username, address, question, bounty, token, created, deadline, onchainId, status)
+      (fid, username, pfpUrl, address, question, bounty, token, created, deadline, onchainId, status)
       VALUES (
         ${fid || 0},
         ${username || 'anon'},
+        ${pfpUrl || ''},
         ${address || ''},
         ${question},
         ${bounty || 0},

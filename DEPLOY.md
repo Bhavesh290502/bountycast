@@ -98,6 +98,11 @@ CREATE TABLE IF NOT EXISTS upvotes (
   UNIQUE(answerId, fid)
 );
 
+-- Add pfpUrl columns (Run this if you already created tables)
+ALTER TABLE questions ADD COLUMN IF NOT EXISTS pfpUrl TEXT;
+ALTER TABLE answers ADD COLUMN IF NOT EXISTS pfpUrl TEXT;
+
+
 ```
 
 ## 5. Final Redeploy
