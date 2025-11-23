@@ -119,6 +119,17 @@ export default function HomePage() {
 
         setLoading(true);
         try {
+            // 0) Check Eligibility
+            if (viewerFid) {
+                const checkRes = await fetch(`/api/check-eligibility?fid=${viewerFid}`);
+                if (!checkRes.ok) {
+                    const checkData = await checkRes.json();
+                    alert(checkData.reason || "You are not eligible to post (Pro or Score > 0.6 required).");
+                    setLoading(false);
+                    return;
+                }
+            }
+
             const now = Date.now();
             const deadlineMs = now + 30 * 24 * 60 * 60 * 1000; // 30 days
             const deadlineSec = Math.floor(deadlineMs / 1000);

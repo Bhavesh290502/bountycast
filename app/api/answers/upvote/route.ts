@@ -1,6 +1,6 @@
-// app/api/answers/upvote/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { checkEligibility } from '../../../../lib/neynar';
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -8,6 +8,15 @@ export async function POST(req: NextRequest) {
 
     if (!id || !fid) {
         return NextResponse.json({ error: 'id and fid required' }, { status: 400 });
+    }
+
+    // Check Eligibility
+    const eligibility = await checkEligibility(fid);
+    if (!eligibility.allowed) {
+        return NextResponse.json(
+            { error: eligibility.reason },
+            { status: 403 }
+        );
     }
 
     try {
@@ -36,4 +45,3 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Update error' }, { status: 500 });
     }
 }
-

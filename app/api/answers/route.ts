@@ -24,6 +24,8 @@ export async function GET(req: NextRequest) {
     }
 }
 
+import { checkEligibility } from '../../../lib/neynar';
+
 export async function POST(req: NextRequest) {
     const body = await req.json();
     const { questionId, fid, username, address, answer } = body || {};
@@ -39,6 +41,15 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
             { error: 'fid required (please log in)' },
             { status: 400 }
+        );
+    }
+
+    // Check Eligibility
+    const eligibility = await checkEligibility(fid);
+    if (!eligibility.allowed) {
+        return NextResponse.json(
+            { error: eligibility.reason },
+            { status: 403 }
         );
     }
 

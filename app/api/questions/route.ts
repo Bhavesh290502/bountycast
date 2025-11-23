@@ -1,6 +1,6 @@
-// app/api/questions/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { checkEligibility } from '../../../lib/neynar';
 
 export async function GET() {
     try {
@@ -14,42 +14,29 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
-    const {
-        fid,
-        username,
-        address,
-        question,
-        bounty,
-        token,
-        onchainId,
-        deadline,
-    } = body || {};
+    const { fid, username, address, question, bounty, token, onchainId, deadline } = body || {};
 
-    if (!question || onchainId === undefined || !deadline) {
+    if (!question || !bounty) {
         return NextResponse.json(
-            { error: 'question, onchainId, deadline required' },
+            { error: 'Question and bounty required' },
             { status: 400 }
         );
     }
 
-    const created = Date.now();
+    if (fid) {
+        const eligibility = await checkEligibility(fid);
+        if (!eligibility.allowed) {
+            return NextResponse.json(
+                { error: eligibility.reason },
+                { status: 403 }
+            );
+        }
+    }
 
     try {
         const { rows } = await sql`
-      INSERT INTO questions
-      (fid, username, address, question, bounty, token, created, deadline, onchainId, status)
-      VALUES (
-        ${fid || 0},
-        ${username || 'anon'},
-        ${address || ''},
-        ${question},
-        ${bounty || 0},
-        ${token || 'ETH'},
-        ${created},
-        ${deadline},
-        ${onchainId},
-        'open'
-      )
+      INSERT INTO questions (fid, username, address, question, bounty, token, created, deadline, onchainId, status)
+      VALUES (${fid || 0}, ${username || 'anon'}, ${address || ''}, ${question}, ${bounty}, ${token || 'ETH'}, ${Date.now()}, ${deadline}, ${onchainId}, 'active')
       RETURNING id;
     `;
         return NextResponse.json({ id: rows[0].id });
@@ -58,4 +45,3 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Insert error' }, { status: 500 });
     }
 }
-
