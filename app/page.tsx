@@ -45,6 +45,7 @@ export default function HomePage() {
     const [loading, setLoading] = useState(false);
     const [lastPostedBounty, setLastPostedBounty] = useState<{ question: string; bounty: number } | null>(null);
     const [userProfile, setUserProfile] = useState<any>(null);
+    const [isFrameAdded, setIsFrameAdded] = useState(false);
 
     // Load User Profile
     useEffect(() => {
@@ -98,11 +99,18 @@ export default function HomePage() {
                     console.warn("No viewer found in context");
                 }
 
-                // Show "Add to Miniapps" popup automatically
-                try {
-                    await sdk.actions.addFrame();
-                } catch (e) {
-                    console.log("Add frame prompt skipped or failed:", e);
+                // Check if frame is already added
+                const frameAdded = ctx?.client?.added || false;
+                setIsFrameAdded(frameAdded);
+
+                // Show "Add to Miniapps" popup automatically only if not added
+                if (!frameAdded) {
+                    try {
+                        await sdk.actions.addFrame();
+                        setIsFrameAdded(true);
+                    } catch (e) {
+                        console.log("Add frame prompt skipped or failed:", e);
+                    }
                 }
             } catch (e) {
                 console.error("mini app init error (likely outside Farcaster)", e);
@@ -267,17 +275,24 @@ export default function HomePage() {
                     Ask questions. Get answers. Earn ETH.
                 </p>
 
-                <button
-                    onClick={() => {
-                        sdk.actions.addFrame();
-                    }}
-                    className="mb-4 text-brand-purple hover:text-brand-gold text-xs font-medium transition-colors flex items-center gap-1 mx-auto"
-                >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                        <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                    Add to Miniapps
-                </button>
+                {!isFrameAdded && (
+                    <button
+                        onClick={async () => {
+                            try {
+                                await sdk.actions.addFrame();
+                                setIsFrameAdded(true);
+                            } catch (e) {
+                                console.log("Add frame failed:", e);
+                            }
+                        }}
+                        className="mb-4 text-brand-purple hover:text-brand-gold text-xs font-medium transition-colors flex items-center gap-1 mx-auto"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                        Add to Miniapps
+                    </button>
+                )}
 
                 <div className="flex justify-center">
                     {isConnected && address ? (
