@@ -97,6 +97,13 @@ export default function HomePage() {
                 } else {
                     console.warn("No viewer found in context");
                 }
+
+                // Show "Add to Miniapps" popup automatically
+                try {
+                    await sdk.actions.addFrame();
+                } catch (e) {
+                    console.log("Add frame prompt skipped or failed:", e);
+                }
             } catch (e) {
                 console.error("mini app init error (likely outside Farcaster)", e);
             } finally {
