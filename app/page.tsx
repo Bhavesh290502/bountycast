@@ -23,8 +23,12 @@ interface Question {
     deadline: number;
     onchainId: number;
     status: string;
-    address?: string; // Asker address
+    address?: string;
     active?: boolean;
+    category?: string;
+    tags?: string[];
+    isPrivate?: boolean;
+    updatedAt?: number;
     authorProfile?: {
         username: string;
         pfpUrl: string;
@@ -32,6 +36,8 @@ interface Question {
         score: number;
     };
 }
+
+const CATEGORIES = ['Solidity', 'Design', 'Marketing', 'Product', 'Business', 'Other'];
 
 export default function HomePage() {
     const [isReady, setIsReady] = useState(false);
@@ -46,6 +52,17 @@ export default function HomePage() {
     const [lastPostedBounty, setLastPostedBounty] = useState<{ question: string; bounty: number } | null>(null);
     const [userProfile, setUserProfile] = useState<any>(null);
     const [isFrameAdded, setIsFrameAdded] = useState(false);
+
+    // New feature states
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState<string>("");
+    const [selectedStatus, setSelectedStatus] = useState<string>("");
+    const [category, setCategory] = useState<string>("");
+    const [tags, setTags] = useState<string[]>([]);
+    const [isPrivate, setIsPrivate] = useState(false);
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [showNotifications, setShowNotifications] = useState(false);
 
     // Load User Profile
     useEffect(() => {
@@ -121,10 +138,15 @@ export default function HomePage() {
         init();
     }, []);
 
-    // Load questions from API
+    // Load questions from API with filters
     const loadQuestions = async () => {
         try {
-            const res = await fetch("/api/questions");
+            const params = new URLSearchParams();
+            if (searchQuery) params.append('search', searchQuery);
+            if (selectedCategory) params.append('category', selectedCategory);
+            if (selectedStatus) params.append('status', selectedStatus);
+
+            const res = await fetch(`/api/questions?${params.toString()}`);
             const data = await res.json();
             if (Array.isArray(data)) {
                 setQuestions(data);
@@ -137,9 +159,33 @@ export default function HomePage() {
         }
     };
 
+    // Load notifications
+    const loadNotifications = async () => {
+        if (!viewerFid) return;
+        try {
+            const res = await fetch(`/api/notifications?fid=${viewerFid}`);
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setNotifications(data);
+                setUnreadCount(data.filter(n => !n.read).length);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     useEffect(() => {
         loadQuestions();
-    }, []);
+    }, [searchQuery, selectedCategory, selectedStatus]);
+
+    useEffect(() => {
+        if (viewerFid) {
+            loadNotifications();
+            // Poll for new notifications every 30 seconds
+            const interval = setInterval(loadNotifications, 30000);
+            return () => clearInterval(interval);
+        }
+    }, [viewerFid]);
 
     // Connect to Farcaster mini app wallet
     const handleConnectClick = () => {
@@ -238,12 +284,18 @@ export default function HomePage() {
                     token: "ETH",
                     onchainId,
                     deadline: deadlineMs,
+                    category,
+                    tags,
+                    isPrivate,
                 }),
             });
 
             setLastPostedBounty({ question: questionText, bounty });
             setQuestionText("");
             setBounty(0.01);
+            setCategory("");
+            setTags([]);
+            setIsPrivate(false);
             // Don't close showAsk yet, let user see success screen
             await loadQuestions();
         } catch (e) {
