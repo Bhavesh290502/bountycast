@@ -215,14 +215,26 @@ export default function QuestionThread({
                                 </button>
                             )}
 
-                            <span className="text-xs font-medium text-gray-400">{a.upvotes}</span>
-                            <button
-                                onClick={() => upvote(a.id)}
-                                className="text-gray-500 hover:text-brand-gold transition-colors p-1 rounded hover:bg-brand-gold/10"
-                                title="Upvote"
-                            >
-                                ▲
-                            </button>
+                            <div className="flex items-center gap-1 bg-white/5 rounded-full px-2 py-1 hover:bg-white/10 transition-all">
+                                <button
+                                    onClick={() => upvote(a.id)}
+                                    className="text-gray-400 hover:text-brand-gold transition-all hover:scale-110 active:scale-95"
+                                    title="Upvote this answer"
+                                >
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 16 16"
+                                        fill="currentColor"
+                                        className="transition-colors"
+                                    >
+                                        <path d="M8 2L10.5 7H13L9 10.5L10.5 15L8 12L5.5 15L7 10.5L3 7H5.5L8 2Z" />
+                                    </svg>
+                                </button>
+                                <span className="text-xs font-semibold text-gray-300 min-w-[20px] text-center">
+                                    {a.upvotes}
+                                </span>
+                            </div>
                         </div>
                     </div >
                 ))

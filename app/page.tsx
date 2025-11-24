@@ -260,6 +260,18 @@ export default function HomePage() {
                     Ask questions. Get answers. Earn ETH.
                 </p>
 
+                <button
+                    onClick={() => {
+                        sdk.actions.addFrame();
+                    }}
+                    className="mb-4 text-brand-purple hover:text-brand-gold text-xs font-medium transition-colors flex items-center gap-1 mx-auto"
+                >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    Add to Miniapps
+                </button>
+
                 <div className="flex justify-center">
                     {isConnected && address ? (
                         <div className="glass-card px-4 py-2 rounded-full text-xs flex items-center gap-3">
