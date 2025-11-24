@@ -86,6 +86,19 @@ export async function POST(req: NextRequest) {
       VALUES (${questionId}, ${fid}, ${username || 'anon'}, ${address || ''}, ${answer}, 0)
       RETURNING id;
     `;
+
+        // Create notification for question asker
+        const questionResult = await sql`SELECT fid, question FROM questions WHERE id = ${questionId}`;
+        if (questionResult.rows.length > 0) {
+            const askerFid = questionResult.rows[0].fid;
+            if (askerFid && askerFid !== fid) { // Don't notify if answering own question
+                await sql`
+                    INSERT INTO notifications (user_fid, type, question_id, answer_id, from_fid, message, created_at)
+                    VALUES (${askerFid}, 'answer', ${questionId}, ${rows[0].id}, ${fid}, ${`${username || 'Someone'} answered your question`}, ${Date.now()})
+                `;
+            }
+        }
+
         return NextResponse.json({ id: rows[0].id });
     } catch (error) {
         console.error(error);

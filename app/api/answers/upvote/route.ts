@@ -39,6 +39,18 @@ export async function POST(req: NextRequest) {
             UPDATE answers SET upvotes = upvotes + 1 WHERE id = ${id}
         `;
 
+        // Create notification for answer author
+        const answerResult = await sql`SELECT fid, username FROM answers WHERE id = ${id}`;
+        if (answerResult.rows.length > 0) {
+            const answerAuthorFid = answerResult.rows[0].fid;
+            if (answerAuthorFid && answerAuthorFid !== fid) { // Don't notify if upvoting own answer
+                await sql`
+                    INSERT INTO notifications (user_fid, type, answer_id, from_fid, message, created_at)
+                    VALUES (${answerAuthorFid}, 'upvote', ${id}, ${fid}, ${'Someone upvoted your answer'}, ${Date.now()})
+                `;
+            }
+        }
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error(error);
