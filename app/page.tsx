@@ -11,7 +11,6 @@ import {
 } from "wagmi";
 import { decodeEventLog } from 'viem';
 import { bountycastAbi, BOUNTYCAST_ADDRESS } from "../lib/contract";
-import { getOnChainId } from "../lib/web3-helper";
 import QuestionThread from "../components/QuestionThread";
 
 interface Question {
@@ -176,12 +175,11 @@ export default function HomePage() {
             )}`;
 
             // 1) On-chain: createQuestion + lock bounty
-            const durationSeconds = 15 * 24 * 60 * 60; // 15 days
             const hash = await writeContractAsync({
                 address: BOUNTYCAST_ADDRESS,
                 abi: bountycastAbi,
                 functionName: "createQuestion",
-                args: [metadataUri, BigInt(durationSeconds)],
+                args: [metadataUri, BigInt(deadlineSec)],
                 value: BigInt(Math.floor(bounty * 1e18)),
             });
             setPendingHash(hash);
@@ -190,10 +188,22 @@ export default function HomePage() {
             if (publicClient) {
                 try {
                     const receipt = await publicClient.waitForTransactionReceipt({ hash });
-                    const id = getOnChainId(receipt);
-                    if (id !== null) {
-                        onchainId = id;
-                        console.log("Captured OnChain ID:", onchainId);
+                    // Find the QuestionCreated event
+                    for (const log of receipt.logs) {
+                        try {
+                            const event = decodeEventLog({
+                                abi: bountycastAbi,
+                                data: log.data,
+                                topics: log.topics,
+                            });
+                            if (event.eventName === 'QuestionCreated' && event.args) {
+                                // @ts-ignore
+                                onchainId = Number(event.args.id);
+                                break;
+                            }
+                        } catch (e) {
+                            // Ignore logs that don't match our ABI
+                        }
                     }
                 } catch (e) {
                     console.error("Failed to parse logs:", e);
