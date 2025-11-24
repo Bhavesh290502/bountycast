@@ -215,18 +215,14 @@ export default function QuestionThread({
                                 </button>
                             )}
 
-                            <div className="flex items-center gap-1 bg-white/5 rounded-full px-2 py-1">
-                                <button
-                                    onClick={() => upvote(a.id)}
-                                    className="text-gray-400 hover:text-brand-gold transition-all hover:scale-110"
-                                    title="Upvote this answer"
-                                >
-                                    👍
-                                </button>
-                                <span className="text-xs font-bold text-gray-300 min-w-[1.5rem] text-center">
-                                    {a.upvotes}
-                                </span>
-                            </div>
+                            <span className="text-xs font-medium text-gray-400">{a.upvotes}</span>
+                            <button
+                                onClick={() => upvote(a.id)}
+                                className="text-gray-500 hover:text-brand-gold transition-colors p-1 rounded hover:bg-brand-gold/10"
+                                title="Upvote"
+                            >
+                                ▲
+                            </button>
                         </div>
                     </div >
                 ))
