@@ -45,6 +45,7 @@ export default function HomePage() {
     const [loading, setLoading] = useState(false);
     const [lastPostedBounty, setLastPostedBounty] = useState<{ question: string; bounty: number } | null>(null);
     const [userProfile, setUserProfile] = useState<any>(null);
+    const [showAddMiniapp, setShowAddMiniapp] = useState(false);
 
     // Load User Profile
     useEffect(() => {
@@ -105,6 +106,17 @@ export default function HomePage() {
         };
         init();
     }, []);
+
+    // Show "Add Miniapp" popup on first visit
+    useEffect(() => {
+        const hasSeenPrompt = localStorage.getItem('hasSeenAddMiniappPrompt');
+        if (!hasSeenPrompt && isReady) {
+            // Show popup after a short delay
+            setTimeout(() => {
+                setShowAddMiniapp(true);
+            }, 2000);
+        }
+    }, [isReady]);
 
     // Load questions from API
     const loadQuestions = async () => {
@@ -251,265 +263,303 @@ export default function HomePage() {
 
 
     return (
-        <div className="max-w-xl mx-auto p-4 font-sans text-sm pb-20">
-            <header className="mb-8 text-center">
-                <h2 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-brand-purple to-brand-gold">
-                    BountyCast
-                </h2>
-                <p className="text-gray-400 text-xs mb-4">
-                    Ask questions. Get answers. Earn ETH.
-                </p>
+        <>
+            {/* Add Miniapp Popup */}
+            {showAddMiniapp && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                    <div className="glass-card max-w-sm w-full p-6 rounded-2xl animate-in slide-in-from-bottom-4 duration-300">
+                        <div className="text-center mb-4">
+                            <div className="text-5xl mb-3">🚀</div>
+                            <h3 className="text-xl font-bold text-white mb-2">Add BountyCast!</h3>
+                            <p className="text-gray-400 text-sm">
+                                Add this miniapp to your Farcaster client for quick access and notifications.
+                            </p>
+                        </div>
 
-                <div className="flex justify-center">
-                    {isConnected && address ? (
-                        <div className="glass-card px-4 py-2 rounded-full text-xs flex items-center gap-3">
-                            {userProfile ? (
-                                <>
-                                    <img
-                                        src={userProfile.pfpUrl}
-                                        alt={userProfile.username}
-                                        className="w-6 h-6 rounded-full border border-white/10"
-                                    />
-                                    <div className="flex flex-col items-start">
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-white font-bold">@{userProfile.username || 'user'}</span>
-                                            {userProfile.isPro && <span title="Pro User">⚡</span>}
+                        <button
+                            onClick={() => {
+                                sdk.actions.addFrame();
+                                localStorage.setItem('hasSeenAddMiniappPrompt', 'true');
+                                setShowAddMiniapp(false);
+                            }}
+                            className="btn-primary w-full py-3 rounded-lg font-medium mb-3"
+                        >
+                            ✨ Add to Farcaster
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                localStorage.setItem('hasSeenAddMiniappPrompt', 'true');
+                                setShowAddMiniapp(false);
+                            }}
+                            className="w-full text-gray-500 hover:text-white text-sm transition-colors"
+                        >
+                            Maybe later
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <div className="max-w-xl mx-auto p-4 font-sans text-sm pb-20">
+                <header className="mb-8 text-center">
+                    <h2 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-brand-purple to-brand-gold">
+                        BountyCast
+                    </h2>
+                    <p className="text-gray-400 text-xs mb-4">
+                        Ask questions. Get answers. Earn ETH.
+                    </p>
+
+                    <div className="flex justify-center">
+                        {isConnected && address ? (
+                            <div className="glass-card px-4 py-2 rounded-full text-xs flex items-center gap-3">
+                                {userProfile ? (
+                                    <>
+                                        <img
+                                            src={userProfile.pfpUrl}
+                                            alt={userProfile.username}
+                                            className="w-6 h-6 rounded-full border border-white/10"
+                                        />
+                                        <div className="flex flex-col items-start">
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-white font-bold">@{userProfile.username || 'user'}</span>
+                                                {userProfile.isPro && <span title="Pro User">⚡</span>}
+                                            </div>
+                                            <div className="text-[10px] text-gray-400 flex gap-2">
+                                                <span>Score: {typeof userProfile.score === 'number' ? userProfile.score.toFixed(2) : '0.00'}</span>
+                                                <span>|</span>
+                                                <span>{address.slice(0, 6)}...{address.slice(-4)}</span>
+                                            </div>
                                         </div>
-                                        <div className="text-[10px] text-gray-400 flex gap-2">
-                                            <span>Score: {typeof userProfile.score === 'number' ? userProfile.score.toFixed(2) : '0.00'}</span>
-                                            <span>|</span>
-                                            <span>{address.slice(0, 6)}...{address.slice(-4)}</span>
-                                        </div>
-                                    </div>
-                                </>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                        <span className="text-gray-300">
+                                            {viewerUsername ? `@${viewerUsername}` : "Connected"}
+                                        </span>
+                                        <span className="text-gray-500">
+                                            ({address.slice(0, 6)}…{address.slice(-4)})
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+                        ) : (
+                            <button
+                                onClick={handleConnectClick}
+                                className="btn-primary px-6 py-2 rounded-full font-medium text-xs"
+                            >
+                                {isConnectPending ? "Connecting…" : "Connect Wallet"}
+                            </button>
+                        )}
+                        {connectError && (
+                            <div className="text-red-500 text-xs mt-2">
+                                {connectError.message}
+                            </div>
+                        )}
+                    </div>
+                </header>
+
+                <section className="mb-8">
+                    {!showAsk ? (
+                        <button
+                            onClick={() => setShowAsk(true)}
+                            className="w-full glass-card p-4 rounded-xl text-left text-gray-400 hover:bg-white/5 transition-colors flex items-center justify-between group"
+                        >
+                            <span>Ask a question...</span>
+                            <span className="bg-brand-purple/20 text-brand-purple px-2 py-1 rounded text-xs group-hover:bg-brand-purple group-hover:text-white transition-colors">
+                                + New
+                            </span>
+                        </button>
+                    ) : (
+                        <div className="glass-card p-5 rounded-xl animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            {lastPostedBounty ? (
+                                <div className="text-center py-4">
+                                    <div className="text-4xl mb-3">🎉</div>
+                                    <h3 className="font-bold text-white text-lg mb-2">Bounty Posted!</h3>
+                                    <p className="text-gray-400 text-sm mb-6">
+                                        Share it to Farcaster to get answers faster.
+                                    </p>
+
+                                    <button
+                                        onClick={() => {
+                                            const text = `Help me solve this bounty! 💰 ${lastPostedBounty.bounty} ETH\n\n${lastPostedBounty.question}\n\nAnswer here:`;
+                                            const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent('https://bountycast.vercel.app')}`;
+                                            sdk.actions.openUrl(url);
+                                        }}
+                                        className="btn-primary w-full py-3 rounded-lg font-medium mb-3 flex items-center justify-center gap-2"
+                                    >
+                                        <span>🔁</span> Share on Warpcast
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            setLastPostedBounty(null);
+                                            setShowAsk(false);
+                                        }}
+                                        className="text-gray-500 hover:text-white text-sm transition-colors"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
                             ) : (
                                 <>
-                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-gray-300">
-                                        {viewerUsername ? `@${viewerUsername}` : "Connected"}
-                                    </span>
-                                    <span className="text-gray-500">
-                                        ({address.slice(0, 6)}…{address.slice(-4)})
-                                    </span>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="font-semibold text-white">New Bounty</h3>
+                                        <button
+                                            onClick={() => setShowAsk(false)}
+                                            className="text-gray-500 hover:text-white transition-colors"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+
+                                    <textarea
+                                        className="glass-input w-full p-3 rounded-lg mb-3 min-h-[100px] resize-none text-sm placeholder-gray-500"
+                                        placeholder="What do you want to know?"
+                                        value={questionText}
+                                        onChange={(e) => setQuestionText(e.target.value)}
+                                    />
+
+                                    <div className="flex gap-3 mb-4">
+                                        <div className="relative flex-1">
+                                            <input
+                                                type="number"
+                                                min={0.001}
+                                                step={0.001}
+                                                className="glass-input w-full p-3 rounded-lg pl-8 text-sm"
+                                                placeholder="0.01"
+                                                value={bounty}
+                                                onChange={(e) => setBounty(Number(e.target.value || 0.001))}
+                                            />
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-gold">
+                                                Ξ
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center text-xs text-gray-500">
+                                            Native Base ETH
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={ask}
+                                        disabled={loading || txPending}
+                                        className="btn-primary w-full py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {loading || txPending ? (
+                                            <span className="flex items-center justify-center gap-2">
+                                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                Processing...
+                                            </span>
+                                        ) : (
+                                            "Post Bounty"
+                                        )}
+                                    </button>
                                 </>
                             )}
                         </div>
-                    ) : (
-                        <button
-                            onClick={handleConnectClick}
-                            className="btn-primary px-6 py-2 rounded-full font-medium text-xs"
-                        >
-                            {isConnectPending ? "Connecting…" : "Connect Wallet"}
-                        </button>
                     )}
-                    {connectError && (
-                        <div className="text-red-500 text-xs mt-2">
-                            {connectError.message}
-                        </div>
-                    )}
-                </div>
-            </header>
+                </section>
 
-            <section className="mb-8">
-                {!showAsk ? (
-                    <button
-                        onClick={() => setShowAsk(true)}
-                        className="w-full glass-card p-4 rounded-xl text-left text-gray-400 hover:bg-white/5 transition-colors flex items-center justify-between group"
-                    >
-                        <span>Ask a question...</span>
-                        <span className="bg-brand-purple/20 text-brand-purple px-2 py-1 rounded text-xs group-hover:bg-brand-purple group-hover:text-white transition-colors">
-                            + New
-                        </span>
-                    </button>
-                ) : (
-                    <div className="glass-card p-5 rounded-xl animate-in fade-in slide-in-from-bottom-4 duration-300">
-                        {lastPostedBounty ? (
-                            <div className="text-center py-4">
-                                <div className="text-4xl mb-3">🎉</div>
-                                <h3 className="font-bold text-white text-lg mb-2">Bounty Posted!</h3>
-                                <p className="text-gray-400 text-sm mb-6">
-                                    Share it to Farcaster to get answers faster.
+                <section>
+                    <div className="flex justify-between items-end mb-4 px-1">
+                        <h3 className="text-lg font-bold text-white">Recent Questions</h3>
+                        <button
+                            onClick={loadQuestions}
+                            className="text-brand-purple text-xs hover:text-brand-purple-dark transition-colors"
+                        >
+                            Refresh
+                        </button>
+                    </div>
+
+                    <div className="space-y-4">
+                        {questions.length === 0 && (
+                            <div className="text-center py-10 text-gray-600">
+                                <p>No questions yet.</p>
+                                <p className="text-xs mt-1">Be the first to ask!</p>
+                            </div>
+                        )}
+
+                        {questions.map((q) => (
+                            <div
+                                key={q.id}
+                                className={`glass-card p-5 rounded-xl transition-all duration-300 ${q.status === "awarded" ? "opacity-70 grayscale-[0.5]" : "hover:scale-[1.01] hover:shadow-lg hover:shadow-brand-purple/10"
+                                    }`}
+                            >
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="flex items-center gap-2">
+                                        {q.authorProfile ? (
+                                            <img
+                                                src={q.authorProfile.pfpUrl}
+                                                alt={q.authorProfile.username}
+                                                className="w-8 h-8 rounded-full border border-white/10"
+                                            />
+                                        ) : (
+                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400">
+                                                {(q.username || 'AN').slice(0, 2).toUpperCase()}
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const username = q.authorProfile ? q.authorProfile.username : (q.username || 'anon');
+                                                        sdk.actions.openUrl(`https://warpcast.com/${username}`);
+                                                    }}
+                                                    className="font-semibold text-white text-sm hover:underline hover:text-brand-purple transition-colors text-left"
+                                                >
+                                                    {q.authorProfile ? `@${q.authorProfile.username}` : (q.username || 'Anon')}
+                                                </button>
+                                                {q.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
+                                            </div>
+                                            <div className="text-[10px] text-gray-500 flex gap-2">
+                                                <span>{q.created ? new Date(q.created).toLocaleDateString() : ''}</span>
+                                                {q.authorProfile && q.authorProfile.score > 0 && (
+                                                    <span>Score: {q.authorProfile.score.toFixed(2)}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const text = `Help me solve this bounty! 💰 ${q.bounty} ETH\n\nAnswer here:`;
+                                                const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent('https://bountycast.vercel.app')}`; // TODO: Deep link if possible
+                                                sdk.actions.openUrl(url);
+                                            }}
+                                            className="bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white px-2 py-1 rounded text-xs transition-colors flex items-center gap-1"
+                                            title="Share on Warpcast"
+                                        >
+                                            <span>🔁</span>
+                                        </button>
+                                        <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                                            <span>🏆</span>
+                                            <span>{q.bounty || 0} ETH</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p className="text-gray-200 mb-4 text-sm leading-relaxed">
+                                    {q.question}
                                 </p>
 
-                                <button
-                                    onClick={() => {
-                                        const text = `Help me solve this bounty! 💰 ${lastPostedBounty.bounty} ETH\n\n${lastPostedBounty.question}\n\nAnswer here:`;
-                                        const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent('https://bountycast.vercel.app')}`;
-                                        sdk.actions.openUrl(url);
-                                    }}
-                                    className="btn-primary w-full py-3 rounded-lg font-medium mb-3 flex items-center justify-center gap-2"
-                                >
-                                    <span>🔁</span> Share on Warpcast
-                                </button>
-
-                                <button
-                                    onClick={() => {
-                                        setLastPostedBounty(null);
-                                        setShowAsk(false);
-                                    }}
-                                    className="text-gray-500 hover:text-white text-sm transition-colors"
-                                >
-                                    Close
-                                </button>
+                                <div className="border-t border-white/5 pt-3 mt-3">
+                                    <QuestionThread
+                                        questionId={q.id}
+                                        fid={viewerFid}
+                                        defaultUsername={viewerUsername || username}
+                                        askerAddress={q.address}
+                                        isQuestionActive={q.status === 'active'}
+                                        onchainId={q.onchainId}
+                                    />
+                                </div>
                             </div>
-                        ) : (
-                            <>
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="font-semibold text-white">New Bounty</h3>
-                                    <button
-                                        onClick={() => setShowAsk(false)}
-                                        className="text-gray-500 hover:text-white transition-colors"
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-
-                                <textarea
-                                    className="glass-input w-full p-3 rounded-lg mb-3 min-h-[100px] resize-none text-sm placeholder-gray-500"
-                                    placeholder="What do you want to know?"
-                                    value={questionText}
-                                    onChange={(e) => setQuestionText(e.target.value)}
-                                />
-
-                                <div className="flex gap-3 mb-4">
-                                    <div className="relative flex-1">
-                                        <input
-                                            type="number"
-                                            min={0.001}
-                                            step={0.001}
-                                            className="glass-input w-full p-3 rounded-lg pl-8 text-sm"
-                                            placeholder="0.01"
-                                            value={bounty}
-                                            onChange={(e) => setBounty(Number(e.target.value || 0.001))}
-                                        />
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-gold">
-                                            Ξ
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center text-xs text-gray-500">
-                                        Native Base ETH
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={ask}
-                                    disabled={loading || txPending}
-                                    className="btn-primary w-full py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {loading || txPending ? (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            Processing...
-                                        </span>
-                                    ) : (
-                                        "Post Bounty"
-                                    )}
-                                </button>
-                            </>
-                        )}
+                        ))}
                     </div>
-                )}
-            </section>
-
-            <section>
-                <div className="flex justify-between items-end mb-4 px-1">
-                    <h3 className="text-lg font-bold text-white">Recent Questions</h3>
-                    <button
-                        onClick={loadQuestions}
-                        className="text-brand-purple text-xs hover:text-brand-purple-dark transition-colors"
-                    >
-                        Refresh
-                    </button>
-                </div>
-
-                <div className="space-y-4">
-                    {questions.length === 0 && (
-                        <div className="text-center py-10 text-gray-600">
-                            <p>No questions yet.</p>
-                            <p className="text-xs mt-1">Be the first to ask!</p>
-                        </div>
-                    )}
-
-                    {questions.map((q) => (
-                        <div
-                            key={q.id}
-                            className={`glass-card p-5 rounded-xl transition-all duration-300 ${q.status === "awarded" ? "opacity-70 grayscale-[0.5]" : "hover:scale-[1.01] hover:shadow-lg hover:shadow-brand-purple/10"
-                                }`}
-                        >
-                            <div className="flex justify-between items-start mb-3">
-                                <div className="flex items-center gap-2">
-                                    {q.authorProfile ? (
-                                        <img
-                                            src={q.authorProfile.pfpUrl}
-                                            alt={q.authorProfile.username}
-                                            className="w-8 h-8 rounded-full border border-white/10"
-                                        />
-                                    ) : (
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400">
-                                            {(q.username || 'AN').slice(0, 2).toUpperCase()}
-                                        </div>
-                                    )}
-
-                                    <div>
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const username = q.authorProfile ? q.authorProfile.username : (q.username || 'anon');
-                                                    sdk.actions.openUrl(`https://warpcast.com/${username}`);
-                                                }}
-                                                className="font-semibold text-white text-sm hover:underline hover:text-brand-purple transition-colors text-left"
-                                            >
-                                                {q.authorProfile ? `@${q.authorProfile.username}` : (q.username || 'Anon')}
-                                            </button>
-                                            {q.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
-                                        </div>
-                                        <div className="text-[10px] text-gray-500 flex gap-2">
-                                            <span>{q.created ? new Date(q.created).toLocaleDateString() : ''}</span>
-                                            {q.authorProfile && q.authorProfile.score > 0 && (
-                                                <span>Score: {q.authorProfile.score.toFixed(2)}</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            const text = `Help me solve this bounty! 💰 ${q.bounty} ETH\n\nAnswer here:`;
-                                            const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent('https://bountycast.vercel.app')}`; // TODO: Deep link if possible
-                                            sdk.actions.openUrl(url);
-                                        }}
-                                        className="bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white px-2 py-1 rounded text-xs transition-colors flex items-center gap-1"
-                                        title="Share on Warpcast"
-                                    >
-                                        <span>🔁</span>
-                                    </button>
-                                    <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
-                                        <span>🏆</span>
-                                        <span>{q.bounty || 0} ETH</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <p className="text-gray-200 mb-4 text-sm leading-relaxed">
-                                {q.question}
-                            </p>
-
-                            <div className="border-t border-white/5 pt-3 mt-3">
-                                <QuestionThread
-                                    questionId={q.id}
-                                    fid={viewerFid}
-                                    defaultUsername={viewerUsername || username}
-                                    askerAddress={q.address}
-                                    isQuestionActive={q.status === 'active'}
-                                    onchainId={q.onchainId}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-        </div>
+                </section>
+            </div>
+        </>
     );
 }
