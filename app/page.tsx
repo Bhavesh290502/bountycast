@@ -499,7 +499,12 @@ export default function HomePage() {
                                             {q.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
                                         </div>
                                         <div className="text-[10px] text-gray-500 flex gap-2">
-                                            <span>{q.created ? new Date(q.created).toLocaleDateString() : ''}</span>
+                                            <span>
+                                                {q.created ? (() => {
+                                                    const date = new Date(typeof q.created === 'number' ? q.created : parseInt(q.created));
+                                                    return isNaN(date.getTime()) ? '' : date.toLocaleDateString();
+                                                })() : ''}
+                                            </span>
                                             {q.authorProfile && q.authorProfile.score > 0 && (
                                                 <span>Score: {q.authorProfile.score.toFixed(2)}</span>
                                             )}
