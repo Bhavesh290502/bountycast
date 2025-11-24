@@ -502,7 +502,11 @@ export default function HomePage() {
                                             <span>
                                                 {q.created ? (() => {
                                                     const date = new Date(typeof q.created === 'number' ? q.created : parseInt(q.created));
-                                                    return isNaN(date.getTime()) ? '' : date.toLocaleDateString();
+                                                    if (isNaN(date.getTime())) return '';
+                                                    const day = String(date.getDate()).padStart(2, '0');
+                                                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                                                    const year = date.getFullYear();
+                                                    return `${day}/${month}/${year}`;
                                                 })() : ''}
                                             </span>
                                             {q.authorProfile && q.authorProfile.score > 0 && (
