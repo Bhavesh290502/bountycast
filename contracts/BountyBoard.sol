@@ -6,10 +6,13 @@ contract BountyBoard {
     struct Question {
         address asker;
         uint256 bounty;
-        uint256 expires;
+        uint256 deadline; // timestamp when auto-award becomes possible
         address token; // address(0) = ETH
         bool active;
+        bool awarded;
+        bool refunded;
         address winner;
+        string metadataUri;
     }
 
     // --- STORAGE ---
@@ -21,17 +24,17 @@ contract BountyBoard {
 
     // prevents the same wallet from upvoting an answer multiple times
     mapping(uint256 => mapping(address => mapping(address => bool))) public hasVoted;
-    // hasVoted[questionId][voter][answerer] = true/false
-
+    
     uint256 public nextQuestionId = 1;
+    address public owner;
 
     // --- EVENTS ---
-    event QuestionPosted(
+    event QuestionCreated(
         uint256 indexed id,
         address indexed asker,
         uint256 bounty,
-        address token,
-        uint256 expires
+        uint256 deadline,
+        string metadataUri
     );
 
     event AnswerPosted(uint256 indexed questionId, address indexed answerer);
@@ -42,46 +45,51 @@ contract BountyBoard {
         uint256 count
     );
 
-    event BountyClaimed(
+    event BountyAwarded(
         uint256 indexed questionId,
         address indexed winner,
+        uint256 amount,
+        address indexed awardedBy
+    );
+
+    event BountyRefunded(
+        uint256 indexed questionId,
+        address indexed asker,
         uint256 amount
     );
 
-    // --- POST QUESTION ---
-    function postQuestion(
-        address token,
-        uint256 bounty,
-        uint256 expiresAfterSeconds
-    ) external payable returns (uint256) {
+    constructor() {
+        owner = msg.sender;
+    }
 
-        require(bounty > 0, "bounty required");
-        require(expiresAfterSeconds >= 1 hours, "minimum 1h");
+    // --- POST QUESTION ---
+    function createQuestion(
+        string memory metadataUri,
+        uint256 autoAwardAfterSeconds
+    ) external payable returns (uint256) {
+        require(msg.value > 0, "bounty required");
+        require(autoAwardAfterSeconds >= 1 hours, "minimum 1h");
 
         uint256 id = nextQuestionId++;
 
-        // ETH bounty
-        if (token == address(0)) {
-            require(msg.value == bounty, "incorrect ETH sent");
-        }
-
-        // ⚠ For ERC20 bounties you must add transferFrom here (not included in demo)
-
         questions[id] = Question({
             asker: msg.sender,
-            bounty: bounty,
-            expires: block.timestamp + expiresAfterSeconds,
-            token: token,
+            bounty: msg.value,
+            deadline: block.timestamp + autoAwardAfterSeconds,
+            token: address(0), // ETH only for now
             active: true,
-            winner: address(0)
+            awarded: false,
+            refunded: false,
+            winner: address(0),
+            metadataUri: metadataUri
         });
 
-        emit QuestionPosted(
+        emit QuestionCreated(
             id,
             msg.sender,
-            bounty,
-            token,
-            block.timestamp + expiresAfterSeconds
+            msg.value,
+            block.timestamp + autoAwardAfterSeconds,
+            metadataUri
         );
 
         return id;
@@ -97,73 +105,64 @@ contract BountyBoard {
     // --- UPVOTE ---
     function upvote(uint256 questionId, address answerer) external {
         require(questions[questionId].asker != address(0), "question not found");
-
         require(!hasVoted[questionId][msg.sender][answerer], "already voted");
 
         hasVoted[questionId][msg.sender][answerer] = true;
-
         upvotes[questionId][answerer] += 1;
 
         emit Upvoted(questionId, answerer, upvotes[questionId][answerer]);
     }
 
-    // --- SELECT WINNER (MANUAL) ---
-    function selectWinner(uint256 questionId, address winner) external {
+    // --- AWARD BOUNTY (MANUAL & AUTO) ---
+    function awardBounty(uint256 questionId, address winner) external {
         Question storage q = questions[questionId];
-        require(q.asker == msg.sender, "only asker can select winner");
-        require(q.active, "already claimed/awarded");
+        require(q.active, "not active");
+        require(!q.awarded && !q.refunded, "already resolved");
         require(winner != address(0), "invalid winner");
 
-        q.active = false;
-        q.winner = winner;
-
-        // payout ETH
-        if (q.token == address(0)) {
-            (bool ok, ) = winner.call{value: q.bounty}("");
-            require(ok, "ETH transfer failed");
+        // Logic:
+        // 1. Asker can award ANY TIME.
+        // 2. Owner (system) can award ONLY AFTER DEADLINE.
+        if (msg.sender == q.asker) {
+            // Asker: OK
+        } else if (msg.sender == owner) {
+            require(block.timestamp >= q.deadline, "too early for auto-award");
+        } else {
+            revert("Not allowed");
         }
 
-        emit BountyClaimed(questionId, winner, q.bounty);
+        q.active = false;
+        q.awarded = true;
+        q.winner = winner;
+        uint256 amount = q.bounty;
+        q.bounty = 0;
+
+        // Payout ETH
+        (bool ok, ) = winner.call{value: amount}("");
+        require(ok, "ETH transfer failed");
+
+        emit BountyAwarded(questionId, winner, amount, msg.sender);
     }
 
-    // --- CLAIM BOUNTY (FALLBACK) ---
-    function claimBounty(uint256 questionId) external {
+    // --- REFUND ---
+    function refund(uint256 questionId) external {
         Question storage q = questions[questionId];
-        require(q.asker != address(0), "question not found");
-        require(block.timestamp >= q.expires, "not expired yet");
-        require(q.active, "already claimed");
-
-        address[] memory ansList = answers[questionId];
-        require(ansList.length > 0, "no answers");
-
-        // find highest voted answer
-        uint256 maxVotes = 0;
-        address winner = address(0);
-
-        for (uint256 i = 0; i < ansList.length; i++) {
-            address ans = ansList[i];
-            uint256 v = upvotes[questionId][ans];
-
-            if (v > maxVotes) {
-                maxVotes = v;
-                winner = ans;
-            }
-        }
-
-        require(winner != address(0), "no upvotes");
+        require(q.active, "not active");
+        require(!q.awarded && !q.refunded, "already resolved");
+        require(block.timestamp >= q.deadline, "too early");
+        
+        // Only asker or owner can trigger refund after deadline if no winner selected
+        require(msg.sender == q.asker || msg.sender == owner, "not allowed");
 
         q.active = false;
-        q.winner = winner;
+        q.refunded = true;
+        uint256 amount = q.bounty;
+        q.bounty = 0;
 
-        // payout ETH
-        if (q.token == address(0)) {
-            (bool ok, ) = winner.call{value: q.bounty}("");
-            require(ok, "ETH transfer failed");
-        }
+        (bool ok, ) = q.asker.call{value: amount}("");
+        require(ok, "ETH transfer failed");
 
-        // ⚠ For ERC20 bounty payout add transfer logic
-
-        emit BountyClaimed(questionId, winner, q.bounty);
+        emit BountyRefunded(questionId, q.asker, amount);
     }
 
     receive() external payable {}

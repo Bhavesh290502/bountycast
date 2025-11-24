@@ -141,7 +141,7 @@ export default function QuestionThread({
             const hash = await writeContractAsync({
                 address: BOUNTYCAST_ADDRESS,
                 abi: bountycastAbi,
-                functionName: "selectWinner",
+                functionName: "awardBounty",
                 args: [BigInt(targetId), winnerAddress as `0x${string}`],
             });
             alert(`Bounty awarded! Tx: ${hash}`);
