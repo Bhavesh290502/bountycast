@@ -48,7 +48,7 @@ export default function HomePage() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [showAsk, setShowAsk] = useState(false);
     const [questionText, setQuestionText] = useState("");
-    const [bounty, setBounty] = useState(0.01);
+    const [bounty, setBounty] = useState(0.00033);
     const [loading, setLoading] = useState(false);
     const [lastPostedBounty, setLastPostedBounty] = useState<any>(null);
     const [userProfile, setUserProfile] = useState<any>(null);
@@ -188,6 +188,10 @@ export default function HomePage() {
     // Ask a question + lock bounty on-chain
     const ask = async () => {
         if (!questionText.trim()) return;
+        if (bounty < 0.00033) {
+            alert("Minimum bounty is 0.00033 ETH");
+            return;
+        }
         if (!isConnected || !address) {
             alert("Connect your Farcaster wallet to lock bounty on-chain.");
             return;
@@ -276,7 +280,10 @@ export default function HomePage() {
 
             setLastPostedBounty({ question: questionText, bounty });
             setQuestionText("");
-            setBounty(0.01);
+            setLastPostedBounty({ question: questionText, bounty });
+            setQuestionText("");
+            setBounty(0.00033);
+            setCategory("");
             setCategory("");
             setTags([]);
             setIsPrivate(false);
@@ -629,7 +636,11 @@ export default function HomePage() {
                     {questions.map((q) => (
                         <div
                             key={q.id}
-                            className={`glass-card p-5 rounded-xl transition-all duration-300 ${q.status === "awarded" ? "opacity-70 grayscale-[0.5]" : "hover:scale-[1.01] hover:shadow-lg hover:shadow-brand-purple/10"} ${activeMenuQuestionId === q.id ? "z-20 relative" : "z-0"}`}
+                            className={`glass-card p-5 rounded-xl transition-all duration-300 
+                                ${q.status === "awarded" ? "opacity-70 grayscale-[0.5]" : "hover:scale-[1.01] hover:shadow-lg hover:shadow-brand-purple/10"} 
+                                ${activeMenuQuestionId === q.id ? "z-20 relative" : "z-0"}
+                                ${viewerFid && q.fid === viewerFid ? "border-brand-purple/30 bg-brand-purple/5" : ""}
+                            `}
                         >
                             <div className="flex justify-between items-start mb-3">
                                 <div className="flex items-center gap-2">
