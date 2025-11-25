@@ -50,12 +50,18 @@ export default function HomePage() {
     const [questionText, setQuestionText] = useState("");
     const [bounty, setBounty] = useState(0.01);
     const [loading, setLoading] = useState(false);
-    const [lastPostedBounty, setLastPostedBounty] = useState<{ question: string; bounty: number } | null>(null);
+    const [lastPostedBounty, setLastPostedBounty] = useState<any>(null);
     const [userProfile, setUserProfile] = useState<any>(null);
     const [isFrameAdded, setIsFrameAdded] = useState(false);
-
-    // New feature states
     const [searchQuery, setSearchQuery] = useState("");
+    const [activeMenuQuestionId, setActiveMenuQuestionId] = useState<number | null>(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => setActiveMenuQuestionId(null);
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
     const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedStatus, setSelectedStatus] = useState<string>("");
     const [category, setCategory] = useState<string>("");
@@ -737,30 +743,49 @@ export default function HomePage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    {viewerFid && q.fid === viewerFid && (
+                                    {/* 3-Dot Menu */}
+                                    <div className="relative">
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setEditingQuestion(q);
+                                                setActiveMenuQuestionId(activeMenuQuestionId === q.id ? null : q.id);
                                             }}
-                                            className="bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white px-2 py-1 rounded text-xs transition-colors flex items-center gap-1"
-                                            title="Edit Question"
+                                            className="p-1.5 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
                                         >
-                                            <span>✏️</span>
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM3.5 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM12.5 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
+                                            </svg>
                                         </button>
-                                    )}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            const text = `Help me solve this bounty! 💰 ${q.bounty} ETH\n\nAnswer here:`;
-                                            const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent('https://bountycast.vercel.app')}`; // TODO: Deep link if possible
-                                            sdk.actions.openUrl(url);
-                                        }}
-                                        className="bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white px-2 py-1 rounded text-xs transition-colors flex items-center gap-1"
-                                        title="Share on Warpcast"
-                                    >
-                                        <span>🔁</span>
-                                    </button>
+
+                                        {activeMenuQuestionId === q.id && (
+                                            <div className="absolute right-0 top-8 w-40 bg-gray-900 border border-white/10 shadow-xl rounded-lg py-1 z-20">
+                                                {viewerFid && q.fid === viewerFid && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setEditingQuestion(q);
+                                                            setActiveMenuQuestionId(null);
+                                                        }}
+                                                        className="w-full text-left px-4 py-2 text-xs text-gray-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                                                    >
+                                                        <span>✏️</span> Edit Question
+                                                    </button>
+                                                )}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const text = `Help me solve this bounty! 💰 ${q.bounty} ETH\n\nAnswer here:`;
+                                                        const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent('https://bountycast.vercel.app')}`;
+                                                        sdk.actions.openUrl(url);
+                                                        setActiveMenuQuestionId(null);
+                                                    }}
+                                                    className="w-full text-left px-4 py-2 text-xs text-gray-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                                                >
+                                                    <span>🔁</span> Share
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                                         <span>🏆</span>
                                         <span>{q.bounty || 0} ETH</span>
