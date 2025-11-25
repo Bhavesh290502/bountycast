@@ -68,6 +68,7 @@ export default function HomePage() {
     };
     const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedStatus, setSelectedStatus] = useState<string>("");
+    const [selectedSort, setSelectedSort] = useState<string>("newest");
     const [category, setCategory] = useState<string>("");
     const [tags, setTags] = useState<string[]>([]);
     const [isPrivate, setIsPrivate] = useState(false);
@@ -157,9 +158,7 @@ export default function HomePage() {
             if (searchQuery) params.append('search', searchQuery);
             if (selectedCategory) params.append('category', selectedCategory);
             if (selectedStatus) params.append('status', selectedStatus);
-            if (searchQuery) params.append('search', searchQuery);
-            if (selectedCategory) params.append('category', selectedCategory);
-            if (selectedStatus) params.append('status', selectedStatus);
+            if (selectedSort) params.append('sort', selectedSort);
 
             const res = await fetch(`/api/questions?${params.toString()}`);
             const data = await res.json();
@@ -176,7 +175,7 @@ export default function HomePage() {
 
     useEffect(() => {
         loadQuestions();
-    }, [searchQuery, selectedCategory, selectedStatus]);
+    }, [searchQuery, selectedCategory, selectedStatus, selectedSort]);
 
     // Load My Bounties when modal opens
     useEffect(() => {
@@ -493,6 +492,18 @@ export default function HomePage() {
                             {CATEGORIES.map(cat => (
                                 <option key={cat} value={cat}>{cat}</option>
                             ))}
+                        </select>
+
+                        {/* Sort Dropdown */}
+                        <select
+                            value={selectedSort}
+                            onChange={e => setSelectedSort(e.target.value)}
+                            className="glass-input px-2 py-1.5 rounded-lg text-sm w-32"
+                        >
+                            <option value="newest">Newest</option>
+                            <option value="highest_bounty">Highest Bounty</option>
+                            <option value="most_answers">Most Answers</option>
+                            <option value="expiring_soon">Expiring Soon</option>
                         </select>
 
                         {/* My Bounties Toggle */}

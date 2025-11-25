@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
         const category = searchParams.get('category');
         const status = searchParams.get('status');
         const authorFid = searchParams.get('authorFid');
+        const sort = searchParams.get('sort') || 'newest';
 
         let query = 'SELECT * FROM questions WHERE 1=1';
         const params: any[] = [];
@@ -48,7 +49,23 @@ export async function GET(req: NextRequest) {
         } else {
             query += ' AND (is_private = false OR is_private IS NULL)';
         }
-        query += ' ORDER BY created DESC';
+
+        // Sorting
+        switch (sort) {
+            case 'highest_bounty':
+                query += ' ORDER BY bounty DESC';
+                break;
+            case 'most_answers':
+                query += ' ORDER BY (SELECT COUNT(*) FROM answers WHERE answers.question_id = questions.id) DESC';
+                break;
+            case 'expiring_soon':
+                query += ' ORDER BY deadline ASC';
+                break;
+            case 'newest':
+            default:
+                query += ' ORDER BY created DESC';
+                break;
+        }
 
         const { rows } = await sql.query(query, params);
 
