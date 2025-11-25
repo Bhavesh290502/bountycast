@@ -619,8 +619,7 @@ export default function HomePage() {
                     {questions.map((q) => (
                         <div
                             key={q.id}
-                            className={`glass-card p-5 rounded-xl transition-all duration-300 ${q.status === "awarded" ? "opacity-70 grayscale-[0.5]" : "hover:scale-[1.01] hover:shadow-lg hover:shadow-brand-purple/10"
-                                }`}
+                            className={`glass-card p-5 rounded-xl transition-all duration-300 ${q.status === "awarded" ? "opacity-70 grayscale-[0.5]" : "hover:scale-[1.01] hover:shadow-lg hover:shadow-brand-purple/10"} ${activeMenuQuestionId === q.id ? "z-20 relative" : "z-0"}`}
                         >
                             <div className="flex justify-between items-start mb-3">
                                 <div className="flex items-center gap-2">
