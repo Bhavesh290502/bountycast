@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
             // Rewrite query to use LEFT JOIN for counting answers
             query = query.replace('SELECT *', 'SELECT questions.*, COUNT(answers.id) as answer_count');
             query += ' LEFT JOIN answers ON answers.question_id = questions.id';
-            query += ' GROUP BY questions.id, questions.fid, questions.username, questions.address, questions.question, questions.bounty, questions.token, questions.created, questions.deadline, questions.onchainid, questions.status, questions.category, questions.tags, questions.is_private, questions.updated_at';
+            query += ' GROUP BY questions.id';
             query += ' ORDER BY answer_count DESC, questions.created DESC';
         } else {
             // Other sorting options
