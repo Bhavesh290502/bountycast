@@ -313,15 +313,7 @@ export default function QuestionThread({
                                             >
                                                 {c.username}
                                             </button>
-                                            <span className="text-[10px] text-gray-600">
-                                                {(() => {
-                                                    try {
-                                                        return new Date(c.created_at).toLocaleString();
-                                                    } catch (e) {
-                                                        return '';
-                                                    }
-                                                })()}
-                                            </span>
+
                                         </div>
                                         <p className="text-gray-300">{c.comment}</p>
                                     </div>

@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
         const search = searchParams.get('search');
         const category = searchParams.get('category');
         const status = searchParams.get('status');
+        const authorFid = searchParams.get('authorFid');
 
         let query = 'SELECT * FROM questions WHERE 1=1';
         const params: any[] = [];
@@ -34,8 +35,19 @@ export async function GET(req: NextRequest) {
             paramIndex++;
         }
 
-        // Don't show private questions in public list
-        query += ' AND (is_private = false OR is_private IS NULL)';
+        // Author filter (My Bounties)
+        if (authorFid) {
+            query += ` AND fid = $${paramIndex}`;
+            params.push(authorFid);
+            paramIndex++;
+        }
+
+        // Don't show private questions in public list UNLESS it's the author viewing their own
+        if (authorFid) {
+            // If viewing own bounties, show private ones too (already filtered by fid)
+        } else {
+            query += ' AND (is_private = false OR is_private IS NULL)';
+        }
         query += ' ORDER BY created DESC';
 
         const { rows } = await sql.query(query, params);
