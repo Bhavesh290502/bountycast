@@ -67,9 +67,7 @@ export default function HomePage() {
     const [category, setCategory] = useState<string>("");
     const [tags, setTags] = useState<string[]>([]);
     const [isPrivate, setIsPrivate] = useState(false);
-    const [notifications, setNotifications] = useState<any[]>([]);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [showNotifications, setShowNotifications] = useState(false);
+    const [showMyBounties, setShowMyBounties] = useState(false);
 
     // Load User Profile
     useEffect(() => {
@@ -152,6 +150,7 @@ export default function HomePage() {
             if (searchQuery) params.append('search', searchQuery);
             if (selectedCategory) params.append('category', selectedCategory);
             if (selectedStatus) params.append('status', selectedStatus);
+            if (showMyBounties && viewerFid) params.append('authorFid', viewerFid.toString());
 
             const res = await fetch(`/api/questions?${params.toString()}`);
             const data = await res.json();
@@ -166,33 +165,9 @@ export default function HomePage() {
         }
     };
 
-    // Load notifications
-    const loadNotifications = async () => {
-        if (!viewerFid) return;
-        try {
-            const res = await fetch(`/api/notifications?fid=${viewerFid}`);
-            const data = await res.json();
-            if (Array.isArray(data)) {
-                setNotifications(data);
-                setUnreadCount(data.filter(n => !n.read).length);
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
     useEffect(() => {
         loadQuestions();
-    }, [searchQuery, selectedCategory, selectedStatus]);
-
-    useEffect(() => {
-        if (viewerFid) {
-            loadNotifications();
-            // Poll for new notifications every 30 seconds
-            const interval = setInterval(loadNotifications, 30000);
-            return () => clearInterval(interval);
-        }
-    }, [viewerFid]);
+    }, [searchQuery, selectedCategory, selectedStatus, showMyBounties]);
 
     // Connect to Farcaster mini app wallet
     const handleConnectClick = () => {
@@ -447,68 +422,18 @@ export default function HomePage() {
                             ))}
                         </select>
 
-                        {/* Notification Bell */}
-                        <div className="relative">
+                        {/* My Bounties Toggle */}
+                        {viewerFid && (
                             <button
-                                onClick={() => setShowNotifications(!showNotifications)}
-                                className="text-brand-purple hover:text-brand-gold transition-colors p-1.5 glass-card rounded-lg"
+                                onClick={() => setShowMyBounties(!showMyBounties)}
+                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${showMyBounties
+                                    ? 'bg-brand-purple text-white shadow-lg shadow-brand-purple/20'
+                                    : 'glass-card text-gray-400 hover:text-white'
+                                    }`}
                             >
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-                                </svg>
-                                {unreadCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-[10px] w-4 h-4 flex items-center justify-center border-2 border-black">
-                                        {unreadCount}
-                                    </span>
-                                )}
+                                My Bounties
                             </button>
-
-                            {/* Notification dropdown */}
-                            {showNotifications && (
-                                <div className="absolute right-0 top-10 w-[90vw] max-w-sm bg-gray-900 border border-white/10 shadow-xl rounded-lg p-2 z-50 max-h-80 overflow-y-auto">
-                                    <div className="flex justify-between items-center mb-2 px-2">
-                                        <h3 className="font-semibold text-xs text-white">Notifications</h3>
-                                        {notifications.length > 0 && (
-                                            <button
-                                                onClick={async () => {
-                                                    await fetch('/api/notifications', {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({ notificationIds: notifications.map(n => n.id) })
-                                                    });
-                                                    setNotifications([]);
-                                                    setUnreadCount(0);
-                                                }}
-                                                className="text-[10px] text-brand-purple hover:text-brand-gold"
-                                            >
-                                                Mark all read
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    {notifications.length === 0 ? (
-                                        <p className="text-gray-500 text-xs text-center py-4">No notifications</p>
-                                    ) : (
-                                        <div className="space-y-1">
-                                            {notifications.map(n => (
-                                                <div key={n.id} className={`p-2 rounded text-xs ${n.read ? 'opacity-50' : 'bg-white/5'}`}>
-                                                    <p className="text-gray-200">{n.message}</p>
-                                                    <span className="text-[10px] text-gray-500">
-                                                        {(() => {
-                                                            try {
-                                                                return new Date(n.created_at).toLocaleString();
-                                                            } catch (e) {
-                                                                return '';
-                                                            }
-                                                        })()}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                        )}
 
                         {!isFrameAdded && (
                             <button
@@ -614,12 +539,12 @@ export default function HomePage() {
                                         <div className="relative flex-1">
                                             <input
                                                 type="number"
-                                                min={0.001}
-                                                step={0.001}
+                                                min={0.00033}
+                                                step={0.00001}
                                                 className="glass-input w-full p-3 rounded-lg pl-8 text-sm"
-                                                placeholder="0.01"
+                                                placeholder="0.001"
                                                 value={bounty}
-                                                onChange={(e) => setBounty(Number(e.target.value || 0.001))}
+                                                onChange={(e) => setBounty(Number(e.target.value))}
                                             />
                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-gold">
                                                 Ξ
@@ -753,12 +678,12 @@ export default function HomePage() {
                                             className="p-1.5 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
                                         >
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                                <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM3.5 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM12.5 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
+                                                <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
                                             </svg>
                                         </button>
 
                                         {activeMenuQuestionId === q.id && (
-                                            <div className="absolute right-0 top-8 w-40 bg-gray-900 border border-white/10 shadow-xl rounded-lg py-1 z-20">
+                                            <div className="absolute right-0 top-8 w-40 bg-gray-900 border border-white/10 shadow-xl rounded-lg py-1 z-50">
                                                 {viewerFid && q.fid === viewerFid && (
                                                     <button
                                                         onClick={(e) => {
@@ -788,7 +713,7 @@ export default function HomePage() {
                                     </div>
                                     <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                                         <span>🏆</span>
-                                        <span>{q.bounty || 0} ETH</span>
+                                        <span>{Number(q.bounty || 0).toFixed(8).replace(/\.?0+$/, '')} ETH</span>
                                     </div>
                                     {q.status !== 'active' && (
                                         <div className={`px-2 py-1 rounded text-xs font-medium border ${q.status === 'awarded'
