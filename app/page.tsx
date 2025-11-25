@@ -668,14 +668,28 @@ export default function HomePage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
+                                    <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                                        <span>🏆</span>
+                                        <span>{Number(q.bounty || 0).toFixed(8).replace(/\.?0+$/, '')} ETH</span>
+                                    </div>
+                                    {q.status !== 'active' && (
+                                        <div className={`px-2 py-1 rounded text-xs font-medium border ${q.status === 'awarded'
+                                            ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                                            : 'bg-red-500/10 border-red-500/20 text-red-400'
+                                            }`}>
+                                            {q.status === 'awarded' ? 'Awarded' : 'Expired'}
+                                        </div>
+                                    )}
+
                                     {/* 3-Dot Menu */}
-                                    <div className="relative">
+                                    <div className="relative z-10">
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
+                                                e.preventDefault();
                                                 setActiveMenuQuestionId(activeMenuQuestionId === q.id ? null : q.id);
                                             }}
-                                            className="p-1.5 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                                            className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
                                         >
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                                                 <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
@@ -711,18 +725,6 @@ export default function HomePage() {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
-                                        <span>🏆</span>
-                                        <span>{Number(q.bounty || 0).toFixed(8).replace(/\.?0+$/, '')} ETH</span>
-                                    </div>
-                                    {q.status !== 'active' && (
-                                        <div className={`px-2 py-1 rounded text-xs font-medium border ${q.status === 'awarded'
-                                            ? 'bg-green-500/10 border-green-500/20 text-green-400'
-                                            : 'bg-red-500/10 border-red-500/20 text-red-400'
-                                            }`}>
-                                            {q.status === 'awarded' ? 'Awarded' : 'Expired'}
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 
