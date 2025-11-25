@@ -56,12 +56,14 @@ export default function HomePage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeMenuQuestionId, setActiveMenuQuestionId] = useState<number | null>(null);
 
-    // Close menu when clicking outside
-    useEffect(() => {
-        const handleClickOutside = () => setActiveMenuQuestionId(null);
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
-    }, []);
+    // Close menu when clicking outside (using overlay instead of document listener)
+    const toggleMenu = (id: number) => {
+        if (activeMenuQuestionId === id) {
+            setActiveMenuQuestionId(null);
+        } else {
+            setActiveMenuQuestionId(id);
+        }
+    };
     const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedStatus, setSelectedStatus] = useState<string>("");
     const [category, setCategory] = useState<string>("");
@@ -597,6 +599,14 @@ export default function HomePage() {
                 )}
             </section >
 
+            {/* Transparent overlay to close menu */}
+            {activeMenuQuestionId !== null && (
+                <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setActiveMenuQuestionId(null)}
+                />
+            )}
+
             <section>
                 <div className="flex justify-between items-end mb-4 px-1">
                     <h3 className="text-lg font-bold text-white">Recent Questions</h3>
@@ -681,12 +691,12 @@ export default function HomePage() {
                                     )}
 
                                     {/* 3-Dot Menu */}
-                                    <div className="relative z-10">
+                                    <div className="relative z-20">
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 e.preventDefault();
-                                                setActiveMenuQuestionId(activeMenuQuestionId === q.id ? null : q.id);
+                                                toggleMenu(q.id);
                                             }}
                                             className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
                                         >
