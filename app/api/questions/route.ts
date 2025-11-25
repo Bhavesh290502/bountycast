@@ -50,11 +50,13 @@ export async function GET(req: NextRequest) {
             query += ' AND (is_private = false OR is_private IS NULL)';
         }
 
-        // Sorting - for most_answers we need to use a different query structure
+        // Sorting
         if (sort === 'most_answers') {
-            // Rewrite query to use LEFT JOIN for counting answers
-            query = query.replace('SELECT *', 'SELECT questions.*, COUNT(answers.id) as answer_count');
+            // For most_answers, we need to rebuild the query with JOIN
+            const whereClause = query.substring(query.indexOf('WHERE'));
+            query = 'SELECT questions.*, COUNT(answers.id) as answer_count FROM questions';
             query += ' LEFT JOIN answers ON answers.question_id = questions.id';
+            query += ' ' + whereClause;
             query += ' GROUP BY questions.id';
             query += ' ORDER BY answer_count DESC, questions.created DESC';
         } else {
@@ -120,7 +122,7 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json(formattedRows);
     } catch (error) {
-        console.error(error);
+        console.error('DB Error:', error);
         return NextResponse.json({ error: 'DB error' }, { status: 500 });
     }
 }
