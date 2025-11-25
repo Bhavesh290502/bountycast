@@ -277,9 +277,21 @@ export default function QuestionThread({
 
                                 <button
                                     onClick={() => toggleComments(a.id)}
-                                    className="text-gray-500 hover:text-white text-xs mr-2 flex items-center gap-1"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all group mr-2"
+                                    title="Comments"
                                 >
-                                    💬
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 16 16"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        className="group-hover:scale-110 transition-transform"
+                                    >
+                                        <path d="M2 4.5C2 3.67157 2.67157 3 3.5 3H12.5C13.3284 3 14 3.67157 14 4.5V10.5C14 11.3284 13.3284 12 12.5 12H9L5 14V12H3.5C2.67157 12 2 11.3284 2 10.5V4.5Z" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                    <span className="text-xs font-medium">{comments[a.id]?.length || 0}</span>
                                 </button>
 
                                 <button
@@ -294,7 +306,7 @@ export default function QuestionThread({
                                         fill="currentColor"
                                         className="group-hover:scale-110 transition-transform"
                                     >
-                                        <path d="M8 2L10.5 7H13L9 10.5L10.5 15L8 12L5.5 15L7 10.5L3 7H5.5L8 2Z" />
+                                        <path d="M8 2L4 8H7V14H9V8H12L8 2Z" />
                                     </svg>
                                     <span className="text-xs font-bold">{a.upvotes}</span>
                                 </button>
