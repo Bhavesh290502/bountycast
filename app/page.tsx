@@ -318,7 +318,7 @@ export default function HomePage() {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    id: editingQuestion.id,
+                    questionId: editingQuestion.id,
                     fid: viewerFid,
                     question: editingQuestion.question,
                     category: editingQuestion.category,
@@ -386,7 +386,7 @@ export default function HomePage() {
                                     onChange={e => setEditingQuestion({ ...editingQuestion, isPrivate: e.target.checked })}
                                     className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-brand-purple focus:ring-brand-purple"
                                 />
-                                <span>Private Question</span>
+                                <span>Private Question (Only visible to you)</span>
                             </label>
                         </div>
                         <div className="flex justify-end space-x-2">
@@ -408,42 +408,52 @@ export default function HomePage() {
                 </div>
             )}
             {/* Header and controls */}
-            <header className="mb-8 text-center">
-                <h2 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-brand-purple to-brand-gold">
-                    BountyCast
-                </h2>
-                <p className="text-gray-400 text-xs mb-4">
-                    Ask questions. Get answers. Earn ETH.
-                </p>
+            <header className="mb-6 text-center">
+                <div className="flex flex-col items-center gap-2 mb-4">
+                    <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-purple to-brand-gold">
+                        BountyCast
+                    </h2>
+                    {isConnected && address && userProfile && (
+                        <div className="glass-card px-3 py-1 rounded-full text-xs flex items-center gap-2">
+                            <img
+                                src={userProfile.pfpUrl}
+                                alt={userProfile.username}
+                                className="w-5 h-5 rounded-full border border-white/10"
+                            />
+                            <span className="text-white font-bold">@{userProfile.username}</span>
+                            <span className="text-gray-400">|</span>
+                            <span className="text-brand-gold">{typeof userProfile.score === 'number' ? userProfile.score.toFixed(2) : '0.00'}</span>
+                        </div>
+                    )}
+                </div>
 
                 {/* Controls Container */}
-                <div className="flex flex-col items-center gap-4 mb-6">
-                    {/* Top Row: Notifications & Add to Miniapps */}
-                    <div className="flex items-center justify-center gap-4 w-full">
-                        {!isFrameAdded && (
-                            <button
-                                onClick={async () => {
-                                    try {
-                                        await sdk.actions.addFrame();
-                                        setIsFrameAdded(true);
-                                    } catch (e) {
-                                        console.log("Add frame failed:", e);
-                                    }
-                                }}
-                                className="text-brand-purple hover:text-brand-gold text-xs font-medium transition-colors flex items-center gap-1"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                    <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                </svg>
-                                Add to Miniapps
-                            </button>
-                        )}
+                <div className="flex flex-col items-center gap-3">
+                    {/* Top Row: Search, Filters, Notifications, Add Frame */}
+                    <div className="flex flex-wrap items-center justify-center gap-2 w-full max-w-lg">
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            className="glass-input px-3 py-1.5 rounded-lg text-sm flex-1 min-w-[100px]"
+                        />
+                        <select
+                            value={selectedCategory}
+                            onChange={e => setSelectedCategory(e.target.value)}
+                            className="glass-input px-2 py-1.5 rounded-lg text-sm w-28"
+                        >
+                            <option value="">Category</option>
+                            {CATEGORIES.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
 
                         {/* Notification Bell */}
                         <div className="relative">
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
-                                className="text-brand-purple hover:text-brand-gold transition-colors"
+                                className="text-brand-purple hover:text-brand-gold transition-colors p-1.5 glass-card rounded-lg"
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
@@ -457,7 +467,7 @@ export default function HomePage() {
 
                             {/* Notification dropdown */}
                             {showNotifications && (
-                                <div className="absolute right-0 top-8 w-64 bg-gray-900 border border-white/10 shadow-xl rounded-lg p-2 z-50 max-h-80 overflow-y-auto">
+                                <div className="absolute right-0 top-10 w-72 bg-gray-900 border border-white/10 shadow-xl rounded-lg p-2 z-50 max-h-80 overflow-y-auto transform -translate-x-1/2 sm:translate-x-0">
                                     <div className="flex justify-between items-center mb-2 px-2">
                                         <h3 className="font-semibold text-xs text-white">Notifications</h3>
                                         {notifications.length > 0 && (
@@ -493,75 +503,30 @@ export default function HomePage() {
                                 </div>
                             )}
                         </div>
-                    </div>
 
-                    {/* Search & Filters Row */}
-                    <div className="flex flex-wrap justify-center gap-2 w-full max-w-md">
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                            className="glass-input px-3 py-1.5 rounded-lg text-sm flex-1 min-w-[120px]"
-                        />
-                        <select
-                            value={selectedCategory}
-                            onChange={e => setSelectedCategory(e.target.value)}
-                            className="glass-input px-2 py-1.5 rounded-lg text-sm w-32"
-                        >
-                            <option value="">Category</option>
-                            {CATEGORIES.map(cat => (
-                                <option key={cat} value={cat}>{cat}</option>
-                            ))}
-                        </select>
-                        <select
-                            value={selectedStatus}
-                            onChange={e => setSelectedStatus(e.target.value)}
-                            className="glass-input px-2 py-1.5 rounded-lg text-sm w-24"
-                        >
-                            <option value="">Status</option>
-                            <option value="active">Active</option>
-                            <option value="answered">Answered</option>
-                            <option value="expired">Expired</option>
-                        </select>
+                        {!isFrameAdded && (
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        await sdk.actions.addFrame();
+                                        setIsFrameAdded(true);
+                                    } catch (e) {
+                                        console.log("Add frame failed:", e);
+                                    }
+                                }}
+                                className="text-brand-purple hover:text-brand-gold text-xs font-medium transition-colors flex items-center gap-1 p-1.5 glass-card rounded-lg"
+                                title="Add to Miniapps"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                </svg>
+                            </button>
+                        )}
                     </div>
                 </div>
 
-                <div className="flex justify-center">
-                    {isConnected && address ? (
-                        <div className="glass-card px-4 py-2 rounded-full text-xs flex items-center gap-3">
-                            {userProfile ? (
-                                <>
-                                    <img
-                                        src={userProfile.pfpUrl}
-                                        alt={userProfile.username}
-                                        className="w-6 h-6 rounded-full border border-white/10"
-                                    />
-                                    <div className="flex flex-col items-start">
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-white font-bold">@{userProfile.username || 'user'}</span>
-                                            {userProfile.isPro && <span title="Pro User">⚡</span>}
-                                        </div>
-                                        <div className="text-[10px] text-gray-400 flex gap-2">
-                                            <span>Score: {typeof userProfile.score === 'number' ? userProfile.score.toFixed(2) : '0.00'}</span>
-                                            <span>|</span>
-                                            <span>{address.slice(0, 6)}...{address.slice(-4)}</span>
-                                        </div>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-gray-300">
-                                        {viewerUsername ? `@${viewerUsername}` : "Connected"}
-                                    </span>
-                                    <span className="text-gray-500">
-                                        ({address.slice(0, 6)}…{address.slice(-4)})
-                                    </span>
-                                </>
-                            )}
-                        </div>
-                    ) : (
+                <div className="flex justify-center mt-4">
+                    {!isConnected && (
                         <button
                             onClick={handleConnectClick}
                             className="btn-primary px-6 py-2 rounded-full font-medium text-xs"
@@ -575,7 +540,7 @@ export default function HomePage() {
                         </div>
                     )}
                 </div>
-            </header >
+            </header>
 
             <section className="mb-8">
                 {!showAsk ? (
