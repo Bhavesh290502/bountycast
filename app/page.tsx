@@ -72,6 +72,7 @@ export default function HomePage() {
     const [category, setCategory] = useState<string>("");
     const [tags, setTags] = useState<string[]>([]);
     const [isPrivate, setIsPrivate] = useState(false);
+    const [token, setToken] = useState<string>("ETH");
 
     const [showMyBountiesModal, setShowMyBountiesModal] = useState(false);
     const [myQuestions, setMyQuestions] = useState<Question[]>([]);
@@ -289,7 +290,7 @@ export default function HomePage() {
                     address,
                     question: questionText,
                     bounty,
-                    token: "ETH",
+                    token,
                     onchainId,
                     deadline: deadlineMs,
                     category,
@@ -299,19 +300,6 @@ export default function HomePage() {
             });
 
             setLastPostedBounty({ question: questionText, bounty });
-            setQuestionText("");
-            setLastPostedBounty({ question: questionText, bounty });
-            setQuestionText("");
-            setBounty(0.00033);
-            setCategory("");
-            setCategory("");
-            setTags([]);
-            setIsPrivate(false);
-            // Don't close showAsk yet, let user see success screen
-            await loadQuestions();
-        } catch (e) {
-            console.error(e);
-            alert("Failed to ask question / send transaction");
         } finally {
             setLoading(false);
         }
@@ -627,12 +615,17 @@ export default function HomePage() {
                                                 onChange={(e) => setBounty(Number(e.target.value))}
                                             />
                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-gold">
-                                                Ξ
+                                                {token === 'ETH' ? 'Ξ' : '$'}
                                             </span>
                                         </div>
-                                        <div className="flex items-center text-xs text-gray-500">
-                                            Native Base ETH
-                                        </div>
+                                        <select
+                                            value={token}
+                                            onChange={e => setToken(e.target.value)}
+                                            className="glass-input px-3 py-1.5 rounded-lg text-sm w-24"
+                                        >
+                                            <option value="ETH">ETH</option>
+                                            <option value="USDC">USDC</option>
+                                        </select>
                                     </div>
 
                                     <div className="flex gap-3">
