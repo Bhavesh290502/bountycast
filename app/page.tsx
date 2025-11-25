@@ -379,15 +379,6 @@ export default function HomePage() {
                                 onChange={e => setEditingQuestion({ ...editingQuestion, tags: e.target.value.split(',').map(t => t.trim()) })}
                                 className="glass-input w-full p-3 rounded-lg text-sm"
                             />
-                            <label className="flex items-center gap-2 cursor-pointer text-gray-300 text-sm">
-                                <input
-                                    type="checkbox"
-                                    checked={editingQuestion.isPrivate || false}
-                                    onChange={e => setEditingQuestion({ ...editingQuestion, isPrivate: e.target.checked })}
-                                    className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-brand-purple focus:ring-brand-purple"
-                                />
-                                <span>Private Question (Only visible to you)</span>
-                            </label>
                         </div>
                         <div className="flex justify-end space-x-2">
                             <button
@@ -406,7 +397,8 @@ export default function HomePage() {
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
             {/* Header and controls */}
             <header className="mb-6 text-center">
                 <div className="flex flex-col items-center gap-2 mb-4">
@@ -647,21 +639,11 @@ export default function HomePage() {
 
                                     <input
                                         type="text"
-                                        placeholder="Tags (comma separated, e.g. react, web3)"
+                                        placeholder="Tags (e.g. react, web3)"
                                         value={tags.join(', ')}
                                         onChange={e => setTags(e.target.value.split(',').map(t => t.trim()))}
                                         className="glass-input w-full p-3 rounded-lg text-sm"
                                     />
-
-                                    <label className="flex items-center gap-2 cursor-pointer text-gray-300 text-sm">
-                                        <input
-                                            type="checkbox"
-                                            checked={isPrivate}
-                                            onChange={e => setIsPrivate(e.target.checked)}
-                                            className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-brand-purple focus:ring-brand-purple"
-                                        />
-                                        <span>Private Question (Only visible to you)</span>
-                                    </label>
                                 </div>
 
                                 <button
@@ -682,7 +664,7 @@ export default function HomePage() {
                         )}
                     </div>
                 )}
-            </section>
+            </section >
 
             <section>
                 <div className="flex justify-between items-end mb-4 px-1">
@@ -785,8 +767,8 @@ export default function HomePage() {
                                     </div>
                                     {q.status !== 'active' && (
                                         <div className={`px-2 py-1 rounded text-xs font-medium border ${q.status === 'awarded'
-                                                ? 'bg-green-500/10 border-green-500/20 text-green-400'
-                                                : 'bg-red-500/10 border-red-500/20 text-red-400'
+                                            ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                                            : 'bg-red-500/10 border-red-500/20 text-red-400'
                                             }`}>
                                             {q.status === 'awarded' ? 'Awarded' : 'Expired'}
                                         </div>

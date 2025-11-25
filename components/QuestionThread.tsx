@@ -282,18 +282,22 @@ export default function QuestionThread({
                                     💬
                                 </button>
 
-                                <div className="flex items-center gap-1 bg-white/5 rounded-full px-3 py-1 hover:bg-white/10 transition-all">
-                                    <button
-                                        onClick={() => upvote(a.id)}
-                                        className="text-gray-400 hover:text-brand-gold transition-all text-xs font-medium flex items-center gap-1"
-                                        title="Toggle Upvote"
+                                <button
+                                    onClick={() => upvote(a.id)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-brand-gold transition-all group"
+                                    title="Toggle Upvote"
+                                >
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 16 16"
+                                        fill="currentColor"
+                                        className="group-hover:scale-110 transition-transform"
                                     >
-                                        <span>Upvote +1</span>
-                                    </button>
-                                    <span className="text-xs font-semibold text-gray-300 border-l border-white/10 pl-2 ml-1">
-                                        {a.upvotes}
-                                    </span>
-                                </div>
+                                        <path d="M8 2L10.5 7H13L9 10.5L10.5 15L8 12L5.5 15L7 10.5L3 7H5.5L8 2Z" />
+                                    </svg>
+                                    <span className="text-xs font-bold">{a.upvotes}</span>
+                                </button>
                             </div>
                         </div>
 
