@@ -282,23 +282,15 @@ export default function QuestionThread({
                                     💬
                                 </button>
 
-                                <div className="flex items-center gap-1 bg-white/5 rounded-full px-2 py-1 hover:bg-white/10 transition-all">
+                                <div className="flex items-center gap-1 bg-white/5 rounded-full px-3 py-1 hover:bg-white/10 transition-all">
                                     <button
                                         onClick={() => upvote(a.id)}
-                                        className="text-gray-400 hover:text-brand-gold transition-all hover:scale-110 active:scale-95"
-                                        title="Upvote this answer"
+                                        className="text-gray-400 hover:text-brand-gold transition-all text-xs font-medium flex items-center gap-1"
+                                        title="Toggle Upvote"
                                     >
-                                        <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 16 16"
-                                            fill="currentColor"
-                                            className="transition-colors"
-                                        >
-                                            <path d="M8 2L10.5 7H13L9 10.5L10.5 15L8 12L5.5 15L7 10.5L3 7H5.5L8 2Z" />
-                                        </svg>
+                                        <span>Upvote +1</span>
                                     </button>
-                                    <span className="text-xs font-semibold text-gray-300 min-w-[20px] text-center">
+                                    <span className="text-xs font-semibold text-gray-300 border-l border-white/10 pl-2 ml-1">
                                         {a.upvotes}
                                     </span>
                                 </div>
@@ -311,8 +303,21 @@ export default function QuestionThread({
                                 {comments[a.id]?.map((c: any) => (
                                     <div key={c.id} className="mb-2 pl-2 border-l-2 border-white/10 text-xs">
                                         <div className="flex items-center gap-1 mb-0.5">
-                                            <span className="font-bold text-gray-400">{c.username}</span>
-                                            <span className="text-[10px] text-gray-600">{new Date(c.created_at).toLocaleTimeString()}</span>
+                                            <button
+                                                onClick={() => sdk.actions.openUrl(`https://warpcast.com/${c.username}`)}
+                                                className="font-bold text-gray-400 hover:text-brand-purple hover:underline"
+                                            >
+                                                {c.username}
+                                            </button>
+                                            <span className="text-[10px] text-gray-600">
+                                                {(() => {
+                                                    try {
+                                                        return new Date(c.created_at).toLocaleString();
+                                                    } catch (e) {
+                                                        return '';
+                                                    }
+                                                })()}
+                                            </span>
                                         </div>
                                         <p className="text-gray-300">{c.comment}</p>
                                     </div>

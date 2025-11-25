@@ -26,32 +26,38 @@ export async function POST(req: NextRequest) {
         `;
 
         if (rowCount && rowCount > 0) {
-            return NextResponse.json({ error: 'Already upvoted' }, { status: 400 });
-        }
+            // Already upvoted, so remove it (Undo)
+            await sql`
+                DELETE FROM upvotes WHERE answerId = ${id} AND fid = ${fid};
+            `;
+            await sql`
+                UPDATE answers SET upvotes = upvotes - 1 WHERE id = ${id};
+            `;
+            return NextResponse.json({ success: true, action: 'removed' });
+        } else {
+            // Not upvoted, so add it
+            await sql`
+                WITH inserted AS (
+                    INSERT INTO upvotes (answerId, fid, created)
+                    VALUES (${id}, ${fid}, ${Date.now()})
+                    RETURNING id
+                )
+                UPDATE answers SET upvotes = upvotes + 1 WHERE id = ${id}
+            `;
 
-        // Record upvote and increment count
-        await sql`
-            WITH inserted AS (
-                INSERT INTO upvotes (answerId, fid, created)
-                VALUES (${id}, ${fid}, ${Date.now()})
-                RETURNING id
-            )
-            UPDATE answers SET upvotes = upvotes + 1 WHERE id = ${id}
-        `;
-
-        // Create notification for answer author
-        const answerResult = await sql`SELECT fid, username FROM answers WHERE id = ${id}`;
-        if (answerResult.rows.length > 0) {
-            const answerAuthorFid = answerResult.rows[0].fid;
-            if (answerAuthorFid && answerAuthorFid !== fid) { // Don't notify if upvoting own answer
-                await sql`
-                    INSERT INTO notifications (user_fid, type, answer_id, from_fid, message, created_at)
-                    VALUES (${answerAuthorFid}, 'upvote', ${id}, ${fid}, ${'Someone upvoted your answer'}, ${Date.now()})
-                `;
+            // Create notification for answer author
+            const answerResult = await sql`SELECT fid, username FROM answers WHERE id = ${id}`;
+            if (answerResult.rows.length > 0) {
+                const answerAuthorFid = answerResult.rows[0].fid;
+                if (answerAuthorFid && answerAuthorFid !== fid) { // Don't notify if upvoting own answer
+                    await sql`
+                        INSERT INTO notifications (user_fid, type, answer_id, from_fid, message, created_at)
+                        VALUES (${answerAuthorFid}, 'upvote', ${id}, ${fid}, ${'Someone upvoted your answer'}, ${Date.now()})
+                    `;
+                }
             }
+            return NextResponse.json({ success: true, action: 'added' });
         }
-
-        return NextResponse.json({ success: true });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: 'Update error' }, { status: 500 });

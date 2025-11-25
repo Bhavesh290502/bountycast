@@ -467,7 +467,7 @@ export default function HomePage() {
 
                             {/* Notification dropdown */}
                             {showNotifications && (
-                                <div className="absolute right-0 top-10 w-72 bg-gray-900 border border-white/10 shadow-xl rounded-lg p-2 z-50 max-h-80 overflow-y-auto transform -translate-x-1/2 sm:translate-x-0">
+                                <div className="absolute right-0 top-10 w-[90vw] max-w-sm bg-gray-900 border border-white/10 shadow-xl rounded-lg p-2 z-50 max-h-80 overflow-y-auto">
                                     <div className="flex justify-between items-center mb-2 px-2">
                                         <h3 className="font-semibold text-xs text-white">Notifications</h3>
                                         {notifications.length > 0 && (
@@ -495,7 +495,15 @@ export default function HomePage() {
                                             {notifications.map(n => (
                                                 <div key={n.id} className={`p-2 rounded text-xs ${n.read ? 'opacity-50' : 'bg-white/5'}`}>
                                                     <p className="text-gray-200">{n.message}</p>
-                                                    <span className="text-[10px] text-gray-500">{new Date(n.created_at).toLocaleTimeString()}</span>
+                                                    <span className="text-[10px] text-gray-500">
+                                                        {(() => {
+                                                            try {
+                                                                return new Date(n.created_at).toLocaleString();
+                                                            } catch (e) {
+                                                                return '';
+                                                            }
+                                                        })()}
+                                                    </span>
                                                 </div>
                                             ))}
                                         </div>
@@ -775,6 +783,14 @@ export default function HomePage() {
                                         <span>🏆</span>
                                         <span>{q.bounty || 0} ETH</span>
                                     </div>
+                                    {q.status !== 'active' && (
+                                        <div className={`px-2 py-1 rounded text-xs font-medium border ${q.status === 'awarded'
+                                                ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                                                : 'bg-red-500/10 border-red-500/20 text-red-400'
+                                            }`}>
+                                            {q.status === 'awarded' ? 'Awarded' : 'Expired'}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
