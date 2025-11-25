@@ -51,28 +51,17 @@ export async function GET(req: NextRequest) {
         }
 
         // Sorting
-        if (sort === 'most_answers') {
-            // For most_answers, we need to rebuild the query with JOIN
-            const whereClause = query.substring(query.indexOf('WHERE'));
-            query = 'SELECT questions.*, COUNT(answers.id) as answer_count FROM questions';
-            query += ' LEFT JOIN answers ON answers.question_id = questions.id';
-            query += ' ' + whereClause;
-            query += ' GROUP BY questions.id';
-            query += ' ORDER BY answer_count DESC, questions.created DESC';
-        } else {
-            // Other sorting options
-            switch (sort) {
-                case 'highest_bounty':
-                    query += ' ORDER BY CAST(bounty AS DECIMAL) DESC';
-                    break;
-                case 'expiring_soon':
-                    query += ' ORDER BY deadline ASC';
-                    break;
-                case 'newest':
-                default:
-                    query += ' ORDER BY created DESC';
-                    break;
-            }
+        switch (sort) {
+            case 'highest_bounty':
+                query += ' ORDER BY CAST(bounty AS DECIMAL) DESC';
+                break;
+            case 'expiring_soon':
+                query += ' ORDER BY deadline ASC';
+                break;
+            case 'newest':
+            default:
+                query += ' ORDER BY created DESC';
+                break;
         }
 
         const { rows } = await sql.query(query, params);

@@ -502,7 +502,6 @@ export default function HomePage() {
                         >
                             <option value="newest">Newest</option>
                             <option value="highest_bounty">Highest Bounty</option>
-                            <option value="most_answers">Most Answers</option>
                             <option value="expiring_soon">Expiring Soon</option>
                         </select>
 
