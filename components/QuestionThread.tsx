@@ -280,19 +280,18 @@ export default function QuestionThread({
                                 {askerAddress && address && askerAddress.toLowerCase() === address.toLowerCase() && isQuestionActive && a.address && (
                                     <button
                                         onClick={() => awardBounty(a.address!)}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/20 hover:bg-green-500/40 text-green-400 hover:text-white transition-all group mr-2"
+                                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-green-500/20 hover:bg-green-500/40 text-green-400 hover:text-white transition-all group mr-2"
                                         title="Award Bounty"
                                     >
                                         <svg
-                                            width="14"
-                                            height="14"
+                                            width="16"
+                                            height="16"
                                             viewBox="0 0 16 16"
                                             fill="currentColor"
                                             className="group-hover:scale-110 transition-transform"
                                         >
                                             <path d="M8 1L10 6H15L11 9L12.5 14L8 11L3.5 14L5 9L1 6H6L8 1Z" />
                                         </svg>
-                                        <span className="text-[10px] font-medium">Award</span>
                                     </button>
                                 )}
 
