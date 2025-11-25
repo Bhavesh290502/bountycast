@@ -53,10 +53,10 @@ export async function GET(req: NextRequest) {
         // Sorting
         switch (sort) {
             case 'highest_bounty':
-                query += ' ORDER BY bounty DESC';
+                query += ' ORDER BY CAST(bounty AS DECIMAL) DESC';
                 break;
             case 'most_answers':
-                query += ' ORDER BY (SELECT COUNT(*) FROM answers WHERE answers.question_id = questions.id) DESC';
+                query += ' ORDER BY (SELECT COUNT(*) FROM answers WHERE answers.question_id = questions.id) DESC, created DESC';
                 break;
             case 'expiring_soon':
                 query += ' ORDER BY deadline ASC';
