@@ -270,7 +270,6 @@ export default function QuestionThread({
                                     >
                                         {a.authorProfile ? `@${a.authorProfile.username}` : a.username}
                                     </button >
-                                    {a.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
                                 </div >
                                 <span className="text-gray-300 text-xs block pl-7">{a.answer}</span>
                             </div >

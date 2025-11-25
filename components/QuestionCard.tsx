@@ -81,7 +81,6 @@ export default function QuestionCard({
                             >
                                 {q.authorProfile ? `@${q.authorProfile.username}` : (q.username || 'Anon')}
                             </button>
-                            {q.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
                         </div>
                         <div className="text-[10px] text-gray-500 flex gap-2">
                             <span>
