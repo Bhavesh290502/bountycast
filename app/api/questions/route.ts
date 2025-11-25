@@ -50,21 +50,27 @@ export async function GET(req: NextRequest) {
             query += ' AND (is_private = false OR is_private IS NULL)';
         }
 
-        // Sorting
-        switch (sort) {
-            case 'highest_bounty':
-                query += ' ORDER BY CAST(bounty AS DECIMAL) DESC';
-                break;
-            case 'most_answers':
-                query += ' ORDER BY (SELECT COUNT(*) FROM answers WHERE answers.question_id = questions.id) DESC, created DESC';
-                break;
-            case 'expiring_soon':
-                query += ' ORDER BY deadline ASC';
-                break;
-            case 'newest':
-            default:
-                query += ' ORDER BY created DESC';
-                break;
+        // Sorting - for most_answers we need to use a different query structure
+        if (sort === 'most_answers') {
+            // Rewrite query to use LEFT JOIN for counting answers
+            query = query.replace('SELECT *', 'SELECT questions.*, COUNT(answers.id) as answer_count');
+            query += ' LEFT JOIN answers ON answers.question_id = questions.id';
+            query += ' GROUP BY questions.id, questions.fid, questions.username, questions.address, questions.question, questions.bounty, questions.token, questions.created, questions.deadline, questions.onchainid, questions.status, questions.category, questions.tags, questions.is_private, questions.updated_at';
+            query += ' ORDER BY answer_count DESC, questions.created DESC';
+        } else {
+            // Other sorting options
+            switch (sort) {
+                case 'highest_bounty':
+                    query += ' ORDER BY CAST(bounty AS DECIMAL) DESC';
+                    break;
+                case 'expiring_soon':
+                    query += ' ORDER BY deadline ASC';
+                    break;
+                case 'newest':
+                default:
+                    query += ' ORDER BY created DESC';
+                    break;
+            }
         }
 
         const { rows } = await sql.query(query, params);
