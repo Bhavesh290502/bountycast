@@ -15,6 +15,7 @@ import QuestionThread from "../components/QuestionThread";
 
 interface Question {
     id: number;
+    fid: number;
     username: string;
     question: string;
     bounty: number;
@@ -306,6 +307,39 @@ export default function HomePage() {
         }
     };
 
+    const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+    const [editLoading, setEditLoading] = useState(false);
+
+    const handleEdit = async () => {
+        if (!editingQuestion) return;
+        setEditLoading(true);
+        try {
+            const res = await fetch('/api/questions/edit', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: editingQuestion.id,
+                    fid: viewerFid,
+                    question: editingQuestion.question,
+                    category: editingQuestion.category,
+                    tags: editingQuestion.tags,
+                    isPrivate: editingQuestion.isPrivate
+                }),
+            });
+
+            if (res.ok) {
+                setEditingQuestion(null);
+                await loadQuestions();
+            } else {
+                alert("Failed to update question");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error updating question");
+        } finally {
+            setEditLoading(false);
+        }
+    };
 
     if (!isReady) {
         return (
@@ -315,10 +349,65 @@ export default function HomePage() {
         );
     }
 
-
-
     return (
         <div className="max-w-xl mx-auto p-4 font-sans text-sm pb-20">
+            {/* Edit Modal */}
+            {editingQuestion && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+                    <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md">
+                        <h3 className="text-lg font-bold mb-4">Edit Question</h3>
+                        <div className="space-y-3 mb-4">
+                            <textarea
+                                className="glass-input w-full p-3 rounded-lg min-h-[100px] resize-none text-sm placeholder-gray-500"
+                                value={editingQuestion.question}
+                                onChange={e => setEditingQuestion({ ...editingQuestion, question: e.target.value })}
+                            />
+                            <select
+                                value={editingQuestion.category || ''}
+                                onChange={e => setEditingQuestion({ ...editingQuestion, category: e.target.value })}
+                                className="glass-input w-full p-3 rounded-lg text-sm"
+                            >
+                                <option value="">Select Category</option>
+                                {CATEGORIES.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                            <input
+                                type="text"
+                                placeholder="Tags (comma separated)"
+                                value={editingQuestion.tags?.join(', ') || ''}
+                                onChange={e => setEditingQuestion({ ...editingQuestion, tags: e.target.value.split(',').map(t => t.trim()) })}
+                                className="glass-input w-full p-3 rounded-lg text-sm"
+                            />
+                            <label className="flex items-center gap-2 cursor-pointer text-gray-300 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={editingQuestion.isPrivate || false}
+                                    onChange={e => setEditingQuestion({ ...editingQuestion, isPrivate: e.target.checked })}
+                                    className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-brand-purple focus:ring-brand-purple"
+                                />
+                                <span>Private Question</span>
+                            </label>
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                            <button
+                                onClick={() => setEditingQuestion(null)}
+                                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-black"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleEdit}
+                                disabled={editLoading}
+                                className="px-4 py-2 rounded bg-brand-purple text-white hover:bg-brand-gold"
+                            >
+                                {editLoading ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Header and controls */}
             <header className="mb-8 text-center">
                 <h2 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-brand-purple to-brand-gold">
                     BountyCast
@@ -327,24 +416,116 @@ export default function HomePage() {
                     Ask questions. Get answers. Earn ETH.
                 </p>
 
-                {!isFrameAdded && (
-                    <button
-                        onClick={async () => {
-                            try {
-                                await sdk.actions.addFrame();
-                                setIsFrameAdded(true);
-                            } catch (e) {
-                                console.log("Add frame failed:", e);
-                            }
-                        }}
-                        className="mb-4 text-brand-purple hover:text-brand-gold text-xs font-medium transition-colors flex items-center gap-1 mx-auto"
-                    >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        </svg>
-                        Add to Miniapps
-                    </button>
-                )}
+                {/* Controls Container */}
+                <div className="flex flex-col items-center gap-4 mb-6">
+                    {/* Top Row: Notifications & Add to Miniapps */}
+                    <div className="flex items-center justify-center gap-4 w-full">
+                        {!isFrameAdded && (
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        await sdk.actions.addFrame();
+                                        setIsFrameAdded(true);
+                                    } catch (e) {
+                                        console.log("Add frame failed:", e);
+                                    }
+                                }}
+                                className="text-brand-purple hover:text-brand-gold text-xs font-medium transition-colors flex items-center gap-1"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M8 2v12M2 8h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                </svg>
+                                Add to Miniapps
+                            </button>
+                        )}
+
+                        {/* Notification Bell */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowNotifications(!showNotifications)}
+                                className="text-brand-purple hover:text-brand-gold transition-colors"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+                                </svg>
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-[10px] w-4 h-4 flex items-center justify-center border-2 border-black">
+                                        {unreadCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Notification dropdown */}
+                            {showNotifications && (
+                                <div className="absolute right-0 top-8 w-64 bg-gray-900 border border-white/10 shadow-xl rounded-lg p-2 z-50 max-h-80 overflow-y-auto">
+                                    <div className="flex justify-between items-center mb-2 px-2">
+                                        <h3 className="font-semibold text-xs text-white">Notifications</h3>
+                                        {notifications.length > 0 && (
+                                            <button
+                                                onClick={async () => {
+                                                    await fetch('/api/notifications', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ notificationIds: notifications.map(n => n.id) })
+                                                    });
+                                                    setNotifications([]);
+                                                    setUnreadCount(0);
+                                                }}
+                                                className="text-[10px] text-brand-purple hover:text-brand-gold"
+                                            >
+                                                Mark all read
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {notifications.length === 0 ? (
+                                        <p className="text-gray-500 text-xs text-center py-4">No notifications</p>
+                                    ) : (
+                                        <div className="space-y-1">
+                                            {notifications.map(n => (
+                                                <div key={n.id} className={`p-2 rounded text-xs ${n.read ? 'opacity-50' : 'bg-white/5'}`}>
+                                                    <p className="text-gray-200">{n.message}</p>
+                                                    <span className="text-[10px] text-gray-500">{new Date(n.created_at).toLocaleTimeString()}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Search & Filters Row */}
+                    <div className="flex flex-wrap justify-center gap-2 w-full max-w-md">
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            className="glass-input px-3 py-1.5 rounded-lg text-sm flex-1 min-w-[120px]"
+                        />
+                        <select
+                            value={selectedCategory}
+                            onChange={e => setSelectedCategory(e.target.value)}
+                            className="glass-input px-2 py-1.5 rounded-lg text-sm w-32"
+                        >
+                            <option value="">Category</option>
+                            {CATEGORIES.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                        <select
+                            value={selectedStatus}
+                            onChange={e => setSelectedStatus(e.target.value)}
+                            className="glass-input px-2 py-1.5 rounded-lg text-sm w-24"
+                        >
+                            <option value="">Status</option>
+                            <option value="active">Active</option>
+                            <option value="answered">Answered</option>
+                            <option value="expired">Expired</option>
+                        </select>
+                    </div>
+                </div>
 
                 <div className="flex justify-center">
                     {isConnected && address ? (
@@ -394,7 +575,7 @@ export default function HomePage() {
                         </div>
                     )}
                 </div>
-            </header>
+            </header >
 
             <section className="mb-8">
                 {!showAsk ? (
@@ -450,31 +631,64 @@ export default function HomePage() {
                                     </button>
                                 </div>
 
-                                <textarea
-                                    className="glass-input w-full p-3 rounded-lg mb-3 min-h-[100px] resize-none text-sm placeholder-gray-500"
-                                    placeholder="What do you want to know?"
-                                    value={questionText}
-                                    onChange={(e) => setQuestionText(e.target.value)}
-                                />
+                                <div className="space-y-3 mb-4">
+                                    <textarea
+                                        className="glass-input w-full p-3 rounded-lg min-h-[100px] resize-none text-sm placeholder-gray-500"
+                                        placeholder="What do you want to know?"
+                                        value={questionText}
+                                        onChange={(e) => setQuestionText(e.target.value)}
+                                    />
 
-                                <div className="flex gap-3 mb-4">
-                                    <div className="relative flex-1">
+                                    <div className="flex gap-3">
+                                        <div className="relative flex-1">
+                                            <input
+                                                type="number"
+                                                min={0.001}
+                                                step={0.001}
+                                                className="glass-input w-full p-3 rounded-lg pl-8 text-sm"
+                                                placeholder="0.01"
+                                                value={bounty}
+                                                onChange={(e) => setBounty(Number(e.target.value || 0.001))}
+                                            />
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-gold">
+                                                Ξ
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center text-xs text-gray-500">
+                                            Native Base ETH
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <select
+                                            value={category}
+                                            onChange={e => setCategory(e.target.value)}
+                                            className="glass-input flex-1 p-3 rounded-lg text-sm"
+                                        >
+                                            <option value="">Select Category</option>
+                                            {CATEGORIES.map(cat => (
+                                                <option key={cat} value={cat}>{cat}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <input
+                                        type="text"
+                                        placeholder="Tags (comma separated, e.g. react, web3)"
+                                        value={tags.join(', ')}
+                                        onChange={e => setTags(e.target.value.split(',').map(t => t.trim()))}
+                                        className="glass-input w-full p-3 rounded-lg text-sm"
+                                    />
+
+                                    <label className="flex items-center gap-2 cursor-pointer text-gray-300 text-sm">
                                         <input
-                                            type="number"
-                                            min={0.001}
-                                            step={0.001}
-                                            className="glass-input w-full p-3 rounded-lg pl-8 text-sm"
-                                            placeholder="0.01"
-                                            value={bounty}
-                                            onChange={(e) => setBounty(Number(e.target.value || 0.001))}
+                                            type="checkbox"
+                                            checked={isPrivate}
+                                            onChange={e => setIsPrivate(e.target.checked)}
+                                            className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-brand-purple focus:ring-brand-purple"
                                         />
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-gold">
-                                            Ξ
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center text-xs text-gray-500">
-                                        Native Base ETH
-                                    </div>
+                                        <span>Private Question (Only visible to you)</span>
+                                    </label>
                                 </div>
 
                                 <button
@@ -568,6 +782,18 @@ export default function HomePage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
+                                    {viewerFid && q.fid === viewerFid && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEditingQuestion(q);
+                                            }}
+                                            className="bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white px-2 py-1 rounded text-xs transition-colors flex items-center gap-1"
+                                            title="Edit Question"
+                                        >
+                                            <span>✏️</span>
+                                        </button>
+                                    )}
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -591,6 +817,25 @@ export default function HomePage() {
                                 {q.question}
                             </p>
 
+                            {/* Tags & Category */}
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {q.category && (
+                                    <span className="bg-brand-purple/20 text-brand-purple px-2 py-0.5 rounded text-[10px] border border-brand-purple/30">
+                                        {q.category}
+                                    </span>
+                                )}
+                                {q.tags && q.tags.map((tag, i) => (
+                                    <span key={i} className="bg-white/5 text-gray-400 px-2 py-0.5 rounded text-[10px] border border-white/10">
+                                        #{tag}
+                                    </span>
+                                ))}
+                                {q.isPrivate && (
+                                    <span className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded text-[10px] flex items-center gap-1">
+                                        🔒 Private
+                                    </span>
+                                )}
+                            </div>
+
                             <div className="border-t border-white/5 pt-3 mt-3">
                                 <QuestionThread
                                     questionId={q.id}
@@ -605,6 +850,6 @@ export default function HomePage() {
                     ))}
                 </div>
             </section>
-        </div>
+        </div >
     );
 }

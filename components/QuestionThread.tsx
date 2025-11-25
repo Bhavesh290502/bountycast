@@ -152,6 +152,68 @@ export default function QuestionThread({
         }
     };
 
+    const [comments, setComments] = useState<{ [answerId: number]: any[] }>({});
+    const [expandedComments, setExpandedComments] = useState<{ [answerId: number]: boolean }>({});
+    const [commentText, setCommentText] = useState<{ [answerId: number]: string }>({});
+    const [commentLoading, setCommentLoading] = useState<{ [answerId: number]: boolean }>({});
+
+    const toggleComments = async (answerId: number) => {
+        const isExpanded = expandedComments[answerId];
+        setExpandedComments(prev => ({ ...prev, [answerId]: !isExpanded }));
+
+        if (!isExpanded && !comments[answerId]) {
+            // Load comments
+            try {
+                const res = await fetch(`/api/comments?answerId=${answerId}`);
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setComments(prev => ({ ...prev, [answerId]: data }));
+                }
+            } catch (e) {
+                console.error("Failed to load comments", e);
+            }
+        }
+    };
+
+    const postComment = async (answerId: number) => {
+        const text = commentText[answerId];
+        if (!text?.trim()) return;
+        if (!fid) {
+            alert("Please log in to comment.");
+            return;
+        }
+
+        setCommentLoading(prev => ({ ...prev, [answerId]: true }));
+        try {
+            const res = await fetch('/api/comments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    answerId,
+                    fid,
+                    username,
+                    address,
+                    comment: text
+                }),
+            });
+
+            if (res.ok) {
+                setCommentText(prev => ({ ...prev, [answerId]: '' }));
+                // Reload comments
+                const commentsRes = await fetch(`/api/comments?answerId=${answerId}`);
+                const data = await commentsRes.json();
+                if (Array.isArray(data)) {
+                    setComments(prev => ({ ...prev, [answerId]: data }));
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Failed to post comment");
+        } finally {
+            setCommentLoading(prev => ({ ...prev, [answerId]: false }));
+        }
+    };
+
     return (
         <div className="mt-4">
             <div className="flex gap-2 mb-4">
@@ -172,73 +234,108 @@ export default function QuestionThread({
 
             <div className="space-y-2">
                 {answers.map((a) => (
-                    <div
-                        key={a.id}
-                        className="bg-white/5 p-3 rounded-lg flex justify-between items-center group hover:bg-white/10 transition-colors"
-                    >
-                        <div className="flex-1 mr-2">
-                            <div className="flex items-center gap-2 mb-1">
-                                {a.authorProfile ? (
-                                    <img
-                                        src={a.authorProfile.pfpUrl}
-                                        alt={a.authorProfile.username}
-                                        className="w-5 h-5 rounded-full border border-white/10"
-                                    />
-                                ) : (
-                                    <div className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center text-[8px] text-gray-400">
-                                        {(a.username || 'AN').slice(0, 2).toUpperCase()}
-                                    </div>
-                                )}
-                                <button
-                                    onClick={() => {
-                                        const username = a.authorProfile?.username || a.username;
-                                        sdk.actions.openUrl(`https://warpcast.com/${username}`);
-                                    }}
-                                    className="font-bold text-brand-purple text-xs hover:underline text-left"
-                                >
-                                    {a.authorProfile ? `@${a.authorProfile.username}` : a.username}
-                                </button >
-                                {a.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
-                            </div >
-                            <span className="text-gray-300 text-xs block pl-7">{a.answer}</span>
-                        </div >
-
-                        <div className="flex items-center gap-2">
-                            {/* Show Award button if viewer is asker and question is active */}
-                            {askerAddress && address && askerAddress.toLowerCase() === address.toLowerCase() && isQuestionActive && a.address && (
-                                <button
-                                    onClick={() => awardBounty(a.address!)}
-                                    className="bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white px-2 py-1 rounded text-[10px] font-bold transition-colors mr-2"
-                                    title="Award Bounty"
-                                >
-                                    🏆 Award
-                                </button>
-                            )}
-
-                            <div className="flex items-center gap-1 bg-white/5 rounded-full px-2 py-1 hover:bg-white/10 transition-all">
-                                <button
-                                    onClick={() => upvote(a.id)}
-                                    className="text-gray-400 hover:text-brand-gold transition-all hover:scale-110 active:scale-95"
-                                    title="Upvote this answer"
-                                >
-                                    <svg
-                                        width="16"
-                                        height="16"
-                                        viewBox="0 0 16 16"
-                                        fill="currentColor"
-                                        className="transition-colors"
+                    <div key={a.id} className="bg-white/5 rounded-lg overflow-hidden">
+                        <div className="p-3 flex justify-between items-center group hover:bg-white/10 transition-colors">
+                            <div className="flex-1 mr-2">
+                                <div className="flex items-center gap-2 mb-1">
+                                    {a.authorProfile ? (
+                                        <img
+                                            src={a.authorProfile.pfpUrl}
+                                            alt={a.authorProfile.username}
+                                            className="w-5 h-5 rounded-full border border-white/10"
+                                        />
+                                    ) : (
+                                        <div className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center text-[8px] text-gray-400">
+                                            {(a.username || 'AN').slice(0, 2).toUpperCase()}
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={() => {
+                                            const username = a.authorProfile?.username || a.username;
+                                            sdk.actions.openUrl(`https://warpcast.com/${username}`);
+                                        }}
+                                        className="font-bold text-brand-purple text-xs hover:underline text-left"
                                     >
-                                        <path d="M8 2L10.5 7H13L9 10.5L10.5 15L8 12L5.5 15L7 10.5L3 7H5.5L8 2Z" />
-                                    </svg>
+                                        {a.authorProfile ? `@${a.authorProfile.username}` : a.username}
+                                    </button >
+                                    {a.authorProfile?.isPro && <span title="Pro User" className="text-[10px]">⚡</span>}
+                                </div >
+                                <span className="text-gray-300 text-xs block pl-7">{a.answer}</span>
+                            </div >
+
+                            <div className="flex items-center gap-2">
+                                {/* Show Award button if viewer is asker and question is active */}
+                                {askerAddress && address && askerAddress.toLowerCase() === address.toLowerCase() && isQuestionActive && a.address && (
+                                    <button
+                                        onClick={() => awardBounty(a.address!)}
+                                        className="bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white px-2 py-1 rounded text-[10px] font-bold transition-colors mr-2"
+                                        title="Award Bounty"
+                                    >
+                                        🏆 Award
+                                    </button>
+                                )}
+
+                                <button
+                                    onClick={() => toggleComments(a.id)}
+                                    className="text-gray-500 hover:text-white text-xs mr-2 flex items-center gap-1"
+                                >
+                                    💬
                                 </button>
-                                <span className="text-xs font-semibold text-gray-300 min-w-[20px] text-center">
-                                    {a.upvotes}
-                                </span>
+
+                                <div className="flex items-center gap-1 bg-white/5 rounded-full px-2 py-1 hover:bg-white/10 transition-all">
+                                    <button
+                                        onClick={() => upvote(a.id)}
+                                        className="text-gray-400 hover:text-brand-gold transition-all hover:scale-110 active:scale-95"
+                                        title="Upvote this answer"
+                                    >
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 16 16"
+                                            fill="currentColor"
+                                            className="transition-colors"
+                                        >
+                                            <path d="M8 2L10.5 7H13L9 10.5L10.5 15L8 12L5.5 15L7 10.5L3 7H5.5L8 2Z" />
+                                        </svg>
+                                    </button>
+                                    <span className="text-xs font-semibold text-gray-300 min-w-[20px] text-center">
+                                        {a.upvotes}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div >
-                ))
-                }
+
+                        {/* Comments Section */}
+                        {expandedComments[a.id] && (
+                            <div className="bg-black/20 p-3 border-t border-white/5">
+                                {comments[a.id]?.map((c: any) => (
+                                    <div key={c.id} className="mb-2 pl-2 border-l-2 border-white/10 text-xs">
+                                        <div className="flex items-center gap-1 mb-0.5">
+                                            <span className="font-bold text-gray-400">{c.username}</span>
+                                            <span className="text-[10px] text-gray-600">{new Date(c.created_at).toLocaleTimeString()}</span>
+                                        </div>
+                                        <p className="text-gray-300">{c.comment}</p>
+                                    </div>
+                                ))}
+                                <div className="flex gap-2 mt-2">
+                                    <input
+                                        className="glass-input flex-1 p-1.5 rounded text-xs"
+                                        placeholder="Reply..."
+                                        value={commentText[a.id] || ''}
+                                        onChange={e => setCommentText(prev => ({ ...prev, [a.id]: e.target.value }))}
+                                    />
+                                    <button
+                                        onClick={() => postComment(a.id)}
+                                        disabled={commentLoading[a.id]}
+                                        className="bg-white/10 hover:bg-white/20 text-white px-2 py-1 rounded text-xs"
+                                    >
+                                        {commentLoading[a.id] ? '...' : 'Reply'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ))}
             </div >
         </div >
     );
