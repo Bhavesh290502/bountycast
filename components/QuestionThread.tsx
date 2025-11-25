@@ -157,22 +157,34 @@ export default function QuestionThread({
     const [commentText, setCommentText] = useState<{ [answerId: number]: string }>({});
     const [commentLoading, setCommentLoading] = useState<{ [answerId: number]: boolean }>({});
 
+    // Load all comments for all answers on mount
+    const loadAllComments = async () => {
+        try {
+            const commentPromises = answers.map(async (a) => {
+                const res = await fetch(`/api/comments?answerId=${a.id}`);
+                const data = await res.json();
+                return { answerId: a.id, comments: Array.isArray(data) ? data : [] };
+            });
+            const results = await Promise.all(commentPromises);
+            const commentsMap: { [key: number]: any[] } = {};
+            results.forEach(r => {
+                commentsMap[r.answerId] = r.comments;
+            });
+            setComments(commentsMap);
+        } catch (e) {
+            console.error("Failed to load comments", e);
+        }
+    };
+
+    useEffect(() => {
+        if (answers.length > 0) {
+            loadAllComments();
+        }
+    }, [answers.length]);
+
     const toggleComments = async (answerId: number) => {
         const isExpanded = expandedComments[answerId];
         setExpandedComments(prev => ({ ...prev, [answerId]: !isExpanded }));
-
-        if (!isExpanded && !comments[answerId]) {
-            // Load comments
-            try {
-                const res = await fetch(`/api/comments?answerId=${answerId}`);
-                const data = await res.json();
-                if (Array.isArray(data)) {
-                    setComments(prev => ({ ...prev, [answerId]: data }));
-                }
-            } catch (e) {
-                console.error("Failed to load comments", e);
-            }
-        }
     };
 
     const postComment = async (answerId: number) => {
@@ -268,10 +280,19 @@ export default function QuestionThread({
                                 {askerAddress && address && askerAddress.toLowerCase() === address.toLowerCase() && isQuestionActive && a.address && (
                                     <button
                                         onClick={() => awardBounty(a.address!)}
-                                        className="bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white px-2 py-1 rounded text-[10px] font-bold transition-colors mr-2"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/20 hover:bg-green-500/40 text-green-400 hover:text-white transition-all group mr-2"
                                         title="Award Bounty"
                                     >
-                                        🏆 Award
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 16 16"
+                                            fill="currentColor"
+                                            className="group-hover:scale-110 transition-transform"
+                                        >
+                                            <path d="M8 1L10 6H15L11 9L12.5 14L8 11L3.5 14L5 9L1 6H6L8 1Z" />
+                                        </svg>
+                                        <span className="text-xs font-bold">Award</span>
                                     </button>
                                 )}
 
