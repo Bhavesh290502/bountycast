@@ -94,8 +94,22 @@ export default function QuestionCard({
                                     return `${day}/${month}/${year}`;
                                 })() : ''}
                             </span>
+                            {q.status === 'active' && q.deadline && (
+                                <span className="text-brand-gold">
+                                    • {(() => {
+                                        const now = Date.now();
+                                        const diff = q.deadline - now;
+                                        if (diff <= 0) return 'Expired';
+                                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                        if (days > 0) return `${days}d ${hours}h left`;
+                                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                        return `${hours}h ${minutes}m left`;
+                                    })()}
+                                </span>
+                            )}
                             {q.authorProfile && q.authorProfile.score > 0 && (
-                                <span>Score: {q.authorProfile.score.toFixed(2)}</span>
+                                <span>• Score: {q.authorProfile.score.toFixed(2)}</span>
                             )}
                         </div>
                     </div>
