@@ -64,6 +64,15 @@ export async function initDB() {
   await sql`CREATE INDEX IF NOT EXISTS idx_questions_category ON questions(category);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_questions_status ON questions(status);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_fid, read);`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS user_notification_tokens (
+      fid INTEGER PRIMARY KEY,
+      url TEXT,
+      token TEXT,
+      updated_at BIGINT
+    );
+  `;
 }
 
 export { sql };

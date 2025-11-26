@@ -134,6 +134,18 @@ export default function HomePage() {
                 const frameAdded = ctx?.client?.added || false;
                 setIsFrameAdded(frameAdded);
 
+                // Register notification token if available
+                if (ctx?.client?.notificationDetails && (ctx.user?.fid || ctx.viewer?.fid)) {
+                    const fid = ctx.user?.fid || ctx.viewer?.fid;
+                    const { url, token } = ctx.client.notificationDetails;
+
+                    fetch('/api/notifications/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fid, url, token })
+                    }).catch(err => console.error("Failed to register notification token:", err));
+                }
+
                 // Show "Add to Miniapps" popup automatically only if not added
                 if (!frameAdded) {
                     try {

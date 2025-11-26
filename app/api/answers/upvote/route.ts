@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { checkEligibility } from '../../../../lib/neynar';
+import { sendFarcasterNotification } from '../../../../lib/notifications';
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -62,6 +63,13 @@ export async function POST(req: NextRequest) {
                 INSERT INTO notifications (user_fid, type, answer_id, from_fid, message, created_at)
                 VALUES (${answerAuthorFid}, 'upvote', ${id}, ${fid}, ${'Someone upvoted your answer'}, ${Date.now()})
             `;
+
+            // Send Push Notification
+            await sendFarcasterNotification(
+                answerAuthorFid,
+                "New Upvote! 🚀",
+                "Someone upvoted your answer on BountyCast"
+            );
 
             return NextResponse.json({ success: true, action: 'added' });
         }

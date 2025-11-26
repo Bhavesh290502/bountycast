@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
+import { sendFarcasterNotification } from '../../../../lib/notifications';
+
 export async function POST(req: NextRequest) {
     try {
-        const { questionId, fid, txHash } = await req.json();
+        const reqBody = await req.json();
+        const { questionId, fid, txHash } = reqBody;
 
         if (!questionId || !fid || !txHash) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -26,6 +29,19 @@ export async function POST(req: NextRequest) {
             SET status = 'awarded'
             WHERE id = ${questionId}
         `;
+
+        if (reqBody.winnerFid) {
+            await sql`
+                INSERT INTO notifications (user_fid, type, question_id, from_fid, message, created_at)
+                VALUES (${reqBody.winnerFid}, 'bounty_won', ${questionId}, ${fid}, 'You won a bounty!', ${Date.now()})
+            `;
+
+            await sendFarcasterNotification(
+                reqBody.winnerFid,
+                "Bounty Won! 🏆",
+                "You have been awarded a bounty! Check your wallet."
+            );
+        }
 
         return NextResponse.json({ success: true });
     } catch (e) {

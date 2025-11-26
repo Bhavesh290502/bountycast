@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
 }
 
 import { checkEligibility } from '../../../lib/neynar';
+import { sendFarcasterNotification } from '../../../lib/notifications';
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -96,6 +97,13 @@ export async function POST(req: NextRequest) {
                     INSERT INTO notifications (user_fid, type, question_id, answer_id, from_fid, message, created_at)
                     VALUES (${askerFid}, 'answer', ${questionId}, ${rows[0].id}, ${fid}, ${`${username || 'Someone'} answered your question`}, ${Date.now()})
                 `;
+
+                // Send Push Notification
+                await sendFarcasterNotification(
+                    askerFid,
+                    "New Answer! 💡",
+                    `${username || 'Someone'} answered your question: "${questionResult.rows[0].question.substring(0, 50)}..."`
+                );
             }
         }
 

@@ -8,6 +8,7 @@ import MarkdownRenderer from './MarkdownRenderer';
 
 interface Answer {
     id: number;
+    fid: number;
     username: string;
     answer: string;
     upvotes: number;
@@ -153,7 +154,8 @@ export default function QuestionThread({
                 body: JSON.stringify({
                     questionId,
                     fid,
-                    txHash: hash
+                    txHash: hash,
+                    winnerFid: answers.find(a => a.address?.toLowerCase() === winnerAddress.toLowerCase())?.fid
                 })
             });
 

@@ -42,6 +42,16 @@ export async function GET() {
         await sql`CREATE INDEX IF NOT EXISTS idx_questions_status ON questions(status)`;
         await sql`CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_fid, read)`;
 
+        // Create user_notification_tokens table
+        await sql`
+            CREATE TABLE IF NOT EXISTS user_notification_tokens (
+                fid INTEGER PRIMARY KEY,
+                url TEXT,
+                token TEXT,
+                updated_at BIGINT
+            )
+        `;
+
         return NextResponse.json({
             success: true,
             message: 'Database migration completed successfully!'
