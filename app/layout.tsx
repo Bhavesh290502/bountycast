@@ -6,6 +6,17 @@ import { Providers } from './providers';
 export const metadata: Metadata = {
   title: 'BountyCast',
   description: 'Bounty Q&A for Farcaster',
+  openGraph: {
+    title: 'BountyCast',
+    description: 'Bounty Q&A for Farcaster',
+    images: ['https://bountycast.vercel.app/opengraph-image.png'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'BountyCast',
+    description: 'Bounty Q&A for Farcaster',
+    images: ['https://bountycast.vercel.app/opengraph-image.png'],
+  },
   other: {
     'fc:frame': JSON.stringify({
       version: 'next',
