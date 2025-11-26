@@ -68,7 +68,7 @@ export default function HomePage() {
         }
     };
     const [selectedCategory, setSelectedCategory] = useState<string>("");
-    const [selectedStatus, setSelectedStatus] = useState<string>("");
+    const [selectedStatus, setSelectedStatus] = useState<string>("active");
     const [selectedSort, setSelectedSort] = useState<string>("newest");
     const [category, setCategory] = useState<string>("");
     const [tags, setTags] = useState<string[]>([]);
@@ -301,10 +301,7 @@ export default function HomePage() {
 
             setLastPostedBounty({ question: questionText, bounty });
             setQuestionText("");
-            setLastPostedBounty({ question: questionText, bounty });
-            setQuestionText("");
             setBounty(0.000001);
-            setCategory("");
             setCategory("");
             setTags([]);
             setIsPrivate(false);
@@ -694,7 +691,20 @@ export default function HomePage() {
 
             <section>
                 <div className="flex justify-between items-end mb-4 px-1">
-                    <h3 className="text-lg font-bold text-white">Recent Questions</h3>
+                    <div className="flex gap-2 bg-white/5 p-1 rounded-lg">
+                        {['active', 'awarded', 'expired'].map((status) => (
+                            <button
+                                key={status}
+                                onClick={() => setSelectedStatus(status)}
+                                className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${selectedStatus === status
+                                        ? 'bg-brand-purple text-white shadow-lg'
+                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    }`}
+                            >
+                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </button>
+                        ))}
+                    </div>
                     <button
                         onClick={loadQuestions}
                         className="text-brand-purple text-xs hover:text-brand-purple-dark transition-colors"
