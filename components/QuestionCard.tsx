@@ -99,24 +99,24 @@ export default function QuestionCard({
                                 <span>• Score: {q.authorProfile.score.toFixed(2)}</span>
                             )}
                         </div>
+                        {q.status === 'active' && q.deadline && (
+                            <div className="text-[10px] text-brand-gold mt-0.5">
+                                {(() => {
+                                    const now = Date.now();
+                                    const diff = q.deadline - now;
+                                    if (diff <= 0) return 'Expired';
+                                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                    if (days > 0) return `${days}d ${hours}h left`;
+                                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                    return `${hours}h ${minutes}m left`;
+                                })()}
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    {q.status === 'active' && q.deadline && (
-                        <div className="text-[10px] text-gray-400 bg-white/5 px-2 py-1 rounded border border-white/10 whitespace-nowrap">
-                            {(() => {
-                                const now = Date.now();
-                                const diff = q.deadline - now;
-                                if (diff <= 0) return 'Expired';
-                                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                if (days > 0) return `${days}d ${hours}h left`;
-                                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                                return `${hours}h ${minutes}m left`;
-                            })()}
-                        </div>
-                    )}
                     <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
                         <span>🏆</span>
                         <span>{Number(q.bounty || 0).toFixed(8).replace(/\.?0+$/, '')} ETH</span>
