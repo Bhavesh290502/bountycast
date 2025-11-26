@@ -51,7 +51,7 @@ export default function HomePage() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [showAsk, setShowAsk] = useState(false);
     const [questionText, setQuestionText] = useState("");
-    const [bounty, setBounty] = useState(0.00033);
+    const [bounty, setBounty] = useState(0.000001);
     const [loading, setLoading] = useState(false);
     const [lastPostedBounty, setLastPostedBounty] = useState<any>(null);
     const [userProfile, setUserProfile] = useState<any>(null);
@@ -209,8 +209,8 @@ export default function HomePage() {
     // Ask a question + lock bounty on-chain
     const ask = async () => {
         if (!questionText.trim()) return;
-        if (bounty < 0.00033) {
-            alert("Minimum bounty is 0.00033 ETH");
+        if (bounty < 0.000001) {
+            alert("Minimum bounty is 0.000001 ETH");
             return;
         }
         if (!isConnected || !address) {
@@ -303,7 +303,7 @@ export default function HomePage() {
             setQuestionText("");
             setLastPostedBounty({ question: questionText, bounty });
             setQuestionText("");
-            setBounty(0.00033);
+            setBounty(0.000001);
             setCategory("");
             setCategory("");
             setTags([]);
@@ -626,8 +626,8 @@ export default function HomePage() {
                                         <div className="relative flex-1">
                                             <input
                                                 type="number"
-                                                min={0.00033}
-                                                step={0.00001}
+                                                min={0.000001}
+                                                step={0.000001}
                                                 className="glass-input w-full p-3 rounded-lg pl-8 text-sm"
                                                 placeholder="0.001"
                                                 value={bounty}
