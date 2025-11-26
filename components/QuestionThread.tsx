@@ -241,57 +241,23 @@ export default function QuestionThread({
 
     return (
         <div className="mt-4">
-            <div className="flex flex-col gap-2 mb-4">
-                <textarea
-                    className="glass-input w-full p-3 rounded-lg text-xs min-h-[80px] resize-none"
+            <div className="flex gap-2 mb-4">
+                <input
+                    className="glass-input flex-1 p-2 rounded-lg text-xs"
                     placeholder="Add an answer..."
                     value={myAnswer}
                     onChange={(e) => setMyAnswer(e.target.value)}
                 />
-                <div className="flex justify-between items-center">
-                    <label className="cursor-pointer text-xs bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white px-2 py-1 rounded transition-colors flex items-center gap-1">
-                        <span>📷</span> Add Image
-                        <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-
-                                try {
-                                    const reader = new FileReader();
-                                    reader.readAsDataURL(file);
-                                    reader.onload = (event) => {
-                                        const img = new Image();
-                                        img.src = event.target?.result as string;
-                                        img.onload = () => {
-                                            const canvas = document.createElement('canvas');
-                                            const MAX_WIDTH = 800;
-                                            const scaleSize = MAX_WIDTH / img.width;
-                                            canvas.width = MAX_WIDTH;
-                                            canvas.height = img.height * scaleSize;
-                                            const ctx = canvas.getContext('2d');
-                                            ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-                                            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                                            setMyAnswer(prev => prev + `\n![Image](${dataUrl})`);
-                                        };
-                                    };
-                                } catch (error) {
-                                    console.error("Image upload failed", error);
-                                    alert("Failed to process image");
-                                }
-                            }}
-                        />
-                    </label>
-                    <button
-                        onClick={submitAnswer}
-                        disabled={loading}
-                        className="btn-primary px-4 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
-                    >
-                        {loading ? 'Posting...' : 'Post'}
-                    </button>
-                </div>
+                <button
+                    onClick={submitAnswer}
+                    disabled={loading}
+                    className="btn-primary px-4 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
+                >
+                    {loading ? 'Posting...' : 'Post'}
+                </button>
+            </div >
+            <div className="text-[10px] text-gray-500 text-right mb-4 -mt-3 mr-1">
+                Markdown supported: **bold**, *italic*, `code`
             </div>
 
             <div className="space-y-2">

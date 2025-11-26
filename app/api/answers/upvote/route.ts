@@ -36,6 +36,18 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true, action: 'removed' });
         } else {
             // Not upvoted, so add it
+
+            // Check if it's own answer
+            const answerResult = await sql`SELECT fid FROM answers WHERE id = ${id}`;
+            if (answerResult.rows.length === 0) {
+                return NextResponse.json({ error: 'Answer not found' }, { status: 404 });
+            }
+            const answerAuthorFid = answerResult.rows[0].fid;
+
+            if (answerAuthorFid === fid) {
+                return NextResponse.json({ error: 'Cannot upvote your own answer' }, { status: 403 });
+            }
+
             await sql`
                 WITH inserted AS (
                     INSERT INTO upvotes (answerId, fid, created)
@@ -46,16 +58,11 @@ export async function POST(req: NextRequest) {
             `;
 
             // Create notification for answer author
-            const answerResult = await sql`SELECT fid, username FROM answers WHERE id = ${id}`;
-            if (answerResult.rows.length > 0) {
-                const answerAuthorFid = answerResult.rows[0].fid;
-                if (answerAuthorFid && answerAuthorFid !== fid) { // Don't notify if upvoting own answer
-                    await sql`
-                        INSERT INTO notifications (user_fid, type, answer_id, from_fid, message, created_at)
-                        VALUES (${answerAuthorFid}, 'upvote', ${id}, ${fid}, ${'Someone upvoted your answer'}, ${Date.now()})
-                    `;
-                }
-            }
+            await sql`
+                INSERT INTO notifications (user_fid, type, answer_id, from_fid, message, created_at)
+                VALUES (${answerAuthorFid}, 'upvote', ${id}, ${fid}, ${'Someone upvoted your answer'}, ${Date.now()})
+            `;
+
             return NextResponse.json({ success: true, action: 'added' });
         }
     } catch (error) {
