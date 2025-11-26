@@ -241,23 +241,29 @@ export default function QuestionThread({
 
     return (
         <div className="mt-4">
-            <div className="flex gap-2 mb-4">
-                <input
-                    className="glass-input flex-1 p-2 rounded-lg text-xs"
+            <div className="flex flex-col gap-2 mb-4">
+                <textarea
+                    className="glass-input w-full p-3 rounded-lg text-xs min-h-[80px] resize-none"
                     placeholder="Add an answer..."
                     value={myAnswer}
                     onChange={(e) => setMyAnswer(e.target.value)}
                 />
-                <button
-                    onClick={submitAnswer}
-                    disabled={loading}
-                    className="btn-primary px-4 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
-                >
-                    {loading ? 'Posting...' : 'Post'}
-                </button>
-            </div >
-            <div className="text-[10px] text-gray-500 text-right mb-4 -mt-3 mr-1">
-                Markdown supported: **bold**, *italic*, `code`
+                <div className="flex justify-between items-center">
+                    <button
+                        onClick={() => setMyAnswer(prev => prev + "\n![Image](https://)")}
+                        className="text-xs bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white px-2 py-1 rounded transition-colors flex items-center gap-1"
+                        title="Insert Image URL"
+                    >
+                        <span>🖼️</span> Add Image
+                    </button>
+                    <button
+                        onClick={submitAnswer}
+                        disabled={loading}
+                        className="btn-primary px-4 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
+                    >
+                        {loading ? 'Posting...' : 'Post'}
+                    </button>
+                </div>
             </div>
 
             <div className="space-y-2">

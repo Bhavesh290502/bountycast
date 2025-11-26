@@ -615,8 +615,17 @@ export default function HomePage() {
                                         value={questionText}
                                         onChange={(e) => setQuestionText(e.target.value)}
                                     />
-                                    <div className="text-xs text-gray-500 text-right mt-1 mb-3">
-                                        Markdown supported: **bold**, *italic*, `code`
+                                    <div className="flex justify-between items-center mt-1 mb-3">
+                                        <button
+                                            onClick={() => setQuestionText(prev => prev + "\n![Image](https://)")}
+                                            className="text-xs bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white px-2 py-1 rounded transition-colors flex items-center gap-1"
+                                            title="Insert Image URL"
+                                        >
+                                            <span>🖼️</span> Add Image
+                                        </button>
+                                        <div className="text-xs text-gray-500">
+                                            Markdown supported
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-3">

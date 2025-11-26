@@ -28,6 +28,13 @@ export default function MarkdownRenderer({ content }: { content: string }) {
                     h1: ({ node, ...props }) => <h1 {...props} className="text-xl font-bold mb-2 mt-4 text-white" />,
                     h2: ({ node, ...props }) => <h2 {...props} className="text-lg font-bold mb-2 mt-3 text-white" />,
                     h3: ({ node, ...props }) => <h3 {...props} className="text-md font-bold mb-1 mt-2 text-white" />,
+                    img: ({ node, ...props }) => (
+                        <img
+                            {...props}
+                            className="max-w-full h-auto rounded-lg border border-white/10 my-2"
+                            loading="lazy"
+                        />
+                    ),
                 }}
             >
                 {content}
