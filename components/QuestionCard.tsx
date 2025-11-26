@@ -105,14 +105,14 @@ export default function QuestionCard({
                         <span>🏆</span>
                         <span>{Number(q.bounty || 0).toFixed(8).replace(/\.?0+$/, '')} ETH</span>
                     </div>
-                    {q.status !== 'active' && (
-                        <div className={`px-2 py-1 rounded text-xs font-medium border ${q.status === 'awarded'
-                            ? 'bg-green-500/10 border-green-500/20 text-green-400'
-                            : 'bg-red-500/10 border-red-500/20 text-red-400'
-                            }`}>
-                            {q.status === 'awarded' ? 'Awarded' : 'Expired'}
-                        </div>
-                    )}
+                    <div className={`px-2 py-1 rounded text-xs font-medium border ${q.status === 'awarded' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
+                            q.status === 'expired' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                                'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                        }`}>
+                        {q.status === 'awarded' ? 'Awarded' :
+                            q.status === 'expired' ? 'Expired' :
+                                'Active'}
+                    </div>
 
                     {/* 3-Dot Menu */}
                     <div className="relative z-20">
