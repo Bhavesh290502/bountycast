@@ -690,27 +690,21 @@ export default function HomePage() {
             )}
 
             <section>
-                <div className="flex justify-between items-end mb-4 px-1">
-                    <div className="flex gap-2 bg-white/5 p-1 rounded-lg">
+                <div className="mb-4">
+                    <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-lg">
                         {['active', 'awarded', 'expired'].map((status) => (
                             <button
                                 key={status}
                                 onClick={() => setSelectedStatus(status)}
-                                className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${selectedStatus === status
-                                        ? 'bg-brand-purple text-white shadow-lg'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                className={`py-2 rounded-md text-xs font-medium transition-all ${selectedStatus === status
+                                    ? 'bg-brand-purple text-white shadow-lg'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 {status.charAt(0).toUpperCase() + status.slice(1)}
                             </button>
                         ))}
                     </div>
-                    <button
-                        onClick={loadQuestions}
-                        className="text-brand-purple text-xs hover:text-brand-purple-dark transition-colors"
-                    >
-                        Refresh
-                    </button>
                 </div>
 
                 <div className="space-y-4">
