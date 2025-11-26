@@ -249,13 +249,41 @@ export default function QuestionThread({
                     onChange={(e) => setMyAnswer(e.target.value)}
                 />
                 <div className="flex justify-between items-center">
-                    <button
-                        onClick={() => setMyAnswer(prev => prev + "\n![Image](https://)")}
-                        className="text-xs bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white px-2 py-1 rounded transition-colors flex items-center gap-1"
-                        title="Insert Image URL"
-                    >
-                        <span>🖼️</span> Add Image
-                    </button>
+                    <label className="cursor-pointer text-xs bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white px-2 py-1 rounded transition-colors flex items-center gap-1">
+                        <span>📷</span> Add Image
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+
+                                try {
+                                    const reader = new FileReader();
+                                    reader.readAsDataURL(file);
+                                    reader.onload = (event) => {
+                                        const img = new Image();
+                                        img.src = event.target?.result as string;
+                                        img.onload = () => {
+                                            const canvas = document.createElement('canvas');
+                                            const MAX_WIDTH = 800;
+                                            const scaleSize = MAX_WIDTH / img.width;
+                                            canvas.width = MAX_WIDTH;
+                                            canvas.height = img.height * scaleSize;
+                                            const ctx = canvas.getContext('2d');
+                                            ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                                            setMyAnswer(prev => prev + `\n![Image](${dataUrl})`);
+                                        };
+                                    };
+                                } catch (error) {
+                                    console.error("Image upload failed", error);
+                                    alert("Failed to process image");
+                                }
+                            }}
+                        />
+                    </label>
                     <button
                         onClick={submitAnswer}
                         disabled={loading}
