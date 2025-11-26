@@ -39,6 +39,7 @@ interface Question {
 }
 
 import QuestionCard from '../components/QuestionCard';
+import OnboardingGuide from '../components/OnboardingGuide';
 
 const CATEGORIES = ['Solidity', 'Design', 'Marketing', 'Product', 'Business', 'Other'];
 
@@ -719,6 +720,7 @@ export default function HomePage() {
                     ))}
                 </div>
             </section>
+            <OnboardingGuide />
         </div >
     );
 }
