@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
                 DELETE FROM upvotes WHERE answerId = ${id} AND fid = ${fid};
             `;
             await sql`
-                UPDATE answers SET upvotes = upvotes - 1 WHERE id = ${id};
+                UPDATE answers SET upvotes = GREATEST(0, upvotes - 1) WHERE id = ${id};
             `;
             return NextResponse.json({ success: true, action: 'removed' });
         } else {
