@@ -50,6 +50,14 @@ export async function GET(req: NextRequest) {
             query += ' AND (is_private = false OR is_private IS NULL)';
         }
 
+        // Lazy Expiration: Check for expired active questions and update them
+        const now = Date.now();
+        await sql`
+            UPDATE questions 
+            SET status = 'expired' 
+            WHERE status = 'active' AND deadline < ${now}
+        `;
+
         // Sorting
         switch (sort) {
             case 'highest_bounty':

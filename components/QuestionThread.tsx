@@ -145,8 +145,20 @@ export default function QuestionThread({
                 functionName: "selectWinner",
                 args: [BigInt(targetId), winnerAddress as `0x${string}`],
             });
+
+            // Call API to update status
+            await fetch('/api/questions/resolve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    questionId,
+                    fid,
+                    txHash: hash
+                })
+            });
+
             alert(`Bounty awarded! Tx: ${hash}`);
-            // Optimistically update UI or reload
+            window.location.reload(); // Reload to show updated status
         } catch (e) {
             console.error(e);
             alert("Failed to award bounty");
