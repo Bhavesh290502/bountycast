@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAccount, useWriteContract } from 'wagmi';
 import { sdk } from "@farcaster/miniapp-sdk";
 import { bountycastAbi, BOUNTYCAST_ADDRESS } from '../lib/contract';
+import MarkdownRenderer from './MarkdownRenderer';
 
 interface Answer {
     id: number;
@@ -243,6 +244,9 @@ export default function QuestionThread({
                     {loading ? 'Posting...' : 'Post'}
                 </button>
             </div >
+            <div className="text-[10px] text-gray-500 text-right mb-4 -mt-3 mr-1">
+                Markdown supported: **bold**, *italic*, `code`
+            </div>
 
             <div className="space-y-2">
                 {answers.map((a) => (
@@ -271,7 +275,10 @@ export default function QuestionThread({
                                         {a.authorProfile ? `@${a.authorProfile.username}` : a.username}
                                     </button >
                                 </div >
-                                <span className="text-gray-300 text-xs block pl-7">{a.answer}</span>
+
+                                <div className="text-gray-300 text-xs block pl-7">
+                                    <MarkdownRenderer content={a.answer} />
+                                </div>
                             </div >
 
                             <div className="flex items-center gap-2">
@@ -333,39 +340,41 @@ export default function QuestionThread({
                         </div>
 
                         {/* Comments Section */}
-                        {expandedComments[a.id] && (
-                            <div className="bg-black/20 p-3 border-t border-white/5">
-                                {comments[a.id]?.map((c: any) => (
-                                    <div key={c.id} className="mb-2 pl-2 border-l-2 border-white/10 text-xs">
-                                        <div className="flex items-center gap-1 mb-0.5">
-                                            <button
-                                                onClick={() => sdk.actions.openUrl(`https://warpcast.com/${c.username}`)}
-                                                className="font-bold text-gray-400 hover:text-brand-purple hover:underline"
-                                            >
-                                                {c.username}
-                                            </button>
+                        {
+                            expandedComments[a.id] && (
+                                <div className="bg-black/20 p-3 border-t border-white/5">
+                                    {comments[a.id]?.map((c: any) => (
+                                        <div key={c.id} className="mb-2 pl-2 border-l-2 border-white/10 text-xs">
+                                            <div className="flex items-center gap-1 mb-0.5">
+                                                <button
+                                                    onClick={() => sdk.actions.openUrl(`https://warpcast.com/${c.username}`)}
+                                                    className="font-bold text-gray-400 hover:text-brand-purple hover:underline"
+                                                >
+                                                    {c.username}
+                                                </button>
 
+                                            </div>
+                                            <p className="text-gray-300">{c.comment}</p>
                                         </div>
-                                        <p className="text-gray-300">{c.comment}</p>
+                                    ))}
+                                    <div className="flex gap-2 mt-2">
+                                        <input
+                                            className="glass-input flex-1 p-1.5 rounded text-xs"
+                                            placeholder="Reply..."
+                                            value={commentText[a.id] || ''}
+                                            onChange={e => setCommentText(prev => ({ ...prev, [a.id]: e.target.value }))}
+                                        />
+                                        <button
+                                            onClick={() => postComment(a.id)}
+                                            disabled={commentLoading[a.id]}
+                                            className="bg-white/10 hover:bg-white/20 text-white px-2 py-1 rounded text-xs"
+                                        >
+                                            {commentLoading[a.id] ? '...' : 'Reply'}
+                                        </button>
                                     </div>
-                                ))}
-                                <div className="flex gap-2 mt-2">
-                                    <input
-                                        className="glass-input flex-1 p-1.5 rounded text-xs"
-                                        placeholder="Reply..."
-                                        value={commentText[a.id] || ''}
-                                        onChange={e => setCommentText(prev => ({ ...prev, [a.id]: e.target.value }))}
-                                    />
-                                    <button
-                                        onClick={() => postComment(a.id)}
-                                        disabled={commentLoading[a.id]}
-                                        className="bg-white/10 hover:bg-white/20 text-white px-2 py-1 rounded text-xs"
-                                    >
-                                        {commentLoading[a.id] ? '...' : 'Reply'}
-                                    </button>
                                 </div>
-                            </div>
-                        )}
+                            )
+                        }
                     </div>
                 ))}
             </div >

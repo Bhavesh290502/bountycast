@@ -1,5 +1,6 @@
 import { sdk } from "@farcaster/miniapp-sdk";
 import QuestionThread from "./QuestionThread";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 interface Question {
     id: number;
@@ -160,9 +161,9 @@ export default function QuestionCard({
                 </div>
             </div>
 
-            <p className="text-gray-200 mb-4 text-sm leading-relaxed">
-                {q.question}
-            </p>
+            <div className="text-gray-200 mb-4 text-sm">
+                <MarkdownRenderer content={q.question} />
+            </div>
 
             {/* Tags & Category */}
             <div className="flex flex-wrap gap-2 mb-4">

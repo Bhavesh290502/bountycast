@@ -373,6 +373,9 @@ export default function HomePage() {
                                 value={editingQuestion.question}
                                 onChange={e => setEditingQuestion({ ...editingQuestion, question: e.target.value })}
                             />
+                            <div className="text-xs text-gray-500 text-right mt-1 mb-2">
+                                Markdown supported: **bold**, *italic*, `code`
+                            </div>
                             <select
                                 value={editingQuestion.category || ''}
                                 onChange={e => setEditingQuestion({ ...editingQuestion, category: e.target.value })}
@@ -615,6 +618,9 @@ export default function HomePage() {
                                         value={questionText}
                                         onChange={(e) => setQuestionText(e.target.value)}
                                     />
+                                    <div className="text-xs text-gray-500 text-right mt-1 mb-3">
+                                        Markdown supported: **bold**, *italic*, `code`
+                                    </div>
 
                                     <div className="flex gap-3">
                                         <div className="relative flex-1">
