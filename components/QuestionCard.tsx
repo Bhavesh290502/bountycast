@@ -100,18 +100,21 @@ export default function QuestionCard({
                         </div>
                     </div>
                 </div>
+
                 <div className="flex items-center gap-2">
-                    <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
-                        <span>🏆</span>
-                        <span>{Number(q.bounty || 0).toFixed(8).replace(/\.?0+$/, '')} ETH</span>
-                    </div>
-                    <div className={`px-2 py-1 rounded text-xs font-medium border ${q.status === 'awarded' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
-                            q.status === 'expired' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
-                                'bg-blue-500/10 border-blue-500/20 text-blue-400'
-                        }`}>
-                        {q.status === 'awarded' ? 'Awarded' :
-                            q.status === 'expired' ? 'Expired' :
-                                'Active'}
+                    <div className="flex flex-col items-end gap-1">
+                        <div className="bg-brand-gold/10 border border-brand-gold/20 text-brand-gold px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                            <span>🏆</span>
+                            <span>{Number(q.bounty || 0).toFixed(8).replace(/\.?0+$/, '')} ETH</span>
+                        </div>
+                        <div className={`px-2 py-0.5 rounded text-[10px] font-medium border ${q.status === 'awarded' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
+                                q.status === 'expired' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                                    'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                            }`}>
+                            {q.status === 'awarded' ? 'Awarded' :
+                                q.status === 'expired' ? 'Expired' :
+                                    'Active'}
+                        </div>
                     </div>
 
                     {/* 3-Dot Menu */}
