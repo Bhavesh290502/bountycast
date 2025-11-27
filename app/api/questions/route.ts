@@ -51,12 +51,52 @@ export async function GET(req: NextRequest) {
         }
 
         // Lazy Expiration: Check for expired active questions and update them
+
+        // Lazy Expiration: Check for expired active questions and update them
         const now = Date.now();
-        await sql`
-            UPDATE questions 
-            SET status = 'expired' 
+
+        // Find expired active questions
+        const expiredQuestions = await sql`
+            SELECT id FROM questions 
             WHERE status = 'active' AND deadline < ${now}
         `;
+
+        for (const q of expiredQuestions.rows) {
+            // Find highest upvoted answer
+            const topAnswer = await sql`
+                SELECT fid, address FROM answers 
+                WHERE questionId = ${q.id} 
+                ORDER BY upvotes DESC, id ASC 
+                LIMIT 1
+            `;
+
+            if (topAnswer.rows.length > 0) {
+                // Award to top answer
+                const winnerFid = topAnswer.rows[0].fid;
+                await sql`
+                    UPDATE questions 
+                    SET status = 'awarded', winner_fid = ${winnerFid}
+                    WHERE id = ${q.id}
+                `;
+
+                // Notify winner
+                if (winnerFid) {
+                    const { sendFarcasterNotification } = await import('../../../lib/notifications');
+                    await sendFarcasterNotification(
+                        winnerFid,
+                        "Bounty Won! 🏆",
+                        "You won a bounty automatically! Check your wallet."
+                    );
+                }
+            } else {
+                // No answers, just expire
+                await sql`
+                    UPDATE questions 
+                    SET status = 'expired' 
+                    WHERE id = ${q.id}
+                `;
+            }
+        }
 
         // Sorting
         switch (sort) {

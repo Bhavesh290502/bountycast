@@ -8,6 +8,7 @@ export async function GET() {
         await sql`ALTER TABLE questions ADD COLUMN IF NOT EXISTS tags TEXT[]`;
         await sql`ALTER TABLE questions ADD COLUMN IF NOT EXISTS is_private BOOLEAN DEFAULT false`;
         await sql`ALTER TABLE questions ADD COLUMN IF NOT EXISTS updated_at BIGINT`;
+        await sql`ALTER TABLE questions ADD COLUMN IF NOT EXISTS winner_fid INTEGER`;
 
         // Create comments table
         await sql`

@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
         // We could also store the txHash if we had a column for it, but for now status is enough
         await sql`
             UPDATE questions 
-            SET status = 'awarded'
+            SET status = 'awarded', winner_fid = ${reqBody.winnerFid || null}
             WHERE id = ${questionId}
         `;
 
