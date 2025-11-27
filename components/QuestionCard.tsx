@@ -128,11 +128,28 @@ export default function QuestionCard({
                                 e.stopPropagation();
                                 try {
                                     const { readContract } = await import('@wagmi/core');
-                                    const { wagmiConfig } = await import('../wagmiConfig'); // You might need to adjust this import path
-                                    // Or use a simpler approach if config isn't available
-                                    alert(`Debug: OnChainID=${q.onchainId}, DB Asker=${q.address}`);
-                                } catch (err) {
-                                    alert(`Debug info: ID=${q.onchainId}`);
+                                    const { wagmiConfig } = await import('../wagmiConfig');
+                                    const { bountycastAbi, BOUNTYCAST_ADDRESS } = await import('../lib/contract');
+
+                                    // @ts-ignore
+                                    const result = await readContract(wagmiConfig, {
+                                        address: BOUNTYCAST_ADDRESS,
+                                        abi: bountycastAbi,
+                                        functionName: 'questions',
+                                        args: [BigInt(q.onchainId || 0)],
+                                    });
+
+                                    // Result is an array/object based on struct. 
+                                    // Struct: asker, bounty, deadline, ...
+                                    // Usually returned as array in viem: [asker, bounty, deadline, ...]
+                                    // or object if ABI defines names.
+
+                                    // @ts-ignore
+                                    const contractAsker = result[0];
+
+                                    alert(`Debug:\nID: ${q.onchainId}\nDB Asker: ${q.address}\nContract Asker: ${contractAsker}\nMatch: ${q.address?.toLowerCase() === contractAsker?.toLowerCase()}`);
+                                } catch (err: any) {
+                                    alert(`Debug Error: ${err.message}`);
                                 }
                             }}
                             className="text-[8px] text-gray-600 hover:text-white"
