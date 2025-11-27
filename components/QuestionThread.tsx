@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useAccount, useWriteContract } from 'wagmi';
+import { useAccount, useWriteContract, usePublicClient } from 'wagmi';
 import { sdk } from "@farcaster/miniapp-sdk";
 import { bountycastAbi, BOUNTYCAST_ADDRESS } from '../lib/contract';
 import MarkdownRenderer from './MarkdownRenderer';
@@ -43,6 +43,7 @@ export default function QuestionThread({
     const [loading, setLoading] = useState(false);
     const { address } = useAccount();
     const { writeContractAsync } = useWriteContract();
+    const publicClient = usePublicClient();
 
     const username = defaultUsername || (address ? `user-${address.slice(0, 6)}` : 'anon');
 
@@ -150,6 +151,23 @@ export default function QuestionThread({
         console.log("Awarding bounty:", { targetId, winnerAddress });
 
         try {
+            // Simulate first to catch errors
+            if (publicClient && address) {
+                try {
+                    await publicClient.simulateContract({
+                        address: BOUNTYCAST_ADDRESS,
+                        abi: bountycastAbi,
+                        functionName: "selectWinner",
+                        args: [BigInt(targetId), winnerAddress as `0x${string}`],
+                        account: address
+                    });
+                } catch (simError: any) {
+                    console.error("Simulation failed:", simError);
+                    alert(`Transaction would fail: ${simError.shortMessage || simError.message}`);
+                    return;
+                }
+            }
+
             const hash = await writeContractAsync({
                 address: BOUNTYCAST_ADDRESS,
                 abi: bountycastAbi,
