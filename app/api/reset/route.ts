@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        await sql`TRUNCATE TABLE answers, questions, notifications, user_notification_tokens CASCADE;`;
+        await sql`TRUNCATE TABLE answers, questions, notifications CASCADE;`;
         return NextResponse.json({ message: "Database reset successfully" });
     } catch (error) {
         console.error(error);
