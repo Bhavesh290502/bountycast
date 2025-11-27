@@ -18,7 +18,8 @@ export async function initDB() {
       category TEXT,
       tags TEXT[],
       is_private BOOLEAN DEFAULT false,
-      updated_at BIGINT
+      updated_at BIGINT,
+      winner_fid INTEGER
     );
   `;
 
