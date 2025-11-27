@@ -28,6 +28,7 @@ export default function QuestionThread({
     askerAddress,
     isQuestionActive,
     onchainId,
+    deadline,
 }: {
     questionId: number;
     fid?: number;
@@ -35,6 +36,7 @@ export default function QuestionThread({
     askerAddress?: string;
     isQuestionActive?: boolean;
     onchainId?: number;
+    deadline?: number;
 }) {
     const [answers, setAnswers] = useState<Answer[]>([]);
     const [myAnswer, setMyAnswer] = useState('');
@@ -132,12 +134,20 @@ export default function QuestionThread({
     const awardBounty = async (winnerAddress: string) => {
         if (!winnerAddress) return;
 
-        const targetId = onchainId && onchainId > -1 ? onchainId : questionId;
-
-        if (targetId === -1 || targetId === undefined) {
-            alert("Error: Invalid On-Chain ID. Cannot award bounty.");
+        // Strict check for onchainId
+        if (onchainId === undefined || onchainId === null || onchainId === -1) {
+            alert("Error: Invalid On-Chain ID. Cannot award bounty. Please contact support.");
             return;
         }
+
+        // Check for expiration
+        if (deadline && Date.now() > deadline) {
+            alert("This bounty has expired. You can no longer manually award it.");
+            return;
+        }
+
+        const targetId = onchainId;
+        console.log("Awarding bounty:", { targetId, winnerAddress });
 
         try {
             const hash = await writeContractAsync({

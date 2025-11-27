@@ -238,6 +238,7 @@ export default function QuestionCard({
                     askerAddress={q.address}
                     isQuestionActive={q.status === 'active'}
                     onchainId={q.onchainId}
+                    deadline={q.deadline}
                 />
             </div>
         </div>
