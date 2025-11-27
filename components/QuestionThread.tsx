@@ -184,7 +184,7 @@ export default function QuestionThread({
             });
 
             // Call API to update status
-            await fetch('/api/questions/resolve', {
+            const res = await fetch('/api/questions/resolve', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -195,8 +195,13 @@ export default function QuestionThread({
                 })
             });
 
-            alert(`Bounty awarded! Tx: ${hash}`);
-            window.location.reload(); // Reload to show updated status
+            if (!res.ok) {
+                const err = await res.json();
+                alert(`Bounty awarded on-chain, but failed to update app status: ${err.error}`);
+            } else {
+                alert(`Bounty awarded! Tx: ${hash}`);
+                window.location.reload(); // Reload to show updated status
+            }
         } catch (e: any) {
             console.error(e);
             alert(`Failed to award bounty: ${e.shortMessage || e.message}`);
