@@ -7,8 +7,10 @@ export async function POST(req: NextRequest) {
     try {
         const reqBody = await req.json();
         const { questionId, fid, txHash } = reqBody;
+        console.log("Resolve API called with:", { questionId, fid, txHash, winnerFid: reqBody.winnerFid });
 
         if (!questionId || !fid || !txHash) {
+            console.log("Missing fields");
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
@@ -18,8 +20,11 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Question not found' }, { status: 404 });
         }
 
-        if (checkResult.rows[0].fid !== fid) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+        const dbFid = checkResult.rows[0].fid;
+        console.log("Auth check:", { reqFid: fid, dbFid });
+
+        if (Number(dbFid) !== Number(fid)) {
+            return NextResponse.json({ error: `Unauthorized: DB FID ${dbFid} !== Req FID ${fid}` }, { status: 403 });
         }
 
         // Update status to awarded
