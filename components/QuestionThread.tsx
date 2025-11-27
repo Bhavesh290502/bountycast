@@ -202,7 +202,7 @@ export default function QuestionThread({
 
             // Fallback: If transaction fails, allow forcing the status update (OFF-CHAIN ONLY)
             // This is a "solution by any means" to unblock the UI flow, though funds remain locked.
-            const force = window.confirm(`Transaction failed: ${e.shortMessage || e.message}\n\nDo you want to FORCE mark this as awarded in the app? (Note: Funds will NOT be moved automatically)`);
+            const force = window.confirm(`Transaction failed (likely due to wallet mismatch or contract state).\n\nDo you want to FORCE mark this as awarded in the app? \n\n(This will update the UI but funds will NOT be moved automatically)`);
 
             if (force) {
                 await fetch('/api/questions/resolve', {
