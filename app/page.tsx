@@ -244,8 +244,9 @@ export default function HomePage() {
             }
 
             const now = Date.now();
-            const deadlineMs = now + 30 * 24 * 60 * 60 * 1000; // 30 days
-            const deadlineSec = Math.floor(deadlineMs / 1000);
+            const durationMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+            const deadlineMs = now + durationMs;
+            const durationSec = Math.floor(durationMs / 1000);
 
             const metadata = {
                 question: questionText,
@@ -261,7 +262,7 @@ export default function HomePage() {
                 address: BOUNTYCAST_ADDRESS,
                 abi: bountycastAbi,
                 functionName: "createQuestion",
-                args: [metadataUri, BigInt(deadlineSec)],
+                args: [metadataUri, BigInt(durationSec)],
                 value: BigInt(Math.floor(bounty * 1e18)),
             });
             setPendingHash(hash);
