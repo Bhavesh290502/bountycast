@@ -106,6 +106,7 @@ export default function QuestionCard({
                                 <span>• Score: {q.authorProfile.score.toFixed(2)}</span>
                             )}
                         </div>
+
                         {q.status === 'active' && q.deadline && (
                             <div className="text-[10px] text-brand-gold mt-0.5">
                                 {(() => {
@@ -120,6 +121,24 @@ export default function QuestionCard({
                                 })()}
                             </div>
                         )}
+
+                        {/* Debug Button (Temporary) */}
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                    const { readContract } = await import('@wagmi/core');
+                                    const { wagmiConfig } = await import('../wagmiConfig'); // You might need to adjust this import path
+                                    // Or use a simpler approach if config isn't available
+                                    alert(`Debug: OnChainID=${q.onchainId}, DB Asker=${q.address}`);
+                                } catch (err) {
+                                    alert(`Debug info: ID=${q.onchainId}`);
+                                }
+                            }}
+                            className="text-[8px] text-gray-600 hover:text-white"
+                        >
+                            [?]
+                        </button>
                     </div>
                 </div>
 
@@ -212,6 +231,6 @@ export default function QuestionCard({
                     deadline={q.deadline}
                 />
             </div>
-        </div>
+        </div >
     );
 }
