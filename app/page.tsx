@@ -269,7 +269,10 @@ export default function HomePage() {
             let onchainId = -1;
             if (publicClient) {
                 try {
+                    console.log("Waiting for transaction receipt...", hash);
                     const receipt = await publicClient.waitForTransactionReceipt({ hash });
+                    console.log("Receipt received:", receipt);
+
                     // Find the QuestionCreated event
                     for (const log of receipt.logs) {
                         try {
@@ -278,9 +281,11 @@ export default function HomePage() {
                                 data: log.data,
                                 topics: log.topics,
                             });
+                            console.log("Decoded event:", event);
                             if (event.eventName === 'QuestionCreated' && event.args) {
                                 // @ts-ignore
                                 onchainId = Number(event.args.id);
+                                console.log("Found onchainId:", onchainId);
                                 break;
                             }
                         } catch (e) {
@@ -290,6 +295,8 @@ export default function HomePage() {
                 } catch (e) {
                     console.error("Failed to parse logs:", e);
                 }
+            } else {
+                console.warn("No publicClient available to wait for receipt");
             }
 
             // 2) Store question in DB for UI
