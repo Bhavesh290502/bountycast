@@ -9,13 +9,13 @@ export const bountycastAbi: Abi = [
         stateMutability: 'payable',
         inputs: [
             { name: 'metadataUri', type: 'string' },
-            { name: 'deadline', type: 'uint256' },
+            { name: 'autoAwardAfterSeconds', type: 'uint256' },
         ],
         outputs: [{ name: '', type: 'uint256' }],
     },
     {
         type: 'function',
-        name: 'selectWinner',
+        name: 'awardBounty',
         stateMutability: 'nonpayable',
         inputs: [
             { name: 'questionId', type: 'uint256' },
@@ -25,10 +25,18 @@ export const bountycastAbi: Abi = [
     },
     {
         type: 'function',
-        name: 'claimBounty',
+        name: 'answer',
+        stateMutability: 'nonpayable',
+        inputs: [{ name: 'questionId', type: 'uint256' }],
+        outputs: [],
+    },
+    {
+        type: 'function',
+        name: 'upvote',
         stateMutability: 'nonpayable',
         inputs: [
-            { name: 'questionId', type: 'uint256' }
+            { name: 'questionId', type: 'uint256' },
+            { name: 'answerer', type: 'address' },
         ],
         outputs: [],
     },
@@ -41,6 +49,16 @@ export const bountycastAbi: Abi = [
             { indexed: false, name: 'bounty', type: 'uint256' },
             { indexed: false, name: 'deadline', type: 'uint256' },
             { indexed: false, name: 'metadataUri', type: 'string' },
+        ],
+    },
+    {
+        type: 'event',
+        name: 'BountyAwarded',
+        inputs: [
+            { indexed: true, name: 'questionId', type: 'uint256' },
+            { indexed: true, name: 'winner', type: 'address' },
+            { indexed: false, name: 'amount', type: 'uint256' },
+            { indexed: true, name: 'awardedBy', type: 'address' },
         ],
     },
 ] as const;

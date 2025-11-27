@@ -53,25 +53,7 @@ export default function QuestionCard({
 }: QuestionCardProps) {
     const { writeContractAsync } = useWriteContract();
 
-    const claimBounty = async () => {
-        if (!q.onchainId || q.onchainId === -1) {
-            alert("Error: Invalid On-Chain ID");
-            return;
-        }
 
-        try {
-            const hash = await writeContractAsync({
-                address: BOUNTYCAST_ADDRESS,
-                abi: bountycastAbi,
-                functionName: "claimBounty",
-                args: [BigInt(q.onchainId)],
-            });
-            alert(`Claim transaction sent! Tx: ${hash}`);
-        } catch (e) {
-            console.error(e);
-            alert("Failed to claim bounty");
-        }
-    };
 
     return (
         <div
@@ -147,18 +129,7 @@ export default function QuestionCard({
                         <span>{Number(q.bounty || 0).toFixed(8).replace(/\.?0+$/, '')} ETH</span>
                     </div>
 
-                    {/* Claim Button for Winner */}
-                    {q.status === 'awarded' && viewerFid && q.winner_fid === viewerFid && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                claimBounty();
-                            }}
-                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-bold shadow-lg animate-pulse"
-                        >
-                            Claim 💰
-                        </button>
-                    )}
+
 
                     {/* 3-Dot Menu */}
                     <div className="relative z-20">
