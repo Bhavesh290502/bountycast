@@ -44,6 +44,10 @@ export default function QuestionThread({
     const { address } = useAccount();
     const { writeContractAsync } = useWriteContract();
     const publicClient = usePublicClient();
+    const [comments, setComments] = useState<{ [key: number]: any[] }>({});
+    const [expandedComments, setExpandedComments] = useState<{ [key: number]: boolean }>({});
+    const [commentText, setCommentText] = useState<{ [key: number]: string }>({});
+    const [commentLoading, setCommentLoading] = useState<{ [key: number]: boolean }>({});
 
     const username = defaultUsername || (address ? `user-${address.slice(0, 6)}` : 'anon');
 
@@ -129,103 +133,6 @@ export default function QuestionThread({
         }
     };
 
-    const { address: viewerAddress } = useAccount();
-
-    // Check if viewer is the asker (this needs to be passed down or fetched)
-    const awardBounty = async (winnerAddress: string) => {
-        if (!winnerAddress) return;
-
-        // Strict check for onchainId
-        if (onchainId === undefined || onchainId === null || onchainId === -1) {
-            alert("Error: Invalid On-Chain ID. Cannot award bounty. Please contact support.");
-            return;
-        }
-
-        // Check for expiration
-        if (deadline && Date.now() > deadline) {
-            alert("This bounty has expired. You can no longer manually award it.");
-            return;
-        }
-
-        // Check if connected wallet matches asker address
-        if (address && askerAddress && address.toLowerCase() !== askerAddress.toLowerCase()) {
-            const proceed = window.confirm(`Warning: You are connected as ${address.slice(0, 6)}... but the bounty was created by ${askerAddress.slice(0, 6)}... \n\nThe transaction will likely fail if you are not the original asker.\n\nDo you want to proceed anyway?`);
-            if (!proceed) return;
-        }
-
-        const targetId = onchainId;
-        console.log("Awarding bounty:", { targetId, winnerAddress, connectedAddress: address, askerAddress });
-
-        try {
-            // Simulate first to catch errors
-            /*
-            if (publicClient && address) {
-                try {
-                    await publicClient.simulateContract({
-                        address: BOUNTYCAST_ADDRESS,
-                        abi: bountycastAbi,
-                        functionName: "selectWinner",
-                        args: [BigInt(targetId), winnerAddress as `0x${string}`],
-                        account: address
-                    });
-                } catch (simError: any) {
-                    console.error("Simulation failed:", simError);
-                    alert(`Transaction would fail: ${simError.shortMessage || simError.message}`);
-                    return;
-                }
-            }
-            */
-
-            const hash = await writeContractAsync({
-                address: BOUNTYCAST_ADDRESS,
-                abi: bountycastAbi,
-                functionName: "selectWinner",
-                args: [BigInt(targetId), winnerAddress as `0x${string}`],
-            });
-
-            // Call API to update status
-            await fetch('/api/questions/resolve', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    questionId,
-                    fid,
-                    txHash: hash,
-                    winnerFid: answers.find(a => a.address?.toLowerCase() === winnerAddress.toLowerCase())?.fid
-                })
-            });
-
-            alert(`Bounty awarded! Tx: ${hash}`);
-            window.location.reload(); // Reload to show updated status
-        } catch (e: any) {
-            console.error(e);
-
-            // Fallback: If transaction fails, allow forcing the status update (OFF-CHAIN ONLY)
-            // This is a "solution by any means" to unblock the UI flow, though funds remain locked.
-            const force = window.confirm(`Transaction failed (likely due to wallet mismatch or contract state).\n\nDo you want to FORCE mark this as awarded in the app? \n\n(This will update the UI but funds will NOT be moved automatically)`);
-
-            if (force) {
-                await fetch('/api/questions/resolve', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        questionId,
-                        fid,
-                        txHash: '0x0000000000000000000000000000000000000000', // Dummy hash
-                        winnerFid: answers.find(a => a.address?.toLowerCase() === winnerAddress.toLowerCase())?.fid
-                    })
-                });
-                alert("Marked as awarded (Off-chain).");
-                window.location.reload();
-            }
-        }
-    };
-
-    const [comments, setComments] = useState<{ [answerId: number]: any[] }>({});
-    const [expandedComments, setExpandedComments] = useState<{ [answerId: number]: boolean }>({});
-    const [commentText, setCommentText] = useState<{ [answerId: number]: string }>({});
-    const [commentLoading, setCommentLoading] = useState<{ [answerId: number]: boolean }>({});
-
     // Load all comments for all answers on mount
     const loadAllComments = async () => {
         try {
@@ -292,6 +199,78 @@ export default function QuestionThread({
             alert("Failed to post comment");
         } finally {
             setCommentLoading(prev => ({ ...prev, [answerId]: false }));
+        }
+    };
+
+    const resolveOffChain = async (winnerAddress: string, txHash: string = '0x0000000000000000000000000000000000000000') => {
+        await fetch('/api/questions/resolve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                questionId,
+                fid,
+                txHash,
+                winnerFid: answers.find(a => a.address?.toLowerCase() === winnerAddress.toLowerCase())?.fid
+            })
+        });
+    };
+
+    const awardBounty = async (winnerAddress: string) => {
+        if (!winnerAddress) return;
+
+        // Strict check for onchainId
+        if (onchainId === undefined || onchainId === null || onchainId === -1) {
+            alert("Error: Invalid On-Chain ID. Cannot award bounty. Please contact support.");
+            return;
+        }
+
+        // Check for expiration
+        if (deadline && Date.now() > deadline) {
+            alert("This bounty has expired. You can no longer manually award it.");
+            return;
+        }
+
+        const isSelfAward = address && askerAddress && address.toLowerCase() === winnerAddress.toLowerCase();
+
+        if (isSelfAward) {
+            const confirmSelf = window.confirm("Warning: You are trying to award the bounty to yourself.\n\nMost smart contracts forbid this to prevent abuse. The on-chain transaction will likely fail.\n\nDo you want to skip the blockchain transaction and just mark it as awarded in the app? (Funds will remain locked in the contract)");
+            if (!confirmSelf) return;
+
+            // Skip contract, go straight to DB
+            await resolveOffChain(winnerAddress);
+            return;
+        }
+
+        // Check if connected wallet matches asker address
+        if (address && askerAddress && address.toLowerCase() !== askerAddress.toLowerCase()) {
+            const proceed = window.confirm(`Warning: You are connected as ${address.slice(0, 6)}... but the bounty was created by ${askerAddress.slice(0, 6)}... \n\nThe transaction will likely fail if you are not the original asker.\n\nDo you want to proceed anyway?`);
+            if (!proceed) return;
+        }
+
+        const targetId = onchainId;
+        console.log("Awarding bounty:", { targetId, winnerAddress, connectedAddress: address, askerAddress });
+
+        try {
+            const hash = await writeContractAsync({
+                address: BOUNTYCAST_ADDRESS,
+                abi: bountycastAbi,
+                functionName: "selectWinner",
+                args: [BigInt(targetId), winnerAddress as `0x${string}`],
+            });
+
+            await resolveOffChain(winnerAddress, hash);
+            alert(`Bounty awarded! Tx: ${hash}`);
+            window.location.reload();
+        } catch (e: any) {
+            console.error(e);
+
+            const force = window.confirm(`Transaction failed (likely due to wallet mismatch or contract state).\n\nDo you want to FORCE mark this as awarded in the app? \n\n(This will update the UI but funds will NOT be moved automatically)`);
+
+            if (force) {
+                await resolveOffChain(winnerAddress);
+                alert("Marked as awarded (Off-chain).");
+                window.location.reload();
+            }
         }
     };
 
