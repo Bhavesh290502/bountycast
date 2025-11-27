@@ -7,6 +7,6 @@ export async function GET() {
         return NextResponse.json({ message: "Database reset successfully" });
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ error: "Failed to reset database" }, { status: 500 });
+        return NextResponse.json({ error: "Failed to reset database", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
     }
 }

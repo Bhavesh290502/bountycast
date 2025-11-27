@@ -1,6 +1,6 @@
 import { Abi } from 'viem';
 
-export const BOUNTYCAST_ADDRESS = (process.env.NEXT_PUBLIC_BOUNTYCAST_ADDRESS || "0x5F336D3Ca56FC51216ee9551B53E7699424e21AE") as `0x${string}`;
+export const BOUNTYCAST_ADDRESS = (process.env.NEXT_PUBLIC_BOUNTYCAST_ADDRESS || "0x76df2b2A635CFf2064ceec997BB34Cbb0468E4D5") as `0x${string}`;
 
 export const bountycastAbi: Abi = [
     {
