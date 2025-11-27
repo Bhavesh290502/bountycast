@@ -61,4 +61,21 @@ export const bountycastAbi: Abi = [
             { indexed: true, name: 'awardedBy', type: 'address' },
         ],
     },
+    {
+        type: 'function',
+        name: 'questions',
+        stateMutability: 'view',
+        inputs: [{ name: '', type: 'uint256' }],
+        outputs: [
+            { name: 'asker', type: 'address' },
+            { name: 'bounty', type: 'uint256' },
+            { name: 'deadline', type: 'uint256' },
+            { name: 'token', type: 'address' },
+            { name: 'active', type: 'bool' },
+            { name: 'awarded', type: 'bool' },
+            { name: 'refunded', type: 'bool' },
+            { name: 'winner', type: 'address' },
+            { name: 'metadataUri', type: 'string' },
+        ],
+    },
 ] as const;
