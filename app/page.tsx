@@ -164,14 +164,32 @@ export default function HomePage() {
         init();
     }, []);
 
+    const [deepLinkId, setDeepLinkId] = useState<string | null>(null);
+
+    // Check for deep link on mount
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (id) {
+                setDeepLinkId(id);
+            }
+        }
+    }, []);
+
     // Load questions from API with filters
     const loadQuestions = async () => {
         try {
             const params = new URLSearchParams();
-            if (searchQuery) params.append('search', searchQuery);
-            if (selectedCategory) params.append('category', selectedCategory);
-            if (selectedStatus) params.append('status', selectedStatus);
-            if (selectedSort) params.append('sort', selectedSort);
+
+            if (deepLinkId) {
+                params.append('id', deepLinkId);
+            } else {
+                if (searchQuery) params.append('search', searchQuery);
+                if (selectedCategory) params.append('category', selectedCategory);
+                if (selectedStatus) params.append('status', selectedStatus);
+                if (selectedSort) params.append('sort', selectedSort);
+            }
 
             const res = await fetch(`/api/questions?${params.toString()}`);
             const data = await res.json();
@@ -188,7 +206,7 @@ export default function HomePage() {
 
     useEffect(() => {
         loadQuestions();
-    }, [searchQuery, selectedCategory, selectedStatus, selectedSort]);
+    }, [searchQuery, selectedCategory, selectedStatus, selectedSort, deepLinkId]);
 
     // Load My Bounties when modal opens
     useEffect(() => {
@@ -501,12 +519,12 @@ export default function HomePage() {
                             type="text"
                             placeholder="Search..."
                             value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
+                            onChange={e => { setSearchQuery(e.target.value); setDeepLinkId(null); }}
                             className="glass-input px-3 py-1.5 rounded-lg text-sm flex-1 min-w-[100px]"
                         />
                         <select
                             value={selectedCategory}
-                            onChange={e => setSelectedCategory(e.target.value)}
+                            onChange={e => { setSelectedCategory(e.target.value); setDeepLinkId(null); }}
                             className="glass-input px-2 py-1.5 rounded-lg text-sm w-28"
                         >
                             <option value="">Category</option>
@@ -518,7 +536,7 @@ export default function HomePage() {
                         {/* Sort Dropdown */}
                         <select
                             value={selectedSort}
-                            onChange={e => setSelectedSort(e.target.value)}
+                            onChange={e => { setSelectedSort(e.target.value); setDeepLinkId(null); }}
                             className="glass-input px-2 py-1.5 rounded-lg text-sm w-32"
                         >
                             <option value="newest">Newest</option>
@@ -715,7 +733,7 @@ export default function HomePage() {
                         {['active', 'awarded', 'expired'].map((status) => (
                             <button
                                 key={status}
-                                onClick={() => setSelectedStatus(status)}
+                                onClick={() => { setSelectedStatus(status); setDeepLinkId(null); }}
                                 className={`py-2 rounded-md text-xs font-medium transition-all ${selectedStatus === status
                                     ? 'bg-brand-purple text-white shadow-lg'
                                     : 'text-gray-400 hover:text-white hover:bg-white/5'

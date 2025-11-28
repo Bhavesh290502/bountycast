@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
         const category = searchParams.get('category');
         const status = searchParams.get('status');
         const authorFid = searchParams.get('authorFid');
+        const id = searchParams.get('id');
         const sort = searchParams.get('sort') || 'newest';
 
         let query = 'SELECT * FROM questions WHERE 1=1';
@@ -40,6 +41,13 @@ export async function GET(req: NextRequest) {
         if (authorFid) {
             query += ` AND fid = $${paramIndex}`;
             params.push(authorFid);
+            paramIndex++;
+        }
+
+        // ID filter (Deep Linking)
+        if (id) {
+            query += ` AND id = $${paramIndex}`;
+            params.push(id);
             paramIndex++;
         }
 
