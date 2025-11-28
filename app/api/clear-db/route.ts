@@ -1,7 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: NextRequest) {
+    const { searchParams } = new URL(req.url);
+    const confirm = searchParams.get('confirm');
+
+    if (confirm !== 'true') {
+        return NextResponse.json({ error: 'Please add ?confirm=true to the URL to clear the database' }, { status: 400 });
+    }
+
     try {
         // Clear all tables
         // Using CASCADE to handle foreign key constraints if they exist
@@ -12,7 +21,6 @@ export async function GET() {
         return NextResponse.json({ message: 'Database cleared successfully' });
     } catch (error) {
         console.error('Failed to clear database:', error);
-        console.log('Env vars:', Object.keys(process.env).filter(k => k.includes('POSTGRES') || k.includes('DATABASE')));
 
         // Fallback to DELETE if TRUNCATE fails (e.g. due to permissions or specific DB limitations)
         try {
