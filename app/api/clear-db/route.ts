@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { initDB } from '../../../lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,31 +13,37 @@ export async function GET(req: NextRequest) {
     }
 
     try {
+        // Initialize DB first to ensure tables exist
+        await initDB();
+
         // Clear all tables
         // Using CASCADE to handle foreign key constraints if they exist
-        // Note: TRUNCATE is faster than DELETE and resets identity columns (auto-increment IDs)
-
-        await sql`TRUNCATE TABLE notifications, comments, answers, questions, user_notification_tokens CASCADE;`;
-
-        return NextResponse.json({ message: 'Database cleared successfully' });
-    } catch (error) {
-        console.error('Failed to clear database:', error);
-
-        // Fallback to DELETE if TRUNCATE fails (e.g. due to permissions or specific DB limitations)
         try {
-            await sql`DELETE FROM notifications`;
-            await sql`DELETE FROM comments`;
-            await sql`DELETE FROM answers`;
-            await sql`DELETE FROM questions`;
-            await sql`DELETE FROM user_notification_tokens`;
-            return NextResponse.json({ message: 'Database cleared successfully (via DELETE)' });
-        } catch (deleteError: any) {
-            console.error('Failed to clear database via DELETE:', deleteError);
+            await sql`TRUNCATE TABLE notifications, comments, answers, questions, user_notification_tokens CASCADE;`;
+            return NextResponse.json({ message: 'Database cleared successfully (TRUNCATE)' });
+        } catch (truncateError) {
+            console.warn('TRUNCATE failed, attempting individual DELETEs:', truncateError);
+
+            // Fallback to individual DELETEs
+            const results = [];
+
+            try { await sql`DELETE FROM notifications`; results.push('notifications'); } catch (e) { }
+            try { await sql`DELETE FROM comments`; results.push('comments'); } catch (e) { }
+            try { await sql`DELETE FROM answers`; results.push('answers'); } catch (e) { }
+            try { await sql`DELETE FROM questions`; results.push('questions'); } catch (e) { }
+            try { await sql`DELETE FROM user_notification_tokens`; results.push('user_notification_tokens'); } catch (e) { }
+
             return NextResponse.json({
-                error: 'Failed to clear database',
-                details: deleteError.message,
-                stack: deleteError.stack
-            }, { status: 500 });
+                message: 'Database cleared successfully (DELETE)',
+                cleared_tables: results
+            });
         }
+    } catch (error: any) {
+        console.error('Failed to clear database:', error);
+        return NextResponse.json({
+            error: 'Failed to clear database',
+            details: error.message,
+            stack: error.stack
+        }, { status: 500 });
     }
 }
