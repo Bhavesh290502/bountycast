@@ -48,6 +48,7 @@ export default function QuestionThread({
     const [answers, setAnswers] = useState<Answer[]>([]);
     const [myAnswer, setMyAnswer] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showAllAnswers, setShowAllAnswers] = useState(false);
     const { address } = useAccount();
     const { writeContractAsync } = useWriteContract();
     const publicClient = usePublicClient();
@@ -341,7 +342,7 @@ export default function QuestionThread({
             </div>
 
             <div className="space-y-2">
-                {answers.map((a) => (
+                {answers.slice(0, showAllAnswers ? undefined : 3).map((a) => (
                     <div key={a.id} className="bg-white/5 rounded-lg overflow-hidden">
                         <div className="p-3 flex justify-between items-center group hover:bg-white/10 transition-colors">
                             <div className="flex-1 mr-2">
@@ -472,7 +473,17 @@ export default function QuestionThread({
                         }
                     </div>
                 ))}
-            </div >
-        </div >
+            </div>
+            {answers.length > 3 && (
+                <button
+                    onClick={() => setShowAllAnswers(!showAllAnswers)}
+                    className="w-full py-2 text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 rounded-lg mt-2 transition-colors"
+                >
+                    {showAllAnswers ? 'Show Less' : `Show all ${answers.length} answers`}
+                </button>
+            )}
+        </div>
     );
 }
+
+
