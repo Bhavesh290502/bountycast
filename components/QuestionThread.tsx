@@ -287,7 +287,7 @@ export default function QuestionThread({
             {isQuestionActive ? (
                 <div className="flex gap-2 mb-4">
                     <input
-                        className="glass-input flex-1 p-2 rounded-lg text-xs"
+                        className="glass-input flex-1 p-2 rounded-lg text-base"
                         placeholder="Add an answer..."
                         value={myAnswer}
                         onChange={(e) => setMyAnswer(e.target.value)}
@@ -382,16 +382,17 @@ export default function QuestionThread({
                                 </button>
 
                                 <button
-                                    onClick={() => upvote(a.id)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-brand-gold transition-all group"
-                                    title="Toggle Upvote"
+                                    onClick={() => isQuestionActive && upvote(a.id)}
+                                    disabled={!isQuestionActive}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all group ${isQuestionActive ? 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-brand-gold cursor-pointer' : 'bg-white/5 text-gray-500 cursor-not-allowed opacity-50'}`}
+                                    title={isQuestionActive ? "Toggle Upvote" : "Voting closed"}
                                 >
                                     <svg
                                         width="16"
                                         height="16"
                                         viewBox="0 0 16 16"
                                         fill="currentColor"
-                                        className="group-hover:scale-110 transition-transform"
+                                        className={isQuestionActive ? "group-hover:scale-110 transition-transform" : ""}
                                     >
                                         <path d="M8 2L4 8H7V14H9V8H12L8 2Z" />
                                     </svg>
@@ -421,7 +422,7 @@ export default function QuestionThread({
                                     {isQuestionActive && (
                                         <div className="flex gap-2 mt-2">
                                             <input
-                                                className="glass-input flex-1 p-1.5 rounded text-xs"
+                                                className="glass-input flex-1 p-1.5 rounded text-base"
                                                 placeholder="Reply..."
                                                 value={commentText[a.id] || ''}
                                                 onChange={e => setCommentText(prev => ({ ...prev, [a.id]: e.target.value }))}

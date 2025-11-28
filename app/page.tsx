@@ -630,7 +630,7 @@ export default function HomePage() {
 
                                 <div className="space-y-3 mb-4">
                                     <textarea
-                                        className="glass-input w-full p-3 rounded-lg min-h-[100px] resize-none text-sm placeholder-gray-500"
+                                        className="glass-input w-full p-3 rounded-lg min-h-[100px] resize-none text-base placeholder-gray-500"
                                         placeholder="What do you want to know?"
                                         value={questionText}
                                         onChange={(e) => setQuestionText(e.target.value)}
@@ -645,7 +645,7 @@ export default function HomePage() {
                                                 type="number"
                                                 min={0.000001}
                                                 step={0.000001}
-                                                className="glass-input w-full p-3 rounded-lg pl-8 text-sm"
+                                                className="glass-input w-full p-3 rounded-lg pl-8 text-base"
                                                 placeholder="0.001"
                                                 value={bounty}
                                                 onChange={(e) => setBounty(Number(e.target.value))}
