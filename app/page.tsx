@@ -38,6 +38,7 @@ interface Question {
 
 import QuestionCard from '../components/QuestionCard';
 import OnboardingGuide from '../components/OnboardingGuide';
+import LeaderboardModal from '../components/LeaderboardModal';
 
 const CATEGORIES = ['Solidity', 'Design', 'Marketing', 'Product', 'Business', 'Other'];
 
@@ -74,6 +75,7 @@ export default function HomePage() {
     const [showMyBountiesModal, setShowMyBountiesModal] = useState(false);
     const [myQuestions, setMyQuestions] = useState<Question[]>([]);
     const [myQuestionsLoading, setMyQuestionsLoading] = useState(false);
+    const [showLeaderboard, setShowLeaderboard] = useState(false);
 
     // Load User Profile
     useEffect(() => {
@@ -548,6 +550,14 @@ export default function HomePage() {
                             </button>
                         )}
 
+                        <button
+                            onClick={() => setShowLeaderboard(true)}
+                            className="glass-card p-1.5 rounded-lg text-brand-gold hover:bg-white/10 transition-all"
+                            title="Leaderboard"
+                        >
+                            <span className="text-lg">🏆</span>
+                        </button>
+
                         {!isFrameAdded && (
                             <button
                                 onClick={async () => {
@@ -763,6 +773,7 @@ export default function HomePage() {
                 </div>
             </section>
             <OnboardingGuide />
+            <LeaderboardModal isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
         </div >
     );
 }
