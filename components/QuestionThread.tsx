@@ -29,6 +29,7 @@ export default function QuestionThread({
     isQuestionActive,
     onchainId,
     deadline,
+    winnerProfile,
 }: {
     questionId: number;
     fid?: number;
@@ -37,6 +38,12 @@ export default function QuestionThread({
     isQuestionActive?: boolean;
     onchainId?: number;
     deadline?: number;
+    winnerProfile?: {
+        username: string;
+        pfpUrl: string;
+        isPro: boolean;
+        score: number;
+    };
 }) {
     const [answers, setAnswers] = useState<Answer[]>([]);
     const [myAnswer, setMyAnswer] = useState('');
@@ -301,8 +308,32 @@ export default function QuestionThread({
                     </button>
                 </div >
             ) : (
-                <div className="mb-4 text-center p-3 bg-white/5 rounded-lg text-xs text-gray-400 italic">
-                    This bounty has been awarded or expired. No new answers can be posted.
+                <div className="mb-4 space-y-3">
+                    {/* Winner Display */}
+                    {winnerProfile && (
+                        <div className="flex items-center justify-center gap-2 bg-green-500/10 border border-green-500/20 px-4 py-2 rounded-lg">
+                            <span className="text-xs text-green-400 font-bold uppercase">🏆 Winner:</span>
+                            <div className="flex items-center gap-2">
+                                <img
+                                    src={winnerProfile.pfpUrl}
+                                    alt={winnerProfile.username}
+                                    className="w-5 h-5 rounded-full border border-green-500/30"
+                                />
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        sdk.actions.openUrl(`https://warpcast.com/${winnerProfile.username}`);
+                                    }}
+                                    className="text-sm font-bold text-green-300 hover:underline"
+                                >
+                                    @{winnerProfile.username}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    <div className="text-center p-3 bg-white/5 rounded-lg text-xs text-gray-400 italic">
+                        This bounty has been awarded or expired. No new answers can be posted.
+                    </div>
                 </div>
             )}
             <div className="text-[10px] text-gray-500 text-right mb-4 -mt-3 mr-1">
