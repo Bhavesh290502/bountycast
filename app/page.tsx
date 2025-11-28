@@ -514,7 +514,7 @@ export default function HomePage() {
                             placeholder="Search..."
                             value={searchQuery}
                             onChange={e => { setSearchQuery(e.target.value); setDeepLinkId(null); }}
-                            className="glass-input px-3 py-1.5 rounded-lg text-sm flex-1 min-w-[100px]"
+                            className="glass-input px-3 py-1.5 rounded-lg text-base flex-1 min-w-[100px]"
                         />
                         <select
                             value={selectedCategory}
