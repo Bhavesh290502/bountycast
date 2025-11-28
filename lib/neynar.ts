@@ -78,7 +78,7 @@ export async function checkEligibility(fid: number): Promise<{ allowed: boolean;
     // Let's keep it simple: if we can't fetch, we can't verify, so we might block or allow.
     // For now, if user is null (API error), we'll block to be safe, unless key is missing.
     if (!process.env.NEYNAR_API_KEY) return { allowed: true };
-    if (!user) return { allowed: false, reason: "Unable to verify identity (Neynar API error)" };
+    if (!user) return { allowed: true }; // Fail open if API error
 
     const score = user.score || user.experimental?.score || 0;
     const isPro = user.power_badge || false;

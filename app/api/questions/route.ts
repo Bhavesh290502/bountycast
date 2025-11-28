@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
         // Search filter
         if (search) {
-            query += ` AND question ILIKE $${paramIndex}`;
+            query += ` AND (question ILIKE $${paramIndex} OR username ILIKE $${paramIndex})`;
             params.push(`%${search}%`);
             paramIndex++;
         }
