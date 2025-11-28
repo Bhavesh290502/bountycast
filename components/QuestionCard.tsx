@@ -252,7 +252,7 @@ export default function QuestionCard({
                 {(q.question.length > 200 || (q.original_question && q.original_question.length > 200)) && (
                     <button
                         onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
-                        className="text-brand-purple text-xs font-bold mt-[-8px] relative z-10 hover:underline flex items-center gap-1"
+                        className="text-brand-purple text-xs font-bold mt-2 relative z-10 hover:underline flex items-center gap-1"
                     >
                         {isExpanded ? (
                             <>Show Less <span className="text-[10px]">▲</span></>
