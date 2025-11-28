@@ -135,6 +135,7 @@ export async function GET(req: NextRequest) {
                 tags: row.tags,
                 isPrivate: row.is_private,
                 updatedAt: row.updated_at,
+                original_question: row.original_question,
                 authorProfile: profiles[row.fid] || null
             }));
             return NextResponse.json(enrichedRows);
@@ -155,6 +156,7 @@ export async function GET(req: NextRequest) {
             tags: row.tags,
             isPrivate: row.is_private,
             updatedAt: row.updated_at,
+            original_question: row.original_question,
         }));
 
         return NextResponse.json(formattedRows);

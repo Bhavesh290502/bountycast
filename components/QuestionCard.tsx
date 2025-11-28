@@ -22,6 +22,7 @@ interface Question {
     isPrivate?: boolean;
     updatedAt?: number;
     winner_fid?: number;
+    original_question?: string;
     authorProfile?: {
         username: string;
         pfpUrl: string;
@@ -177,7 +178,7 @@ export default function QuestionCard({
 
                         {activeMenuQuestionId === q.id && (
                             <div className="absolute right-0 top-8 w-40 bg-gray-900 border border-white/10 shadow-xl rounded-lg py-1 z-50">
-                                {viewerFid && q.fid === viewerFid && q.status === 'active' && (
+                                {viewerFid && q.fid === viewerFid && q.status === 'active' && !q.original_question && (
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -210,7 +211,22 @@ export default function QuestionCard({
             </div>
 
             <div className="text-gray-200 mb-4 text-sm">
-                <MarkdownRenderer content={q.question} />
+                {q.original_question ? (
+                    <div className="space-y-3">
+                        <div className="bg-white/5 p-3 rounded-lg border border-white/10">
+                            <div className="text-[10px] text-gray-500 uppercase font-bold mb-1">Original Question</div>
+                            <div className="opacity-70 text-xs">
+                                <MarkdownRenderer content={q.original_question} />
+                            </div>
+                        </div>
+                        <div className="bg-brand-purple/10 p-3 rounded-lg border border-brand-purple/20">
+                            <div className="text-[10px] text-brand-purple uppercase font-bold mb-1">Edited Question</div>
+                            <MarkdownRenderer content={q.question} />
+                        </div>
+                    </div>
+                ) : (
+                    <MarkdownRenderer content={q.question} />
+                )}
             </div>
 
             {/* Tags & Category */}

@@ -19,7 +19,8 @@ export async function initDB() {
       tags TEXT[],
       is_private BOOLEAN DEFAULT false,
       updated_at BIGINT,
-      winner_fid INTEGER
+      winner_fid INTEGER,
+      original_question TEXT
     );
   `;
 

@@ -244,7 +244,7 @@ export default function HomePage() {
             }
 
             const now = Date.now();
-            const durationMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+            const durationMs = 15 * 24 * 60 * 60 * 1000; // 15 days
             const deadlineMs = now + durationMs;
             const deadlineSec = Math.floor(deadlineMs / 1000);
 
