@@ -1,9 +1,9 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-export default function MarkdownRenderer({ content }: { content: string }) {
+export default function MarkdownRenderer({ content, className }: { content: string, className?: string }) {
     return (
-        <div className="prose prose-invert prose-sm max-w-none break-words">
+        <div className={`prose prose-invert prose-sm max-w-none break-words ${className || ''}`}>
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{

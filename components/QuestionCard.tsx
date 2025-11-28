@@ -233,14 +233,20 @@ export default function QuestionCard({
                         </div>
                         <div className="bg-brand-purple/10 p-3 rounded-lg border border-brand-purple/20">
                             <div className="text-[10px] text-brand-purple uppercase font-bold mb-1">Edited Question</div>
-                            <div className={`relative ${!isExpanded ? 'max-h-[120px] overflow-hidden' : ''}`}>
-                                <MarkdownRenderer content={q.question} />
+                            <div className="relative">
+                                <MarkdownRenderer
+                                    content={q.question}
+                                    className={!isExpanded ? 'line-clamp-5' : ''}
+                                />
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div className={`relative ${!isExpanded ? 'max-h-[120px] overflow-hidden' : ''}`}>
-                        <MarkdownRenderer content={q.question} />
+                    <div className="relative">
+                        <MarkdownRenderer
+                            content={q.question}
+                            className={!isExpanded ? 'line-clamp-5' : ''}
+                        />
                     </div>
                 )}
                 {(q.question.length > 200 || (q.original_question && q.original_question.length > 200)) && (
