@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '../../../lib/db';
+import { sendFarcasterNotification } from '../../../lib/notifications';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -46,6 +47,13 @@ export async function POST(req: NextRequest) {
                     INSERT INTO notifications (user_fid, type, answer_id, from_fid, message, created_at)
                     VALUES (${answerAuthorFid}, 'comment', ${answerId}, ${fid}, ${`${username} commented on your answer`}, ${createdAt})
                 `;
+
+                // Send Push Notification
+                await sendFarcasterNotification(
+                    answerAuthorFid,
+                    "New Comment 💬",
+                    `${username} commented on your answer: "${comment.substring(0, 50)}..."`
+                );
             }
         }
 
