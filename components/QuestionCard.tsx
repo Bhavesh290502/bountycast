@@ -59,7 +59,7 @@ export default function QuestionCard({
     return (
         <div
             className={`glass-card p-5 rounded-xl transition-all duration-300 
-                ${q.status === "awarded" ? "opacity-70 grayscale-[0.5]" : "hover:scale-[1.01] hover:shadow-lg hover:shadow-brand-purple/10"} 
+                hover:scale-[1.01] hover:shadow-lg hover:shadow-brand-purple/10 
                 ${activeMenuQuestionId === q.id ? "z-20 relative" : "z-0"}
                 ${viewerFid && q.fid === viewerFid ? "border-brand-purple/30 bg-brand-purple/5" : ""}
             `}
