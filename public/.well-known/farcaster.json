@@ -1,19 +1,18 @@
 {
   "accountAssociation": {
-    "header": "eyJmaWQiOjE3OTkxLCJ0eXBlIjoiYXV0aCIsImtleSI6IjB4RDhjNEQ3OEExNUUwOTIxMTQwODk0MUQwZjNmZjk4MDgxZDNkQ2U4MCJ9",
-    "payload": "eyJkb21haW4iOiJib3VudHljYXN0LnZlcmNlbC5hcHAifQ",
-    "signature": "DD8nxfH47WCMKyjwrNeXLgPeMddES0KdzwawqmW+6hoMfgPE+H2mpPAwavJ9OD8Yk/bpLyqOoZN8fXsMrbuAYBw="
+    "header": "eyJmaWQiOjU0NDgsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg2MWQwMEFENzYwNjhGOEQ0NzQwYzM1OEM4QzAzYUFFYjUxMGI1OTBEIn0",
+    "payload": "eyJkb21haW4iOiJleGFtcGxlLmNvbSJ9",
+    "signature": "MHg3NmRkOWVlMjE4OGEyMjliNzExZjUzOTkxYTc1NmEzMGZjNTA3NmE5OTU5OWJmOWFmYjYyMzAyZWQxMWQ2MWFmNTExYzlhYWVjNjQ3OWMzODcyMTI5MzA2YmJhYjdhMTE0MmRhMjA4MmNjNTM5MTJiY2MyMDRhMWFjZTY2NjE5OTFj"
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "BountyCast",
+    "iconUrl": "https://bountycast.vercel.app/icon.png",
+    "homeUrl": "https://bountycast.vercel.app",
+    "imageUrl": "https://bountycast.vercel.app/image.png",
+    "buttonTitle": "Solve Bounties",
+    "splashImageUrl": "https://bountycast.vercel.app/splash.png",
+    "splashBackgroundColor": "#1a1b1e",
+    "webhookUrl": "https://bountycast.vercel.app/api/webhook"
   }
-,
-    "frame": {
-        "version": "1",
-        "name": "BountyCast",
-        "iconUrl": "https://bountycast.vercel.app/icon.png",
-        "homeUrl": "https://bountycast.vercel.app",
-        "imageUrl": "https://bountycast.vercel.app/opengraph-image.png",
-        "buttonTitle": "Launch BountyCast",
-        "splashImageUrl": "https://bountycast.vercel.app/splash.png",
-        "splashBackgroundColor": "#000000",
-        "webhookUrl": "https://bountycast.vercel.app/api/webhook"
-    }
 }
