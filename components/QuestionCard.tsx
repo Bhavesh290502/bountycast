@@ -224,28 +224,41 @@ export default function QuestionCard({
                     <div className="space-y-3">
                         <div className="bg-white/5 p-3 rounded-lg border border-white/10">
                             <div className="text-[10px] text-gray-500 uppercase font-bold mb-1">Original Question</div>
-                            <div className={`opacity-70 text-xs ${!isExpanded ? 'line-clamp-3' : ''}`}>
+                            <div className={`relative ${!isExpanded ? 'max-h-[80px] overflow-hidden' : ''}`}>
                                 <MarkdownRenderer content={q.original_question} />
+                                {!isExpanded && q.original_question.length > 200 && (
+                                    <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-[#1a1b1e] to-transparent pointer-events-none" />
+                                )}
                             </div>
                         </div>
                         <div className="bg-brand-purple/10 p-3 rounded-lg border border-brand-purple/20">
                             <div className="text-[10px] text-brand-purple uppercase font-bold mb-1">Edited Question</div>
-                            <div className={!isExpanded ? 'line-clamp-5' : ''}>
+                            <div className={`relative ${!isExpanded ? 'max-h-[120px] overflow-hidden' : ''}`}>
                                 <MarkdownRenderer content={q.question} />
+                                {!isExpanded && q.question.length > 300 && (
+                                    <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[#1a1b1e] to-transparent pointer-events-none" />
+                                )}
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div className={!isExpanded ? 'line-clamp-5' : ''}>
+                    <div className={`relative ${!isExpanded ? 'max-h-[120px] overflow-hidden' : ''}`}>
                         <MarkdownRenderer content={q.question} />
+                        {!isExpanded && q.question.length > 300 && (
+                            <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[#0f0e13] to-transparent pointer-events-none" />
+                        )}
                     </div>
                 )}
                 {(q.question.length > 300 || (q.original_question && q.original_question.length > 200)) && (
                     <button
                         onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
-                        className="text-brand-purple text-xs font-bold mt-1 hover:underline"
+                        className="text-brand-purple text-xs font-bold mt-2 hover:underline flex items-center gap-1"
                     >
-                        {isExpanded ? 'Show Less' : 'Read More'}
+                        {isExpanded ? (
+                            <>Show Less <span className="text-[10px]">▲</span></>
+                        ) : (
+                            <>Read More <span className="text-[10px]">▼</span></>
+                        )}
                     </button>
                 )}
             </div>
