@@ -45,7 +45,7 @@ export async function generateMetadata(
             "fc:frame:image": ogUrl.toString(),
             "fc:frame:button:1": "View Bounty",
             "fc:frame:button:1:action": "link",
-            "fc:frame:button:1:target": `https://bountycast.vercel.app/?id=${id}`
+            "fc:frame:button:1:target": `https://warpcast.com/~/frames/launch?url=${encodeURIComponent(`https://bountycast.vercel.app/?id=${id}`)}&domain=bountycast.vercel.app`
         }
     };
 }
