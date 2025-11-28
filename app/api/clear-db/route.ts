@@ -30,9 +30,13 @@ export async function GET(req: NextRequest) {
             await sql`DELETE FROM questions`;
             await sql`DELETE FROM user_notification_tokens`;
             return NextResponse.json({ message: 'Database cleared successfully (via DELETE)' });
-        } catch (deleteError) {
+        } catch (deleteError: any) {
             console.error('Failed to clear database via DELETE:', deleteError);
-            return NextResponse.json({ error: 'Failed to clear database' }, { status: 500 });
+            return NextResponse.json({
+                error: 'Failed to clear database',
+                details: deleteError.message,
+                stack: deleteError.stack
+            }, { status: 500 });
         }
     }
 }
