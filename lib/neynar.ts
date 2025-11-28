@@ -1,3 +1,5 @@
+import { ELIGIBILITY_CONFIG } from './constants';
+
 interface NeynarUser {
     fid: number;
     username: string;
@@ -83,15 +85,13 @@ export async function checkEligibility(fid: number): Promise<{ allowed: boolean;
     const score = user.score || user.experimental?.score || 0;
     const isPro = user.power_badge || false;
 
-
-
-    if (isPro || score > 0.6) {
+    if (isPro || score > ELIGIBILITY_CONFIG.MIN_NEYNAR_SCORE) {
         return { allowed: true };
     }
 
     return {
         allowed: false,
-        reason: `Eligibility failed. Requirements: Pro User or Neynar Score > 0.6. (Your Score: ${score})`
+        reason: `Eligibility failed. Requirements: Pro User or Neynar Score > ${ELIGIBILITY_CONFIG.MIN_NEYNAR_SCORE}. (Your Score: ${score})`
     };
 }
 

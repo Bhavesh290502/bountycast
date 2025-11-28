@@ -11,6 +11,9 @@ import {
 } from "wagmi";
 import { decodeEventLog } from 'viem';
 import { bountycastAbi, BOUNTYCAST_ADDRESS } from "../lib/contract";
+import type { FarcasterContext, AddFrameResult } from "../lib/farcaster-types";
+import { BOUNTY_CONFIG } from "../lib/constants";
+import { Validators } from "../lib/validation";
 
 interface Question {
     id: number;
@@ -50,7 +53,7 @@ export default function HomePage() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [showAsk, setShowAsk] = useState(false);
     const [questionText, setQuestionText] = useState("");
-    const [bounty, setBounty] = useState(0.000001);
+    const [bounty, setBounty] = useState(BOUNTY_CONFIG.MIN_BOUNTY_ETH);
     const [loading, setLoading] = useState(false);
     const [lastPostedBounty, setLastPostedBounty] = useState<any>(null);
     const [userProfile, setUserProfile] = useState<any>(null);
@@ -76,6 +79,7 @@ export default function HomePage() {
     const [myQuestions, setMyQuestions] = useState<Question[]>([]);
     const [myQuestionsLoading, setMyQuestionsLoading] = useState(false);
     const [showLeaderboard, setShowLeaderboard] = useState(false);
+    const [notificationStatus, setNotificationStatus] = useState<'idle' | 'registering' | 'success' | 'error'>('idle');
 
     // Load User Profile
     useEffect(() => {
@@ -114,59 +118,19 @@ export default function HomePage() {
         const init = async () => {
             try {
                 await sdk.actions.ready();
-                const ctx = await sdk.context as any;
-                console.log("Farcaster Context:", ctx); // DEBUG LOG
+                const ctx = await sdk.context as FarcasterContext;
 
-                if (ctx?.user) { // Try ctx.user first (v2 spec)
-                    console.log("Found ctx.user:", ctx.user);
+                if (ctx?.user) {
                     setViewerFid(ctx.user.fid);
                     setViewerUsername(ctx.user.username || undefined);
-                } else if (ctx?.viewer) { // Fallback to ctx.viewer (older spec)
-                    console.log("Found ctx.viewer:", ctx.viewer);
+                } else if (ctx?.viewer) {
                     setViewerFid(ctx.viewer.fid);
                     setViewerUsername(ctx.viewer.username || undefined);
-                } else {
-                    console.warn("No viewer found in context");
                 }
 
                 // Check if frame is already added
                 const frameAdded = ctx?.client?.added || false;
                 setIsFrameAdded(frameAdded);
-
-                // Register notification token if available
-                if (ctx?.client?.notificationDetails && (ctx.user?.fid || ctx.viewer?.fid)) {
-                    const fid = ctx.user?.fid || ctx.viewer?.fid;
-                    const { url, token } = ctx.client.notificationDetails;
-
-                    fetch('/api/notifications/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ fid, url, token })
-                    }).catch(err => console.error("Failed to register notification token:", err));
-                }
-
-                // Show "Add to Miniapps" popup automatically only if not added
-                if (!frameAdded) {
-                    try {
-                        const result = await sdk.actions.addFrame();
-                        setIsFrameAdded(true);
-
-                        // @ts-ignore
-                        if (result.notificationDetails && (ctx.user?.fid || ctx.viewer?.fid)) {
-                            const fid = ctx.user?.fid || ctx.viewer?.fid;
-                            // @ts-ignore
-                            const { url, token } = result.notificationDetails;
-
-                            fetch('/api/notifications/register', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ fid, url, token })
-                            }).catch(err => console.error("Failed to register new notification token:", err));
-                        }
-                    } catch (e) {
-                        console.log("Add frame prompt skipped or failed:", e);
-                    }
-                }
             } catch (e) {
                 console.error("mini app init error (likely outside Farcaster)", e);
             } finally {
@@ -250,11 +214,20 @@ export default function HomePage() {
 
     // Ask a question + lock bounty on-chain
     const ask = async () => {
-        if (!questionText.trim()) return;
-        if (bounty < 0.000001) {
-            alert("Minimum bounty is 0.000001 ETH");
+        // Validate question text
+        const questionValidation = Validators.question(questionText);
+        if (!questionValidation.valid) {
+            alert(questionValidation.error);
             return;
         }
+
+        // Validate bounty amount
+        const bountyValidation = Validators.bountyAmount(bounty);
+        if (!bountyValidation.valid) {
+            alert(bountyValidation.error);
+            return;
+        }
+
         if (!isConnected || !address) {
             alert("Connect your Farcaster wallet to lock bounty on-chain.");
             return;
@@ -274,7 +247,7 @@ export default function HomePage() {
             }
 
             const now = Date.now();
-            const durationMs = 15 * 24 * 60 * 60 * 1000; // 15 days
+            const durationMs = BOUNTY_CONFIG.DEADLINE_DAYS * 24 * 60 * 60 * 1000;
             const deadlineMs = now + durationMs;
             const deadlineSec = Math.floor(deadlineMs / 1000);
 
@@ -300,9 +273,7 @@ export default function HomePage() {
             let onchainId = -1;
             if (publicClient) {
                 try {
-                    console.log("Waiting for transaction receipt...", hash);
                     const receipt = await publicClient.waitForTransactionReceipt({ hash });
-                    console.log("Receipt received:", receipt);
 
                     // Find the QuestionCreated event
                     for (const log of receipt.logs) {
@@ -312,11 +283,9 @@ export default function HomePage() {
                                 data: log.data,
                                 topics: log.topics,
                             });
-                            console.log("Decoded event:", event);
                             if (event.eventName === 'QuestionCreated' && event.args) {
                                 // @ts-ignore
                                 onchainId = Number(event.args.id);
-                                console.log("Found onchainId:", onchainId);
                                 break;
                             }
                         } catch (e) {
@@ -577,21 +546,26 @@ export default function HomePage() {
                             <button
                                 onClick={async () => {
                                     try {
-                                        const result = await sdk.actions.addFrame();
+                                        const result = await sdk.actions.addFrame() as AddFrameResult;
                                         setIsFrameAdded(true);
-                                        // @ts-ignore
                                         if (result.notificationDetails && viewerFid) {
-                                            // @ts-ignore
                                             const { url, token } = result.notificationDetails;
-                                            await fetch('/api/notifications/register', {
+                                            setNotificationStatus('registering');
+                                            const res = await fetch('/api/notifications/register', {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
                                                 body: JSON.stringify({ fid: viewerFid, url, token })
                                             });
+                                            if (!res.ok) {
+                                                console.error("Notification registration failed with status:", res.status);
+                                                setNotificationStatus('error');
+                                            } else {
+                                                setNotificationStatus('success');
+                                                setTimeout(() => setNotificationStatus('idle'), 3000);
+                                            }
                                         }
-                                        setIsFrameAdded(true);
                                     } catch (e) {
-                                        console.log("Add frame failed:", e);
+                                        // Add frame failed silently
                                     }
                                 }}
                                 className="text-brand-purple hover:text-brand-gold text-xs font-medium transition-colors flex items-center gap-1 p-1.5 glass-card rounded-lg"
@@ -620,6 +594,18 @@ export default function HomePage() {
                         </div>
                     )}
                 </div>
+
+                {/* Notification Status Indicator */}
+                {notificationStatus !== 'idle' && (
+                    <div className={`mt-4 text-center text-xs px-4 py-2 rounded-lg ${notificationStatus === 'registering' ? 'bg-blue-500/20 text-blue-300' :
+                        notificationStatus === 'success' ? 'bg-green-500/20 text-green-300' :
+                            'bg-red-500/20 text-red-300'
+                        }`}>
+                        {notificationStatus === 'registering' && '🔔 Registering notifications...'}
+                        {notificationStatus === 'success' && '✅ Notifications enabled!'}
+                        {notificationStatus === 'error' && '❌ Failed to enable notifications'}
+                    </div>
+                )}
             </header>
 
             <section className="mb-8">

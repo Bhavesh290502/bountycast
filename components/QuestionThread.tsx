@@ -162,7 +162,6 @@ export default function QuestionThread({
         }
 
         const targetId = onchainId;
-        console.log("Awarding bounty:", { targetId, winnerAddress, connectedAddress: address, askerAddress });
 
         try {
             // Simulate first to catch errors
