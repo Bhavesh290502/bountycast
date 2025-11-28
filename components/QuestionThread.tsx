@@ -376,7 +376,7 @@ export default function QuestionThread({
 
                             <div className="flex items-center gap-2">
                                 {/* Show Award button if viewer is asker and question is active */}
-                                {askerAddress && address && askerAddress.toLowerCase() === address.toLowerCase() && isQuestionActive && a.address && (
+                                {askerAddress && address && askerAddress.toLowerCase() === address.toLowerCase() && isQuestionActive && a.address && a.address.toLowerCase() !== address.toLowerCase() && (
                                     <button
                                         onClick={() => awardBounty(a.address!)}
                                         className="flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-green-500/20 hover:bg-green-500/40 text-green-400 hover:text-white transition-all group mr-2"
