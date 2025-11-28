@@ -10,7 +10,23 @@ export async function GET(req: NextRequest, { params }: { params: any }) {
 
     try {
         // 1. Get User Profile (Neynar)
-        const profile = await getUserProfile(fid);
+        let profile = await getUserProfile(fid);
+
+        // Fallback if Neynar fails: Get username from our DB
+        if (!profile) {
+            const userResult = await sql`SELECT username FROM questions WHERE fid = ${fid} LIMIT 1`;
+            if (userResult.rows.length > 0) {
+                profile = {
+                    fid,
+                    username: userResult.rows[0].username,
+                    displayName: userResult.rows[0].username,
+                    pfpUrl: 'https://warpcast.com/avatar.png', // Default avatar
+                    bio: 'Profile unavailable (API Error)',
+                    isPro: false,
+                    score: 0
+                };
+            }
+        }
 
         // 2. Get Stats (DB)
         const statsResult = await sql`
