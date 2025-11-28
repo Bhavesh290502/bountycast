@@ -546,8 +546,8 @@ export default function HomePage() {
                                 onClick={() => setShowMyBountiesModal(true)}
                                 className="glass-card px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 border border-white/5"
                             >
-                                <span>👤</span>
-                                <span className="hidden sm:inline">My Bounties</span>
+                                <span className="text-base">👤</span>
+                                <span>My Bounties</span>
                             </button>
                         )}
 
@@ -557,7 +557,7 @@ export default function HomePage() {
                             title="Leaderboard"
                         >
                             <span className="text-base">🏆</span>
-                            <span className="hidden sm:inline">Leaderboard</span>
+                            <span>Leaderboard</span>
                         </button>
 
                         {!isFrameAdded && (
