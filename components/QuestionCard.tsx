@@ -204,7 +204,7 @@ export default function QuestionCard({
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             const text = `Help me solve this bounty! 💰 ${q.bounty} ETH\n\nAnswer here:`;
-                                            const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(`https://bountycast.vercel.app?id=${q.id}`)}`;
+                                            const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(`https://bountycast.vercel.app/question/${q.id}`)}`;
                                             sdk.actions.openUrl(url);
                                             setActiveMenuQuestionId(null);
                                         }}
