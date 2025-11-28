@@ -227,7 +227,7 @@ export default function QuestionCard({
                             <div className={`relative ${!isExpanded ? 'max-h-[80px] overflow-hidden' : ''}`}>
                                 <MarkdownRenderer content={q.original_question} />
                                 {!isExpanded && q.original_question.length > 200 && (
-                                    <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-[#1a1b1e] to-transparent pointer-events-none" />
+                                    <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#1a1b1e] via-[#1a1b1e]/80 to-transparent pointer-events-none" />
                                 )}
                             </div>
                         </div>
@@ -235,8 +235,8 @@ export default function QuestionCard({
                             <div className="text-[10px] text-brand-purple uppercase font-bold mb-1">Edited Question</div>
                             <div className={`relative ${!isExpanded ? 'max-h-[120px] overflow-hidden' : ''}`}>
                                 <MarkdownRenderer content={q.question} />
-                                {!isExpanded && q.question.length > 300 && (
-                                    <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[#1a1b1e] to-transparent pointer-events-none" />
+                                {!isExpanded && q.question.length > 200 && (
+                                    <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#1a1b1e] via-[#1a1b1e]/80 to-transparent pointer-events-none" />
                                 )}
                             </div>
                         </div>
@@ -244,12 +244,12 @@ export default function QuestionCard({
                 ) : (
                     <div className={`relative ${!isExpanded ? 'max-h-[120px] overflow-hidden' : ''}`}>
                         <MarkdownRenderer content={q.question} />
-                        {!isExpanded && q.question.length > 300 && (
+                        {!isExpanded && q.question.length > 200 && (
                             <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#0f0e13] via-[#0f0e13]/80 to-transparent pointer-events-none" />
                         )}
                     </div>
                 )}
-                {(q.question.length > 300 || (q.original_question && q.original_question.length > 200)) && (
+                {(q.question.length > 200 || (q.original_question && q.original_question.length > 200)) && (
                     <button
                         onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
                         className="text-brand-purple text-xs font-bold mt-[-8px] relative z-10 hover:underline flex items-center gap-1"
