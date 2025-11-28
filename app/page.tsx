@@ -148,8 +148,21 @@ export default function HomePage() {
                 // Show "Add to Miniapps" popup automatically only if not added
                 if (!frameAdded) {
                     try {
-                        await sdk.actions.addFrame();
+                        const result = await sdk.actions.addFrame();
                         setIsFrameAdded(true);
+
+                        // @ts-ignore
+                        if (result.notificationDetails && (ctx.user?.fid || ctx.viewer?.fid)) {
+                            const fid = ctx.user?.fid || ctx.viewer?.fid;
+                            // @ts-ignore
+                            const { url, token } = result.notificationDetails;
+
+                            fetch('/api/notifications/register', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ fid, url, token })
+                            }).catch(err => console.error("Failed to register new notification token:", err));
+                        }
                     } catch (e) {
                         console.log("Add frame prompt skipped or failed:", e);
                     }
@@ -564,7 +577,18 @@ export default function HomePage() {
                             <button
                                 onClick={async () => {
                                     try {
-                                        await sdk.actions.addFrame();
+                                        const result = await sdk.actions.addFrame();
+                                        setIsFrameAdded(true);
+                                        // @ts-ignore
+                                        if (result.notificationDetails && viewerFid) {
+                                            // @ts-ignore
+                                            const { url, token } = result.notificationDetails;
+                                            await fetch('/api/notifications/register', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ fid: viewerFid, url, token })
+                                            });
+                                        }
                                         setIsFrameAdded(true);
                                     } catch (e) {
                                         console.log("Add frame failed:", e);
