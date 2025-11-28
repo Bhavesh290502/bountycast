@@ -319,7 +319,7 @@ export default function HomePage() {
 
             setLastPostedBounty({ question: questionText, bounty });
             setQuestionText("");
-            setBounty(0.000001);
+            setBounty(0.001);
             setCategory("");
             setTags([]);
             // Don't close showAsk yet, let user see success screen
@@ -631,7 +631,7 @@ export default function HomePage() {
 
                                 <button
                                     onClick={() => {
-                                        const text = `Help me solve this bounty! 💰 ${lastPostedBounty.bounty} ETH\n\n${lastPostedBounty.question}\n\nAnswer here:`;
+                                        const text = `Help me solve this bounty! 💰 ${lastPostedBounty.bounty} ETH\n\nAnswer here:`;
                                         const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent('https://bountycast.vercel.app')}`;
                                         sdk.actions.openUrl(url);
                                     }}
@@ -677,8 +677,8 @@ export default function HomePage() {
                                         <div className="relative flex-1">
                                             <input
                                                 type="number"
-                                                min={0.000001}
-                                                step={0.000001}
+                                                min={0.001}
+                                                step={0.001}
                                                 className="glass-input w-full p-3 rounded-lg pl-8 text-base"
                                                 placeholder="0.001"
                                                 value={bounty}

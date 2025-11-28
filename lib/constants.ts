@@ -2,7 +2,7 @@
 
 // Bounty Configuration
 export const BOUNTY_CONFIG = {
-    MIN_BOUNTY_ETH: parseFloat(process.env.NEXT_PUBLIC_MIN_BOUNTY_ETH || '0.000001'),
+    MIN_BOUNTY_ETH: parseFloat(process.env.NEXT_PUBLIC_MIN_BOUNTY_ETH || '0.001'),
     DEADLINE_DAYS: parseInt(process.env.NEXT_PUBLIC_BOUNTY_DEADLINE_DAYS || '15'),
     MAX_QUESTION_LENGTH: parseInt(process.env.NEXT_PUBLIC_MAX_QUESTION_LENGTH || '500'),
     MAX_ANSWER_LENGTH: parseInt(process.env.NEXT_PUBLIC_MAX_ANSWER_LENGTH || '2000'),
