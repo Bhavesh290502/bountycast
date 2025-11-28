@@ -39,6 +39,7 @@ interface Question {
 import QuestionCard from '../components/QuestionCard';
 import OnboardingGuide from '../components/OnboardingGuide';
 import LeaderboardModal from '../components/LeaderboardModal';
+import ProfileModal from '../components/ProfileModal';
 
 const CATEGORIES = ['Solidity', 'Design', 'Marketing', 'Product', 'Business', 'Other'];
 
@@ -76,6 +77,7 @@ export default function HomePage() {
     const [myQuestions, setMyQuestions] = useState<Question[]>([]);
     const [myQuestionsLoading, setMyQuestionsLoading] = useState(false);
     const [showLeaderboard, setShowLeaderboard] = useState(false);
+    const [selectedProfileFid, setSelectedProfileFid] = useState<number | null>(null);
 
     // Load User Profile
     useEffect(() => {
@@ -479,6 +481,7 @@ export default function HomePage() {
                                         toggleMenu={toggleMenu}
                                         setActiveMenuQuestionId={setActiveMenuQuestionId}
                                         setEditingQuestion={setEditingQuestion}
+                                        onProfileClick={setSelectedProfileFid}
                                     />
                                 ))
                             )}
@@ -555,7 +558,7 @@ export default function HomePage() {
                             className="glass-card p-1.5 rounded-lg text-brand-gold hover:bg-white/10 transition-all"
                             title="Leaderboard"
                         >
-                            <span className="text-lg">🏆</span>
+                            <span className="text-lg">🏆 Leaderboard</span>
                         </button>
 
                         {!isFrameAdded && (
@@ -768,12 +771,14 @@ export default function HomePage() {
                             toggleMenu={toggleMenu}
                             setActiveMenuQuestionId={setActiveMenuQuestionId}
                             setEditingQuestion={setEditingQuestion}
+                            onProfileClick={setSelectedProfileFid}
                         />
                     ))}
                 </div>
             </section>
             <OnboardingGuide />
             <LeaderboardModal isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
+            <ProfileModal fid={selectedProfileFid} isOpen={!!selectedProfileFid} onClose={() => setSelectedProfileFid(null)} />
         </div >
     );
 }

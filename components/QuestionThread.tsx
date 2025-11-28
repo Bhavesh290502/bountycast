@@ -30,6 +30,8 @@ export default function QuestionThread({
     onchainId,
     deadline,
     winnerProfile,
+    winnerFid,
+    onProfileClick,
 }: {
     questionId: number;
     fid?: number;
@@ -44,6 +46,8 @@ export default function QuestionThread({
         isPro: boolean;
         score: number;
     };
+    winnerFid?: number;
+    onProfileClick?: (fid: number) => void;
 }) {
     const [answers, setAnswers] = useState<Answer[]>([]);
     const [myAnswer, setMyAnswer] = useState('');
@@ -323,7 +327,11 @@ export default function QuestionThread({
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        sdk.actions.openUrl(`https://warpcast.com/${winnerProfile.username}`);
+                                        if (onProfileClick && winnerFid) {
+                                            onProfileClick(winnerFid);
+                                        } else {
+                                            sdk.actions.openUrl(`https://warpcast.com/${winnerProfile.username}`);
+                                        }
                                     }}
                                     className="text-sm font-bold text-green-300 hover:underline"
                                 >
@@ -360,8 +368,12 @@ export default function QuestionThread({
                                     )}
                                     <button
                                         onClick={() => {
-                                            const username = a.authorProfile?.username || a.username;
-                                            sdk.actions.openUrl(`https://warpcast.com/${username}`);
+                                            if (onProfileClick) {
+                                                onProfileClick(a.fid);
+                                            } else {
+                                                const username = a.authorProfile?.username || a.username;
+                                                sdk.actions.openUrl(`https://warpcast.com/${username}`);
+                                            }
                                         }}
                                         className="font-bold text-brand-purple text-xs hover:underline text-left"
                                     >
@@ -441,7 +453,13 @@ export default function QuestionThread({
                                         <div key={c.id} className="mb-2 pl-2 border-l-2 border-white/10 text-xs">
                                             <div className="flex items-center gap-1 mb-0.5">
                                                 <button
-                                                    onClick={() => sdk.actions.openUrl(`https://warpcast.com/${c.username}`)}
+                                                    onClick={() => {
+                                                        if (onProfileClick && c.fid) {
+                                                            onProfileClick(c.fid);
+                                                        } else {
+                                                            sdk.actions.openUrl(`https://warpcast.com/${c.username}`);
+                                                        }
+                                                    }}
                                                     className="font-bold text-gray-400 hover:text-brand-purple hover:underline"
                                                 >
                                                     {c.username}
