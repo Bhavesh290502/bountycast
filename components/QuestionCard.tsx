@@ -29,6 +29,12 @@ interface Question {
         isPro: boolean;
         score: number;
     };
+    winnerProfile?: {
+        username: string;
+        pfpUrl: string;
+        isPro: boolean;
+        score: number;
+    };
 }
 
 interface QuestionCardProps {
@@ -130,6 +136,29 @@ export default function QuestionCard({
                         <span>🏆</span>
                         <span>{Number(q.bounty || 0).toFixed(8).replace(/\.?0+$/, '')} ETH</span>
                     </div>
+
+                    {/* Winner Display */}
+                    {q.status === 'awarded' && q.winnerProfile && (
+                        <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 px-2 py-1 rounded-full">
+                            <span className="text-[10px] text-green-400 font-bold uppercase">Winner</span>
+                            <div className="flex items-center gap-1">
+                                <img
+                                    src={q.winnerProfile.pfpUrl}
+                                    alt={q.winnerProfile.username}
+                                    className="w-4 h-4 rounded-full border border-green-500/30"
+                                />
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        sdk.actions.openUrl(`https://warpcast.com/${q.winnerProfile?.username}`);
+                                    }}
+                                    className="text-xs font-bold text-green-300 hover:underline"
+                                >
+                                    @{q.winnerProfile.username}
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Refund Button for Expired Questions */}
                     {q.status === 'expired' && viewerFid && q.fid === viewerFid && (

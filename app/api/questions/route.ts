@@ -123,10 +123,13 @@ export async function GET(req: NextRequest) {
         const { rows } = await sql.query(query, params);
 
         // Enrich with Neynar data
-        const fids = rows.map(r => r.fid).filter(f => f > 0);
-        if (fids.length > 0) {
+        const authorFids = rows.map(r => r.fid).filter(f => f > 0);
+        const winnerFids = rows.map(r => r.winner_fid).filter(f => f > 0);
+        const allFids = [...new Set([...authorFids, ...winnerFids])];
+
+        if (allFids.length > 0) {
             const { getBulkUserProfiles } = await import('../../../lib/neynar');
-            const profiles = await getBulkUserProfiles(fids);
+            const profiles = await getBulkUserProfiles(allFids);
 
             const enrichedRows = rows.map(row => ({
                 ...row,
@@ -144,7 +147,9 @@ export async function GET(req: NextRequest) {
                 isPrivate: row.is_private,
                 updatedAt: row.updated_at,
                 original_question: row.original_question,
-                authorProfile: profiles[row.fid] || null
+                winner_fid: row.winner_fid,
+                authorProfile: profiles[row.fid] || null,
+                winnerProfile: row.winner_fid ? profiles[row.winner_fid] : null
             }));
             return NextResponse.json(enrichedRows);
         }
