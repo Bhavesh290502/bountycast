@@ -343,9 +343,9 @@ export default function QuestionThread({
             <div className="space-y-2">
                 {answers.slice(0, showAllAnswers ? undefined : 3).map((a) => (
                     <div key={a.id} className="bg-white/5 rounded-lg overflow-hidden">
-                        <div className="p-3 flex justify-between items-center group hover:bg-white/10 transition-colors">
-                            <div className="flex-1 mr-2">
-                                <div className="flex items-center gap-2 mb-1">
+                        <div className="p-3 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 group hover:bg-white/10 transition-colors">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-2">
                                     {a.authorProfile ? (
                                         <img
                                             src={a.authorProfile.pfpUrl}
@@ -362,23 +362,23 @@ export default function QuestionThread({
                                             const username = a.authorProfile?.username || a.username;
                                             sdk.actions.openUrl(`https://warpcast.com/${username}`);
                                         }}
-                                        className="font-bold text-brand-purple text-xs hover:underline text-left"
+                                        className="font-bold text-brand-purple text-xs hover:underline text-left truncate"
                                     >
                                         {a.authorProfile ? `@${a.authorProfile.username}` : a.username}
                                     </button >
                                 </div >
 
-                                <div className="text-gray-300 text-xs block pl-7">
+                                <div className="text-gray-300 text-xs block pl-7 break-words">
                                     <MarkdownRenderer content={a.answer} />
                                 </div>
                             </div >
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-end gap-2 self-end sm:self-start mt-2 sm:mt-0 shrink-0">
                                 {/* Show Award button if viewer is asker and question is active */}
                                 {askerAddress && address && askerAddress.toLowerCase() === address.toLowerCase() && isQuestionActive && a.address && a.address.toLowerCase() !== address.toLowerCase() && (
                                     <button
                                         onClick={() => awardBounty(a.address!)}
-                                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-green-500/20 hover:bg-green-500/40 text-green-400 hover:text-white transition-all group mr-2"
+                                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-green-500/20 hover:bg-green-500/40 text-green-400 hover:text-white transition-all group"
                                         title="Award Bounty"
                                     >
                                         <svg
@@ -395,7 +395,7 @@ export default function QuestionThread({
 
                                 <button
                                     onClick={() => toggleComments(a.id)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all group mr-2"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all group"
                                     title="Comments"
                                 >
                                     <svg
