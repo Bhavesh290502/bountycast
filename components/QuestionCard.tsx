@@ -46,7 +46,6 @@ interface QuestionCardProps {
     toggleMenu: (id: number) => void;
     setActiveMenuQuestionId: (id: number | null) => void;
     setEditingQuestion: (q: Question | null) => void;
-    onProfileClick: (fid: number) => void;
 }
 
 export default function QuestionCard({
@@ -57,8 +56,7 @@ export default function QuestionCard({
     activeMenuQuestionId,
     toggleMenu,
     setActiveMenuQuestionId,
-    setEditingQuestion,
-    onProfileClick
+    setEditingQuestion
 }: QuestionCardProps) {
     const { writeContractAsync } = useWriteContract();
     const [isExpanded, setIsExpanded] = useState(false);
@@ -79,11 +77,7 @@ export default function QuestionCard({
                         <img
                             src={q.authorProfile.pfpUrl}
                             alt={q.authorProfile.username}
-                            className="w-8 h-8 rounded-full border border-white/10 cursor-pointer"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onProfileClick(q.fid);
-                            }}
+                            className="w-8 h-8 rounded-full border border-white/10"
                         />
                     ) : (
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-gray-400">
@@ -96,12 +90,8 @@ export default function QuestionCard({
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    if (q.fid) {
-                                        onProfileClick(q.fid);
-                                    } else {
-                                        const username = q.authorProfile ? q.authorProfile.username : (q.username || 'anon');
-                                        sdk.actions.openUrl(`https://warpcast.com/${username}`);
-                                    }
+                                    const username = q.authorProfile ? q.authorProfile.username : (q.username || 'anon');
+                                    sdk.actions.openUrl(`https://warpcast.com/${username}`);
                                 }}
                                 className="font-semibold text-white text-sm hover:underline hover:text-brand-purple transition-colors text-left"
                             >
@@ -285,8 +275,6 @@ export default function QuestionCard({
                     onchainId={q.onchainId}
                     deadline={q.deadline}
                     winnerProfile={q.winnerProfile}
-                    winnerFid={q.winner_fid}
-                    onProfileClick={onProfileClick}
                 />
             </div>
         </div >
