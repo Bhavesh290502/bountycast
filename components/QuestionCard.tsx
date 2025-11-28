@@ -130,6 +130,34 @@ export default function QuestionCard({
                         <span>{Number(q.bounty || 0).toFixed(8).replace(/\.?0+$/, '')} ETH</span>
                     </div>
 
+                    {/* Refund Button for Expired Questions */}
+                    {q.status === 'expired' && viewerFid && q.fid === viewerFid && (
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                if (!q.onchainId || q.onchainId === -1) {
+                                    alert("Error: Invalid On-Chain ID");
+                                    return;
+                                }
+                                try {
+                                    const hash = await writeContractAsync({
+                                        address: BOUNTYCAST_ADDRESS,
+                                        abi: bountycastAbi,
+                                        functionName: "refund",
+                                        args: [BigInt(q.onchainId)],
+                                    });
+                                    alert(`Refund transaction sent! Tx: ${hash}`);
+                                } catch (err: any) {
+                                    console.error(err);
+                                    alert(`Refund failed: ${err.message}`);
+                                }
+                            }}
+                            className="bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/30 px-2 py-1 rounded text-xs font-bold transition-colors"
+                        >
+                            Refund 💸
+                        </button>
+                    )}
+
 
 
                     {/* 3-Dot Menu */}
@@ -149,7 +177,7 @@ export default function QuestionCard({
 
                         {activeMenuQuestionId === q.id && (
                             <div className="absolute right-0 top-8 w-40 bg-gray-900 border border-white/10 shadow-xl rounded-lg py-1 z-50">
-                                {viewerFid && q.fid === viewerFid && (
+                                {viewerFid && q.fid === viewerFid && q.status === 'active' && (
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -161,18 +189,20 @@ export default function QuestionCard({
                                         <span>✏️</span> Edit Question
                                     </button>
                                 )}
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        const text = `Help me solve this bounty! 💰 ${q.bounty} ETH\n\nAnswer here:`;
-                                        const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent('https://bountycast.vercel.app')}`;
-                                        sdk.actions.openUrl(url);
-                                        setActiveMenuQuestionId(null);
-                                    }}
-                                    className="w-full text-left px-4 py-2 text-xs text-gray-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
-                                >
-                                    <span>🔁</span> Share
-                                </button>
+                                {q.status === 'active' && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const text = `Help me solve this bounty! 💰 ${q.bounty} ETH\n\nAnswer here:`;
+                                            const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent('https://bountycast.vercel.app')}`;
+                                            sdk.actions.openUrl(url);
+                                            setActiveMenuQuestionId(null);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-xs text-gray-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                                    >
+                                        <span>🔁</span> Share
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

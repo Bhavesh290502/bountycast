@@ -284,21 +284,27 @@ export default function QuestionThread({
 
     return (
         <div className="mt-4">
-            <div className="flex gap-2 mb-4">
-                <input
-                    className="glass-input flex-1 p-2 rounded-lg text-xs"
-                    placeholder="Add an answer..."
-                    value={myAnswer}
-                    onChange={(e) => setMyAnswer(e.target.value)}
-                />
-                <button
-                    onClick={submitAnswer}
-                    disabled={loading}
-                    className="btn-primary px-4 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
-                >
-                    {loading ? 'Posting...' : 'Post'}
-                </button>
-            </div >
+            {isQuestionActive ? (
+                <div className="flex gap-2 mb-4">
+                    <input
+                        className="glass-input flex-1 p-2 rounded-lg text-xs"
+                        placeholder="Add an answer..."
+                        value={myAnswer}
+                        onChange={(e) => setMyAnswer(e.target.value)}
+                    />
+                    <button
+                        onClick={submitAnswer}
+                        disabled={loading}
+                        className="btn-primary px-4 py-2 rounded-lg text-xs font-medium disabled:opacity-50"
+                    >
+                        {loading ? 'Posting...' : 'Post'}
+                    </button>
+                </div >
+            ) : (
+                <div className="mb-4 text-center p-3 bg-white/5 rounded-lg text-xs text-gray-400 italic">
+                    This bounty has been awarded or expired. No new answers can be posted.
+                </div>
+            )}
             <div className="text-[10px] text-gray-500 text-right mb-4 -mt-3 mr-1">
                 Markdown supported: **bold**, *italic*, `code`
             </div>
@@ -412,21 +418,23 @@ export default function QuestionThread({
                                             <p className="text-gray-300">{c.comment}</p>
                                         </div>
                                     ))}
-                                    <div className="flex gap-2 mt-2">
-                                        <input
-                                            className="glass-input flex-1 p-1.5 rounded text-xs"
-                                            placeholder="Reply..."
-                                            value={commentText[a.id] || ''}
-                                            onChange={e => setCommentText(prev => ({ ...prev, [a.id]: e.target.value }))}
-                                        />
-                                        <button
-                                            onClick={() => postComment(a.id)}
-                                            disabled={commentLoading[a.id]}
-                                            className="bg-white/10 hover:bg-white/20 text-white px-2 py-1 rounded text-xs"
-                                        >
-                                            {commentLoading[a.id] ? '...' : 'Reply'}
-                                        </button>
-                                    </div>
+                                    {isQuestionActive && (
+                                        <div className="flex gap-2 mt-2">
+                                            <input
+                                                className="glass-input flex-1 p-1.5 rounded text-xs"
+                                                placeholder="Reply..."
+                                                value={commentText[a.id] || ''}
+                                                onChange={e => setCommentText(prev => ({ ...prev, [a.id]: e.target.value }))}
+                                            />
+                                            <button
+                                                onClick={() => postComment(a.id)}
+                                                disabled={commentLoading[a.id]}
+                                                className="bg-white/10 hover:bg-white/20 text-white px-2 py-1 rounded text-xs"
+                                            >
+                                                {commentLoading[a.id] ? '...' : 'Reply'}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )
                         }

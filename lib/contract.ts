@@ -63,6 +63,13 @@ export const bountycastAbi: Abi = [
     },
     {
         type: 'function',
+        name: 'refund',
+        stateMutability: 'nonpayable',
+        inputs: [{ name: 'questionId', type: 'uint256' }],
+        outputs: [],
+    },
+    {
+        type: 'function',
         name: 'questions',
         stateMutability: 'view',
         inputs: [{ name: '', type: 'uint256' }],
