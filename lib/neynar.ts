@@ -83,7 +83,7 @@ export async function checkEligibility(fid: number): Promise<{ allowed: boolean;
     const score = user.score || user.experimental?.score || 0;
     const isPro = user.power_badge || false;
 
-    console.log(`Eligibility Check [FID:${fid}]: Pro=${isPro}, Score=${score}`);
+
 
     if (isPro || score > 0.6) {
         return { allowed: true };

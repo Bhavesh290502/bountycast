@@ -20,7 +20,6 @@ interface Question {
     active?: boolean;
     category?: string;
     tags?: string[];
-    isPrivate?: boolean;
     updatedAt?: number;
     winner_fid?: number;
     original_question?: string;
@@ -263,11 +262,7 @@ export default function QuestionCard({
                         #{tag}
                     </span>
                 ))}
-                {q.isPrivate && (
-                    <span className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded text-[10px] flex items-center gap-1">
-                        🔒 Private
-                    </span>
-                )}
+
             </div>
 
             <div className="border-t border-white/5 pt-3 mt-3">

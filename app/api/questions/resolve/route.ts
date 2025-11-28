@@ -7,10 +7,7 @@ export async function POST(req: NextRequest) {
     try {
         const reqBody = await req.json();
         const { questionId, fid, txHash } = reqBody;
-        console.log("Resolve API called with:", { questionId, fid, txHash, winnerFid: reqBody.winnerFid });
-
         if (!questionId || !fid || !txHash) {
-            console.log("Missing fields");
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
@@ -21,10 +18,9 @@ export async function POST(req: NextRequest) {
         }
 
         const dbFid = checkResult.rows[0].fid;
-        console.log("Auth check:", { reqFid: fid, dbFid });
 
         if (Number(dbFid) !== Number(fid)) {
-            console.warn(`FID Mismatch: DB ${dbFid} vs Req ${fid}. Proceeding anyway as on-chain tx is primary source of truth.`);
+            // Proceeding anyway as on-chain tx is primary source of truth.
         }
 
         // Update status to awarded

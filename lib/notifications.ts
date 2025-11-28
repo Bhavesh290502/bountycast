@@ -7,7 +7,6 @@ export async function sendFarcasterNotification(fid: number, title: string, body
         `;
 
         if (result.rows.length === 0) {
-            // console.log(`No notification token found for FID ${fid}`);
             return;
         }
 

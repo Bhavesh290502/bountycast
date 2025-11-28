@@ -3,7 +3,7 @@ import { sql } from '../../../../lib/db';
 
 export async function PUT(req: NextRequest) {
     try {
-        const { questionId, fid, question, category, tags, isPrivate } = await req.json();
+        const { questionId, fid, question, category, tags } = await req.json();
 
         if (!questionId || !fid) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -38,7 +38,6 @@ export async function PUT(req: NextRequest) {
                 original_question = ${currentQ.question},
                 category = COALESCE(${category}, category),
                 tags = COALESCE(${tags}, tags),
-                is_private = COALESCE(${isPrivate}, is_private),
                 updated_at = ${updatedAt}
             WHERE id = ${questionId}
         `;

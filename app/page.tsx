@@ -11,7 +11,6 @@ import {
 } from "wagmi";
 import { decodeEventLog } from 'viem';
 import { bountycastAbi, BOUNTYCAST_ADDRESS } from "../lib/contract";
-import QuestionThread from "../components/QuestionThread";
 
 interface Question {
     id: number;
@@ -28,7 +27,6 @@ interface Question {
     active?: boolean;
     category?: string;
     tags?: string[];
-    isPrivate?: boolean;
     updatedAt?: number;
     authorProfile?: {
         username: string;
@@ -72,7 +70,6 @@ export default function HomePage() {
     const [selectedSort, setSelectedSort] = useState<string>("newest");
     const [category, setCategory] = useState<string>("");
     const [tags, setTags] = useState<string[]>([]);
-    const [isPrivate, setIsPrivate] = useState(false);
 
     const [showMyBountiesModal, setShowMyBountiesModal] = useState(false);
     const [myQuestions, setMyQuestions] = useState<Question[]>([]);
@@ -333,7 +330,6 @@ export default function HomePage() {
                     deadline: deadlineMs,
                     category,
                     tags,
-                    isPrivate,
                 }),
             });
 
@@ -342,7 +338,6 @@ export default function HomePage() {
             setBounty(0.000001);
             setCategory("");
             setTags([]);
-            setIsPrivate(false);
             // Don't close showAsk yet, let user see success screen
             await loadQuestions();
         } catch (e) {
@@ -368,8 +363,7 @@ export default function HomePage() {
                     fid: viewerFid,
                     question: editingQuestion.question,
                     category: editingQuestion.category,
-                    tags: editingQuestion.tags,
-                    isPrivate: editingQuestion.isPrivate
+                    tags: editingQuestion.tags
                 }),
             });
 

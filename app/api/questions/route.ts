@@ -51,12 +51,7 @@ export async function GET(req: NextRequest) {
             paramIndex++;
         }
 
-        // Don't show private questions in public list UNLESS it's the author viewing their own
-        if (authorFid) {
-            // If viewing own bounties, show private ones too (already filtered by fid)
-        } else {
-            query += ' AND (is_private = false OR is_private IS NULL)';
-        }
+
 
         // Lazy Expiration: Check for expired active questions and update them
 
@@ -144,7 +139,6 @@ export async function GET(req: NextRequest) {
                 address: row.address,
                 category: row.category,
                 tags: row.tags,
-                isPrivate: row.is_private,
                 updatedAt: row.updated_at,
                 original_question: row.original_question,
                 winner_fid: row.winner_fid,
@@ -167,7 +161,6 @@ export async function GET(req: NextRequest) {
             address: row.address,
             category: row.category,
             tags: row.tags,
-            isPrivate: row.is_private,
             updatedAt: row.updated_at,
             original_question: row.original_question,
         }));
@@ -181,7 +174,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
-    const { fid, username, address, question, bounty, token, onchainId, deadline, category, tags, isPrivate } = body || {};
+    const { fid, username, address, question, bounty, token, onchainId, deadline, category, tags } = body || {};
 
     if (!question || !bounty) {
         return NextResponse.json(
@@ -202,8 +195,8 @@ export async function POST(req: NextRequest) {
 
     try {
         const { rows } = await sql`
-      INSERT INTO questions (fid, username, address, question, bounty, token, created, deadline, onchainId, status, category, tags, is_private)
-      VALUES (${fid || 0}, ${username || 'anon'}, ${address || ''}, ${question}, ${bounty}, ${token || 'ETH'}, ${Date.now()}, ${deadline}, ${onchainId}, 'active', ${category || null}, ${tags || null}, ${isPrivate || false})
+      INSERT INTO questions (fid, username, address, question, bounty, token, created, deadline, onchainId, status, category, tags)
+      VALUES (${fid || 0}, ${username || 'anon'}, ${address || ''}, ${question}, ${bounty}, ${token || 'ETH'}, ${Date.now()}, ${deadline}, ${onchainId}, 'active', ${category || null}, ${tags || null})
       RETURNING id;
     `;
         return NextResponse.json({ id: rows[0].id });
