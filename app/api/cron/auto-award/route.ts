@@ -3,7 +3,7 @@ import { sql } from '@vercel/postgres';
 import { createWalletClient, http, createPublicClient } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains'; // Assuming Base chain
-import { bountycastAbi, BOUNTYCAST_ADDRESS } from '../../../lib/contract';
+import { bountycastAbi, BOUNTYCAST_ADDRESS } from '../../../../lib/contract';
 
 // Prevent caching
 export const dynamic = 'force-dynamic';
@@ -60,6 +60,11 @@ export async function GET(req: NextRequest) {
 
             if (!winner.upvotes || winner.upvotes <= 0) {
                 results.push({ id: q.id, status: 'skipped', reason: 'no upvotes' });
+                continue;
+            }
+
+            if (!winner.address) {
+                results.push({ id: q.id, status: 'skipped', reason: 'winner has no wallet address' });
                 continue;
             }
 
