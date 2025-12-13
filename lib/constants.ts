@@ -10,7 +10,7 @@ export const BOUNTY_CONFIG = {
 
 // Eligibility Configuration
 export const ELIGIBILITY_CONFIG = {
-    MIN_NEYNAR_SCORE: parseFloat(process.env.NEYNAR_MIN_SCORE || '0.6'),
+    MIN_NEYNAR_SCORE: parseFloat(process.env.NEYNAR_MIN_SCORE || '0.5'),
 } as const;
 
 // Rate Limiting Configuration

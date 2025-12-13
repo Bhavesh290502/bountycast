@@ -240,7 +240,7 @@ export default function HomePage() {
                 const checkRes = await fetch(`/api/check-eligibility?fid=${viewerFid}`);
                 if (!checkRes.ok) {
                     const checkData = await checkRes.json();
-                    alert(checkData.reason || "You are not eligible to post (Pro or Score > 0.6 required).");
+                    alert(checkData.reason || "You are not eligible to post (Pro or Score > 0.5 required).");
                     setLoading(false);
                     return;
                 }
