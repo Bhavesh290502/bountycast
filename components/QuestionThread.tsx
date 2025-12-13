@@ -341,7 +341,15 @@ export default function QuestionThread({
             </div>
 
             <div className="space-y-2">
-                {answers.slice(0, showAllAnswers ? undefined : 3).map((a) => (
+                {[...answers].sort((a, b) => {
+                    if (winnerProfile) {
+                        const isAWinner = a.username.toLowerCase() === winnerProfile.username.toLowerCase();
+                        const isBWinner = b.username.toLowerCase() === winnerProfile.username.toLowerCase();
+                        if (isAWinner && !isBWinner) return -1;
+                        if (!isAWinner && isBWinner) return 1;
+                    }
+                    return b.upvotes - a.upvotes;
+                }).slice(0, showAllAnswers ? undefined : 3).map((a) => (
                     <div key={a.id} className="bg-white/5 rounded-lg overflow-hidden">
                         <div className="p-3 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 group hover:bg-white/10 transition-colors">
                             <div className="flex-1 min-w-0">
