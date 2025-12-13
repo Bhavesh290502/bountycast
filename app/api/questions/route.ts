@@ -69,7 +69,9 @@ export async function GET(req: NextRequest) {
         const result = await sql.query(query, params);
 
         // Enrich with Neynar data
-        const fids = result.rows.map(r => r.fid).filter(f => f > 0);
+        const authorFids = result.rows.map(r => r.fid).filter(f => f > 0);
+        const winnerFids = result.rows.map(r => r.winner_fid).filter((f: any) => f > 0);
+        const fids = [...new Set([...authorFids, ...winnerFids])];
         if (fids.length > 0) {
             const { getBulkUserProfiles } = await import('../../../lib/neynar');
             const profiles = await getBulkUserProfiles(fids);

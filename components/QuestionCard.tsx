@@ -129,6 +129,18 @@ export default function QuestionCard({
                                 })()}
                             </div>
                         )}
+
+                        {q.winnerProfile && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    sdk.actions.openUrl(`https://warpcast.com/${q.winnerProfile!.username}`);
+                                }}
+                                className="text-[10px] text-green-400 mt-0.5 flex items-center gap-1 hover:underline text-left"
+                            >
+                                <span>🏆 Won by @{q.winnerProfile.username}</span>
+                            </button>
+                        )}
                     </div>
                 </div>
 
