@@ -331,9 +331,11 @@ export default function QuestionThread({
                             </div>
                         </div>
                     )}
-                    <div className="text-center p-3 bg-white/5 rounded-lg text-xs text-gray-400 italic">
-                        This bounty has been awarded or expired. No new answers can be posted.
-                    </div>
+                    {!winnerProfile && (
+                        <div className="text-center p-3 bg-white/5 rounded-lg text-xs text-gray-400 italic">
+                            This bounty has expired. No new answers can be posted.
+                        </div>
+                    )}
                 </div>
             )}
             <div className="text-[10px] text-gray-500 text-right mb-4 -mt-3 mr-1">

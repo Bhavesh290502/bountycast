@@ -130,7 +130,7 @@ export default function QuestionCard({
                             </div>
                         )}
 
-                        {q.winnerProfile && (
+                        {/* {q.winnerProfile && (
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -140,7 +140,7 @@ export default function QuestionCard({
                             >
                                 <span>🏆 Won by @{q.winnerProfile.username}</span>
                             </button>
-                        )}
+                        )} */}
                     </div>
                 </div>
 
