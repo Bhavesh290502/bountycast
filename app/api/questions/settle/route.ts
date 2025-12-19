@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
         // 2. Fetch Answers
         const { rows: answers } = await sql`
             SELECT * FROM answers 
-            WHERE question_id = ${q.id}
+            WHERE questionId = ${q.id}
         `;
 
         if (answers.length === 0) {

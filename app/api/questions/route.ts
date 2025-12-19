@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
                 AND deadline < ${Date.now()} 
                 AND NOT EXISTS (
                     SELECT 1 FROM answers 
-                    WHERE answers.question_id = questions.id
+                    WHERE answers.questionId = questions.id
                 )
             `;
         } catch (updateError) {
