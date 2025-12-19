@@ -17,13 +17,21 @@ export async function GET(req: NextRequest) {
         const sort = searchParams.get('sort') || 'newest';
 
         // Auto-expire questions with no answers
-        await sql`
-            UPDATE questions 
-            SET status = 'expired' 
-            WHERE status = 'active' 
-            AND deadline < ${Date.now()} 
-            AND id NOT IN (SELECT question_id FROM answers)
-        `;
+        try {
+            await sql`
+                UPDATE questions 
+                SET status = 'expired' 
+                WHERE status = 'active' 
+                AND deadline < ${Date.now()} 
+                AND NOT EXISTS (
+                    SELECT 1 FROM answers 
+                    WHERE answers.question_id = questions.id
+                )
+            `;
+        } catch (updateError) {
+            console.error("Failed to auto-expire questions:", updateError);
+            // Continue execution even if update fails
+        }
 
         let query = 'SELECT * FROM questions WHERE 1=1';
         const params: any[] = [];
