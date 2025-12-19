@@ -116,11 +116,44 @@ export default function QuestionCard({
                         </div>
 
                         {q.status === 'active' && q.deadline && (
-                            <div className="text-[10px] text-brand-gold mt-0.5">
+                            <div className="text-[10px] text-brand-gold mt-0.5 flex items-center gap-2">
                                 {(() => {
                                     const now = Date.now();
                                     const diff = q.deadline - now;
-                                    if (diff <= 0) return 'Expired';
+                                    if (diff <= 0) {
+                                        return (
+                                            <div className="flex items-center gap-2">
+                                                <span>Expired (Pending Distribution)</span>
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        if (confirm('Distribute bounty to the highest voted answer?')) {
+                                                            try {
+                                                                const res = await fetch('/api/questions/settle', {
+                                                                    method: 'POST',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({ questionId: q.id })
+                                                                });
+                                                                if (res.ok) {
+                                                                    alert('Bounty distributed successfully!');
+                                                                    window.location.reload();
+                                                                } else {
+                                                                    const data = await res.json();
+                                                                    alert(`Failed: ${data.error || 'Unknown error'}`);
+                                                                }
+                                                            } catch (err) {
+                                                                console.error(err);
+                                                                alert('Failed to trigger distribution');
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="bg-brand-gold/20 hover:bg-brand-gold/40 text-brand-gold border border-brand-gold/30 px-2 py-0.5 rounded text-[10px] font-bold transition-colors"
+                                                >
+                                                    Distribute ⚡
+                                                </button>
+                                            </div>
+                                        );
+                                    }
                                     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                                     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                                     if (days > 0) return `${days}d ${hours}h left`;
