@@ -33,9 +33,9 @@ export async function GET(req: NextRequest) {
         });
 
         // 3. Find Expired, Active Questions
-        // Add 5 min buffer to ensure block.timestamp > deadline (prevent 'too early' error)
+        // Buffer reduced to 0 for immediate award (testing phase)
         const now = Date.now();
-        const buffer = 5 * 60 * 1000;
+        const buffer = 0;
         const { rows: expiredQuestions } = await sql`
             SELECT * FROM questions 
             WHERE status = 'active' 

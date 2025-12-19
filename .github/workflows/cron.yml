@@ -11,5 +11,5 @@ jobs:
     steps:
       - name: Call Auto-Award Endpoint
         run: |
-          curl -X GET https://bountycast.vercel.app/api/cron/auto-award \
+          curl -v -X GET https://bountycast.vercel.app/api/cron/auto-award \
           -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
