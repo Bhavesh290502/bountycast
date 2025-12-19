@@ -33,11 +33,13 @@ export async function GET(req: NextRequest) {
         });
 
         // 3. Find Expired, Active Questions
+        // Add 5 min buffer to ensure block.timestamp > deadline (prevent 'too early' error)
         const now = Date.now();
+        const buffer = 5 * 60 * 1000;
         const { rows: expiredQuestions } = await sql`
             SELECT * FROM questions 
             WHERE status = 'active' 
-            AND deadline < ${now}
+            AND deadline < ${now - buffer}
         `;
 
         const results = [];
