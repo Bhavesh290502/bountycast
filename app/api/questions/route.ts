@@ -16,6 +16,15 @@ export async function GET(req: NextRequest) {
         const id = searchParams.get('id');
         const sort = searchParams.get('sort') || 'newest';
 
+        // Auto-expire questions with no answers
+        await sql`
+            UPDATE questions 
+            SET status = 'expired' 
+            WHERE status = 'active' 
+            AND deadline < ${Date.now()} 
+            AND id NOT IN (SELECT question_id FROM answers)
+        `;
+
         let query = 'SELECT * FROM questions WHERE 1=1';
         const params: any[] = [];
         let paramIndex = 1;

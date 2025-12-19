@@ -50,18 +50,19 @@ export async function GET(req: NextRequest) {
             `;
 
             if (answers.length === 0) {
-                results.push({ id: q.id, status: 'skipped', reason: 'no answers' });
+                // No answers -> Expire
+                await sql`
+                    UPDATE questions 
+                    SET status = 'expired', updated_at = ${Date.now()}
+                    WHERE id = ${q.id}
+                `;
+                results.push({ id: q.id, status: 'expired', reason: 'no answers' });
                 continue;
             }
 
             // Sort by upvotes desc (using the cached count in answers table)
             const sortedAnswers = [...answers].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
             const winner = sortedAnswers[0];
-
-            if (!winner.upvotes || winner.upvotes <= 0) {
-                results.push({ id: q.id, status: 'skipped', reason: 'no upvotes' });
-                continue;
-            }
 
             if (!winner.address) {
                 results.push({ id: q.id, status: 'skipped', reason: 'winner has no wallet address' });
