@@ -42,17 +42,24 @@ export async function GET(req: NextRequest) {
             AND deadline < ${now - buffer}
         `;
 
+        console.log(`[Auto-Award] Found ${expiredQuestions.length} expired active questions.`);
+
         const results = [];
 
         for (const q of expiredQuestions) {
+            console.log(`[Auto-Award] Processing Question ID: ${q.id}`);
+
             // 4. Find Top Answer
             const { rows: answers } = await sql`
                 SELECT * FROM answers 
                 WHERE questionId = ${q.id}
             `;
 
+            console.log(`[Auto-Award] Question ${q.id} has ${answers.length} answers.`);
+
             if (answers.length === 0) {
                 // No answers -> Expire
+                console.log(`[Auto-Award] Expiring Question ${q.id} (no answers)`);
                 await sql`
                     UPDATE questions 
                     SET status = 'expired', updated_at = ${Date.now()}
@@ -65,6 +72,7 @@ export async function GET(req: NextRequest) {
             // Sort by upvotes desc (using the cached count in answers table)
             const sortedAnswers = [...answers].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
             const winner = sortedAnswers[0];
+            console.log(`[Auto-Award] Winner for Question ${q.id} is ${winner?.username} (${winner?.address})`);
 
             if (!winner.address) {
                 results.push({ id: q.id, status: 'skipped', reason: 'winner has no wallet address' });
@@ -73,15 +81,18 @@ export async function GET(req: NextRequest) {
 
             // 5. Award on Blockchain
             try {
+                console.log(`[Auto-Award] Sending transaction for Question ${q.id}...`);
                 const hash = await client.writeContract({
                     address: BOUNTYCAST_ADDRESS,
                     abi: bountycastAbi,
                     functionName: 'awardBounty',
                     args: [BigInt(q.onchainid || q.onchain_id), winner.address],
                 });
+                console.log(`[Auto-Award] Tx sent: ${hash}`);
 
                 // Wait for confirmation
                 await publicClient.waitForTransactionReceipt({ hash });
+                console.log(`[Auto-Award] Tx confirmed: ${hash}`);
 
                 // 6. Update DB
                 await sql`
@@ -93,7 +104,7 @@ export async function GET(req: NextRequest) {
                 results.push({ id: q.id, status: 'awarded', winner: winner.username, tx: hash });
 
             } catch (err: any) {
-                console.error(`Failed to award question ${q.id}:`, err);
+                console.error(`[Auto-Award] Failed to award question ${q.id}:`, err);
                 results.push({ id: q.id, status: 'failed', error: err.message });
             }
         }
