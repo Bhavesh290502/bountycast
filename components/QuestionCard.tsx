@@ -127,29 +127,62 @@ export default function QuestionCard({
                                                 <button
                                                     onClick={async (e) => {
                                                         e.stopPropagation();
-                                                        if (confirm('Distribute bounty to the highest voted answer?')) {
+                                                        const isAsker = viewerFid === q.fid;
+
+                                                        if (isAsker) {
+                                                            // Asker Flow: Client-side Award (Bypasses "Too Early" check)
+                                                            if (!confirm('As the author, distribute bounty to the highest voted answer now?')) return;
                                                             try {
-                                                                const res = await fetch('/api/questions/settle', {
-                                                                    method: 'POST',
-                                                                    headers: { 'Content-Type': 'application/json' },
-                                                                    body: JSON.stringify({ questionId: q.id })
-                                                                });
-                                                                if (res.ok) {
-                                                                    alert('Bounty distributed successfully!');
-                                                                    window.location.reload();
-                                                                } else {
-                                                                    const data = await res.json();
-                                                                    alert(`Failed: ${data.error || 'Unknown error'}`);
+                                                                const res = await fetch(`/api/answers?questionId=${q.id}`);
+                                                                const answers = await res.json();
+                                                                if (!Array.isArray(answers) || answers.length === 0) {
+                                                                    alert("No answers to award!");
+                                                                    return;
                                                                 }
-                                                            } catch (err) {
+                                                                const winner = answers[0];
+                                                                if (!winner.address) {
+                                                                    alert("Highest voted answer has no wallet connected!");
+                                                                    return;
+                                                                }
+
+                                                                await writeContractAsync({
+                                                                    address: BOUNTYCAST_ADDRESS,
+                                                                    abi: bountycastAbi,
+                                                                    functionName: 'awardBounty',
+                                                                    args: [BigInt(q.onchainId), winner.address],
+                                                                });
+                                                                alert('Transaction sent! Bounty will be awarded shortly.');
+                                                                // Ideally we wait for receipt, but for now just alert
+                                                            } catch (err: any) {
                                                                 console.error(err);
-                                                                alert('Failed to trigger distribution');
+                                                                alert(`Failed to award: ${err.message}`);
+                                                            }
+                                                        } else {
+                                                            // Public Flow: API Trigger (Strict Deadline)
+                                                            if (confirm('Distribute bounty to the highest voted answer?')) {
+                                                                try {
+                                                                    const res = await fetch('/api/questions/settle', {
+                                                                        method: 'POST',
+                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                        body: JSON.stringify({ questionId: q.id })
+                                                                    });
+                                                                    if (res.ok) {
+                                                                        alert('Bounty distributed successfully!');
+                                                                        window.location.reload();
+                                                                    } else {
+                                                                        const data = await res.json();
+                                                                        alert(`Failed: ${data.error || 'Unknown error'}`);
+                                                                    }
+                                                                } catch (err) {
+                                                                    console.error(err);
+                                                                    alert('Failed to trigger distribution');
+                                                                }
                                                             }
                                                         }
                                                     }}
                                                     className="bg-brand-gold/20 hover:bg-brand-gold/40 text-brand-gold border border-brand-gold/30 px-2 py-0.5 rounded text-[10px] font-bold transition-colors"
                                                 >
-                                                    Distribute ⚡
+                                                    {viewerFid === q.fid ? 'Award Now ⚡' : 'Distribute ⚡'}
                                                 </button>
                                             </div>
                                         );
